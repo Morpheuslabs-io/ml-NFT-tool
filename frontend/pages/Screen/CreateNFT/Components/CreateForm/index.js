@@ -8,6 +8,13 @@ import SwitchNotification from 'pages/Components/SwitchNotification'
 import Web3Service from 'controller/Web3'
 import './style.scss'
 
+const etherscanLink = {
+  1: 'https://etherscan.io',
+  3: 'https://ropsten.etherscan.io',
+  4: 'https://rinkeby.etherscan.io',
+  42: 'https://kovan.etherscan.io',
+}
+
 class CreateForm extends React.PureComponent {
   constructor(props) {
     super(props)
@@ -20,7 +27,6 @@ class CreateForm extends React.PureComponent {
   }
   componentDidMount() {
     scrollTop && scrollTop()
-    Web3Service.getNetWorkId()
   }
 
   onChangeSwitch = (value) => {
@@ -61,7 +67,6 @@ class CreateForm extends React.PureComponent {
             }
           : null,
       })
-      Web3Service.getNetWorkId()
     }
     const isSigned = checkIsSigned(this.props.userData, this.props.metamaskRedux)
     if (!isSigned) {
@@ -88,6 +93,8 @@ class CreateForm extends React.PureComponent {
       wrapperCol: { span: 11 },
     }
     const defaultAttributeFields = [{ key: 0, name: '', value: '' }]
+
+    const networkID = await Web3Service.getNetWorkId()
 
     return (
       <div className="create-form-container">
@@ -210,8 +217,8 @@ class CreateForm extends React.PureComponent {
           </Form>
           {!loading && createdDataNFT !== null && (
             <Alert
-              message={`NFT Token Address: ${createdDataNFT.address}`}
-              description={`Transaction Link: ${createdDataNFT.tx}`}
+              message={`NFT Token Address: ${etherscanLink[networkID]}/token/${createdDataNFT.address}`}
+              description={`Transaction Link: ${etherscanLink[networkID]}/tx/${createdDataNFT.tx}`}
               type="success"
             />
           )}
