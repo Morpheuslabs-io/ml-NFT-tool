@@ -9,11 +9,11 @@ In addition to Ethereum mainnet, the following testnets are also supported
 
 ## Installation
 
-`yarn`
+`npm i`
 
 ## Deployment
 
-Execute the script `script_deploy.sh`
+`pm2 start script_deploy.sh`
 
 The frontend server is listenning at port `3006` (as specified in the `.env` file)
 
@@ -25,4 +25,4 @@ The frontend server is listenning at port `3006` (as specified in the `.env` fil
 
 For development on localhost, please use the below command to start
 
-`yarn start`
+`npm start`
