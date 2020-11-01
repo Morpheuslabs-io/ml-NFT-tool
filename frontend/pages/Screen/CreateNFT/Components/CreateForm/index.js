@@ -21,12 +21,17 @@ class CreateForm extends React.PureComponent {
     this.state = {
       loading: false,
       createdDataNFT: null,
+      networkID: null,
     }
     this.formRef = React.createRef()
     this.erc721Contract = new Erc721Contract()
   }
   componentDidMount() {
     scrollTop && scrollTop()
+    Web3Service.getNetWorkId().then((networkID) => {
+      console.log(`networkID:${networkID}`)
+      this.setState({ networkID })
+    })
   }
 
   onChangeSwitch = (value) => {
@@ -86,15 +91,12 @@ class CreateForm extends React.PureComponent {
     return rand
   }
   render() {
-    const { locale } = this.props
-    const { loading, createdDataNFT } = this.state
+    const { loading, createdDataNFT, networkID } = this.state
     const layout = {
       labelCol: { span: 13 },
       wrapperCol: { span: 11 },
     }
     const defaultAttributeFields = [{ key: 0, name: '', value: '' }]
-
-    const networkID = await Web3Service.getNetWorkId()
 
     return (
       <div className="create-form-container">
