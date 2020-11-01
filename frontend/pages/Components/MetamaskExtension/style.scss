@@ -1,0 +1,35 @@
+@import 'pages/Style/variable.scss';
+
+.metamask-extension {
+    height: 100% !important;
+    padding-top: 20px;
+
+    .txt-wanna-title {
+        font-size: 28px;
+        font-family: Montserrat-SemiBold;
+        margin-bottom: 10px;
+    }
+
+    .txt-wanna-content {
+        padding-left: 15px;
+        padding-right: 15px;
+        margin-bottom: 0;
+    }
+
+    .img-wanna-play-desktop {
+        height: 100%;
+    }
+
+    .img-wanna-play-mobile {
+        height: 100%;
+        object-fit: contain;
+    }
+
+    .bottom-content {
+        padding: 0 30px 15px 30px;
+        height: 40%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+}

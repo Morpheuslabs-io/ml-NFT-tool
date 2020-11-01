@@ -1,0 +1,4 @@
+export const KEY_PAGE = {
+  SET_TIME: 'SET_TIME',
+  SET_METAMASK_INFO: 'SET_METAMASK_INFO'
+}
