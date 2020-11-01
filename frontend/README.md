@@ -15,7 +15,7 @@ In addition to Ethereum mainnet, the following testnets are also supported
 
 `pm2 start script_deploy.sh`
 
-The frontend server is listenning at port `3006` (as specified in the `.env` file)
+The frontend server is listenning at port `8080` (as specified in the `.env` file)
 
 **Notice**
 
