@@ -15,6 +15,13 @@ const etherscanLink = {
   42: 'https://kovan.etherscan.io',
 }
 
+const networkName = {
+  1: 'Ethereum Mainnet',
+  3: 'Ethereum Testnet Ropsten',
+  4: 'Ethereum Testnet Rinkeby',
+  42: 'Ethereum Testnet Kovan',
+}
+
 class CreateForm extends React.PureComponent {
   constructor(props) {
     super(props)
@@ -101,8 +108,11 @@ class CreateForm extends React.PureComponent {
     return (
       <div className="create-form-container">
         <div className="wrapper">
-          <h2 className="page-title" style={{ textAlign: 'left', color: '#665eba' }}>
-            Launch NFT
+          <h2
+            className="page-title"
+            style={{ textAlign: 'left', color: '#665eba', paddingTop: '20px' }}
+          >
+            {`Launch NFT to ${networkName[networkID]}`}
           </h2>
           <Form
             ref={this.formRef}
@@ -222,6 +232,7 @@ class CreateForm extends React.PureComponent {
               message={`NFT Token Address: ${etherscanLink[networkID]}/token/${createdDataNFT.address}`}
               description={`Transaction Link: ${etherscanLink[networkID]}/tx/${createdDataNFT.tx}`}
               type="success"
+              closable
             />
           )}
         </div>
