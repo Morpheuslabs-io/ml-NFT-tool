@@ -52,7 +52,6 @@ class Header extends React.PureComponent {
   }
 
   handleSignIn = (callback = null, callbackErr = null) => {
-    this.closeDrawer()
     ReduxServices.loginMetamask(
       this.onShowModalGetMetaMask,
       callback || this.callbackSignIn,

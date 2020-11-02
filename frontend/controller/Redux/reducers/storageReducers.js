@@ -7,7 +7,7 @@ const localeEN = {
 }
 
 export const locale = createReducer(localeEN, {
-  [KEY_STORE.SET_LOCALE](action) {
+  [KEY_STORE.SET_LOCALE](state, action) {
     switch (action.payload) {
       case 'en':
         return localeEN
@@ -18,7 +18,7 @@ export const locale = createReducer(localeEN, {
 })
 
 export const userData = createReducer(initState.userData, {
-  [KEY_STORE.SET_USER](action) {
+  [KEY_STORE.SET_USER](state, action) {
     return action.payload
   },
 })
