@@ -1,7 +1,7 @@
 import React from 'react'
 import { withRouter } from 'next/router'
 import { connect } from 'react-redux'
-import { Button, Form, Input, Tooltip, Spin, Alert } from 'antd'
+import { Button, Form, Input, Tooltip, Spin, Alert, Select } from 'antd'
 import { Erc721Contract } from 'contract-api'
 import { scrollTop, showNotification, checkIsSigned } from 'common/function'
 import SwitchNotification from 'pages/Components/SwitchNotification'
@@ -12,6 +12,7 @@ const etherscanLink = {
   1: 'https://etherscan.io',
   3: 'https://ropsten.etherscan.io',
   4: 'https://rinkeby.etherscan.io',
+  5: 'https://goerli.etherscan.io',
   42: 'https://kovan.etherscan.io',
 }
 
@@ -19,6 +20,7 @@ const networkName = {
   1: 'Ethereum Mainnet',
   3: 'Ethereum Testnet Ropsten',
   4: 'Ethereum Testnet Rinkeby',
+  5: 'Ethereum Testnet Goerli',
   42: 'Ethereum Testnet Kovan',
 }
 
@@ -97,6 +99,7 @@ class CreateForm extends React.PureComponent {
     const rand = Math.floor(Math.random() * (max - min + 1) + min)
     return rand
   }
+  onNftStandardChange = (value) => {}
   render() {
     const { loading, createdDataNFT, networkID } = this.state
     const layout = {
@@ -112,7 +115,7 @@ class CreateForm extends React.PureComponent {
             className="page-title"
             style={{ textAlign: 'left', color: '#665eba', paddingTop: '20px' }}
           >
-            {`Launch NFT to ${networkName[networkID]}`}
+            {`Launch NFT to ${networkName[networkID] || 'Unknown Network'}`}
           </h2>
           <Form
             ref={this.formRef}
@@ -127,6 +130,7 @@ class CreateForm extends React.PureComponent {
               ownerMessage: '',
               nftID: this.generateNumber(),
               nftOwner: this.props.userData ? this.props.userData.address : '',
+              nftStandard: 'ERC721',
             }}
             onFinish={this.onFinish}
             onValuesChange={(changedValues, allValues) => {
@@ -135,6 +139,26 @@ class CreateForm extends React.PureComponent {
               })
             }}
           >
+            <Tooltip placement="rightTop" title="ERC1155 Standard is to be supported soon">
+              <Form.Item
+                label={<div className="text text-bold text-color-4 text-size-3x">Standard</div>}
+                name="nftStandard"
+                rules={[
+                  {
+                    required: true,
+                    message: 'NFT standard is required',
+                  },
+                ]}
+              >
+                <Select defaultValue="ERC721" onChange={this.onNftStandardChange}>
+                  <Option value="ERC721">ERC721</Option>
+                  <Option value="ERC1155" disabled>
+                    ERC1155
+                  </Option>
+                </Select>
+              </Form.Item>
+            </Tooltip>
+
             <Tooltip placement="rightTop" title="This is your NFT name">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
