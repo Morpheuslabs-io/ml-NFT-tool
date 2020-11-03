@@ -1,14 +1,14 @@
 @use "sass:map";
-@import "pages/Style/variable.scss";
+@import 'pages/Style/variable.scss';
 
 @font-face {
   font-family: Montserrat-Regular;
-  src: url("/static/Assets/Fonts/Montserrat-Regular.otf");
+  src: url('/static/Assets/Fonts/Montserrat-Regular.otf');
 }
 
 @font-face {
   font-family: Montserrat-SemiBold;
-  src: url("/static/Assets/Fonts/Montserrat-SemiBold.otf");
+  src: url('/static/Assets/Fonts/Montserrat-SemiBold.otf');
 }
 
 body {
@@ -18,7 +18,9 @@ body {
   font-family: Montserrat-Regular;
 }
 
-ol, ul, dl {
+ol,
+ul,
+dl {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -123,8 +125,8 @@ ol, ul, dl {
 
 .text {
   // default
-  font-size: map-get($font-sizes, "3x");
-  color: map-get($text-colors, "main");
+  font-size: map-get($font-sizes, '3x');
+  color: map-get($text-colors, 'main');
   margin: 0;
   padding-bottom: 5px;
   word-wrap: break-word;
@@ -132,28 +134,28 @@ ol, ul, dl {
   &.text-title {
     font-family: Montserrat-SemiBold;
     text-align: center;
-    font-size: map-get($font-sizes, "5x");
-    color: map-get($text-colors, "color-2");
+    font-size: map-get($font-sizes, '5x');
+    color: map-get($text-colors, 'color-2');
     margin-bottom: 0;
   }
 
   &.text-help {
-    font-size: map-get($font-sizes, "sm");
-    color: map-get($text-colors, "color-1");
+    font-size: map-get($font-sizes, 'sm');
+    color: map-get($text-colors, 'color-1');
     margin: 0;
     padding: 0;
   }
 
   // text color main
   &.text-color-main {
-    color: map-get($text-colors, "main");
+    color: map-get($text-colors, 'main');
   }
 
   // text color classes
   // ex: .text-color-1 | .text-color-2 | ...
   @for $i from 1 through 100 {
     &.text-color-#{$i} {
-      color: map-get($text-colors, "color-#{$i}");
+      color: map-get($text-colors, 'color-#{$i}');
     }
   }
 
@@ -292,10 +294,10 @@ ol, ul, dl {
 
 .wrapper {
   width: 100%;
-  padding: 15px;
+  // padding: 15px;
   margin: 0 auto;
   @media screen and (min-width: 1024px) {
-    width: 1024px;
+    // width: 1024px;
   }
 }
 
@@ -323,7 +325,7 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type=number] {
+input[type='number'] {
   -moz-appearance: textfield;
 }
 
@@ -331,5 +333,6 @@ input[type=number] {
   font-family: Montserrat-SemiBold;
   font-size: 36px;
   text-align: center;
-  margin-bottom: 30px;
+  // margin-bottom: 30px;
+  background-color: #3629b7;
 }

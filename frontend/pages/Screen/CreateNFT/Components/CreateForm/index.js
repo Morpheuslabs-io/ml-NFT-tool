@@ -111,12 +111,12 @@ class CreateForm extends React.PureComponent {
     return (
       <div className="create-form-container">
         <div className="wrapper">
-          <h2
+          <div
             className="page-title"
-            style={{ textAlign: 'left', color: '#665eba', paddingTop: '20px' }}
+            style={{ textAlign: 'center', color: '#ffffff', padding: '40px' }}
           >
             {`Launch NFT to ${networkName[networkID] || 'Unknown Network'}`}
-          </h2>
+          </div>
           <Form
             ref={this.formRef}
             {...layout}
@@ -139,7 +139,7 @@ class CreateForm extends React.PureComponent {
               })
             }}
           >
-            <Tooltip placement="rightTop" title="ERC1155 Standard is to be supported soon">
+            <Tooltip title="ERC1155 Standard is to be supported soon">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Standard</div>}
                 name="nftStandard"
@@ -159,7 +159,7 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip placement="rightTop" title="This is your NFT name">
+            <Tooltip title="This is your NFT name">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
                 name="nftName"
@@ -174,7 +174,7 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip placement="rightTop" title="This is your NFT symbol">
+            <Tooltip title="This is your NFT symbol">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Symbol</div>}
                 name="nftSymbol"
@@ -189,7 +189,7 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip placement="rightTop" title="This is your NFT ID (auto generated)">
+            <Tooltip title="This is your NFT ID (auto generated)">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">ID</div>}
                 name="nftID"
@@ -203,7 +203,7 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip placement="rightTop" title="This is Ethereum address as the NFT owner">
+            <Tooltip title="This is Ethereum address as the NFT owner">
               <Form.Item
                 label={
                   <div className="text text-bold text-color-4 text-size-3x">Owner Address</div>
@@ -220,10 +220,7 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip
-              placement="rightTop"
-              title="This is your NFT link that can be to some website or some image"
-            >
+            <Tooltip title="This is your NFT link that can be to some website or some image">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Link</div>}
                 name="nftLink"

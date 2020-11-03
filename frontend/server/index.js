@@ -8,7 +8,7 @@ const port = parseInt(process.env.PORT) || 3000
 const dev = process.env.REACT_NEED_DEBUG === 'true'
 const app = next({ dev })
 const handler = routes.getRequestHandler(app)
-const isSSREnabled = process.env.ENABLE_SSR === 'true'
+const isSSREnabled = process.env.ENABLE_SSR && process.env.ENABLE_SSR === 'true'
 
 if (!isSSREnabled) {
   app
