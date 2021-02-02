@@ -1,11 +1,8 @@
 # NFT Frontend Component
 
 Web app to facilitate in launching NFT to Ethereum network with the in-browser Metamask extension.
-In addition to Ethereum mainnet, the following testnets are also supported
 
-- Rinkeby
-- Ropsten
-- Kovan
+The target ETH network is determined by Metamask current connection.
 
 ## Installation
 
