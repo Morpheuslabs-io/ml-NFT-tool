@@ -12,7 +12,6 @@ class Header extends React.PureComponent {
 
   handleSignIn = async () => {
     if (window.ethereum) {
-      // const web3 = new Web3(window.ethereum)
       const web3 = Web3Service.getWeb3()
 
       // fetch accounts
