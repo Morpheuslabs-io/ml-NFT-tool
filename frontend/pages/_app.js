@@ -28,52 +28,52 @@ class MyApp extends App {
     this.currentInterval = null
   }
 
-  async componentDidMount() {
-    try {
-      this.currentInterval = setTimeout(() => {
-        ReduxServices.refreshMetaMask()
-      }, 500)
-      const ethererum = window.web3
-      if (ethererum) {
-        ethererum.currentProvider.on('accountsChanged', function (accounts) {
-          ReduxServices.refreshMetaMask()
-          Observer.emit(OBSERVER.CHANGED_ACCOUNT)
-        })
-        ethererum.currentProvider.on('networkChanged', function (accounts) {
-          ReduxServices.refreshMetaMask()
-        })
-      }
-      const storageRedux = [
-        {
-          key: KEY_STORE.SET_LOCALE,
-          action: storageActions.setLocale,
-          init: init.lang,
-        },
-        {
-          key: KEY_STORE.SET_USER,
-          action: storageActions.setUserData,
-          init: init.userData,
-        },
-      ]
+  // async componentDidMount() {
+  //   try {
+  //     this.currentInterval = setTimeout(() => {
+  //       ReduxServices.refreshMetaMask()
+  //     }, 500)
+  //     const ethererum = window.web3
+  //     if (ethererum) {
+  //       ethererum.currentProvider.on('accountsChanged', function (accounts) {
+  //         ReduxServices.refreshMetaMask()
+  //         Observer.emit(OBSERVER.CHANGED_ACCOUNT)
+  //       })
+  //       ethererum.currentProvider.on('networkChanged', function (accounts) {
+  //         ReduxServices.refreshMetaMask()
+  //       })
+  //     }
+  //     const storageRedux = [
+  //       {
+  //         key: KEY_STORE.SET_LOCALE,
+  //         action: storageActions.setLocale,
+  //         init: init.lang,
+  //       },
+  //       {
+  //         key: KEY_STORE.SET_USER,
+  //         action: storageActions.setUserData,
+  //         init: init.userData,
+  //       },
+  //     ]
 
-      const promiseArr = storageRedux.map((item) => {
-        checkLocalStoreToRedux(store, item.key, item.action, item.init)
-      })
-      await Promise.all(promiseArr)
-      ReduxServices.onEnableMetaMask()
+  //     const promiseArr = storageRedux.map((item) => {
+  //       checkLocalStoreToRedux(store, item.key, item.action, item.init)
+  //     })
+  //     await Promise.all(promiseArr)
+  //     ReduxServices.onEnableMetaMask()
 
-      const initDataPromiseArr = [ReduxServices.refreshUser()]
+  //     const initDataPromiseArr = [ReduxServices.refreshUser()]
 
-      Promise.all(initDataPromiseArr)
+  //     Promise.all(initDataPromiseArr)
 
-      // in the case reload page: need to wait for metamask already in use before showing page
-      // await ReduxServices.waitForRefreshMetaMask()
-    } finally {
-      this.setState({
-        isLoading: false,
-      })
-    }
-  }
+  //     // in the case reload page: need to wait for metamask already in use before showing page
+  //     // await ReduxServices.waitForRefreshMetaMask()
+  //   } finally {
+  //     this.setState({
+  //       isLoading: false,
+  //     })
+  //   }
+  // }
 
   render() {
     const { Component, pageProps } = this.props
@@ -93,17 +93,10 @@ class MyApp extends App {
           <meta name="theme-color" content="#000000" />
           <meta name="description" content="" />
         </Head>
-        {this.state.isLoading ? (
-          <div className="loading-container">
-            <Spin size="large" />
-          </div>
-        ) : (
-          <ReduxConnectIntl>
-            <BaseContainer>
-              <Component {...pageProps} />
-            </BaseContainer>
-          </ReduxConnectIntl>
-        )}
+
+        <BaseContainer>
+          <Component {...pageProps} />
+        </BaseContainer>
       </Provider>
     )
   }

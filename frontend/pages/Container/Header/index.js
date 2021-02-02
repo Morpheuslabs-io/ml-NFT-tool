@@ -14,6 +14,7 @@ import GetMetaMask from 'pages/Components/GetMetaMark'
 import MetamaskExtension from 'pages/Components/MetamaskExtension'
 import { isFirefox } from 'react-device-detect'
 import Observer from 'common/observer'
+import Web3Service from 'controller/Web3'
 
 class Header extends React.PureComponent {
   constructor(props) {
@@ -24,13 +25,13 @@ class Header extends React.PureComponent {
     this.myModal = React.createRef()
   }
 
-  componentDidMount() {
-    Observer.on(OBSERVER.SIGN_IN, this.handleSignIn)
-  }
+  // componentDidMount() {
+  //   Observer.on(OBSERVER.SIGN_IN, this.handleSignIn)
+  // }
 
-  componentWillUnmount() {
-    Observer.removeListener(OBSERVER.SIGN_IN, this.handleSignIn)
-  }
+  // componentWillUnmount() {
+  //   Observer.removeListener(OBSERVER.SIGN_IN, this.handleSignIn)
+  // }
 
   closeModal = () => {
     this.myModal.current.closeModal()
@@ -51,13 +52,48 @@ class Header extends React.PureComponent {
     Observer.emit(OBSERVER.ALREADY_SIGNED)
   }
 
-  handleSignIn = (callback = null, callbackErr = null) => {
-    ReduxServices.loginMetamask(
-      this.onShowModalGetMetaMask,
-      callback || this.callbackSignIn,
-      callbackErr,
-    )
+  handleSignIn = async () => {
+    if (window.ethereum) {
+      // const web3 = new Web3(window.ethereum)
+      const web3 = Web3Service.getWeb3()
+
+      // fetch accounts
+      window.ethereum.enable().then((accounts) => {
+        // web3.eth.net.getId().then((id) => {
+        //   console.log('id:', id)
+        //   this.setState({
+        //     network: id === MATIC_NETWORK.id || id === MATIC_NETWORK.idMainnet ? 'MATIC' : 'ETH',
+        //   })
+        // })
+
+        const address = accounts[0]
+        const toChecksumAddress = web3.utils.toChecksumAddress
+
+        window.ethereum.on('accountsChanged', (e) => {
+          console.log('accountsChanged - toChecksumAddress(e[0]):', toChecksumAddress(e[0]))
+          if (address) {
+            const accountChanged = !(toChecksumAddress(e[0]) === toChecksumAddress(address))
+            if (accountChanged) {
+              window.location.reload()
+            }
+          }
+        })
+
+        window.ethereum.on('networkChanged', () => {
+          console.log('networkChanged')
+          window.location.reload()
+        })
+      })
+    }
   }
+
+  // handleSignIn = (callback = null, callbackErr = null) => {
+  //   ReduxServices.loginMetamask(
+  //     this.onShowModalGetMetaMask,
+  //     callback || this.callbackSignIn,
+  //     callbackErr,
+  //   )
+  // }
 
   renderLeftSide() {
     return (
@@ -81,7 +117,7 @@ class Header extends React.PureComponent {
     return (
       <React.Fragment>
         {this.renderLeftSide()}
-        <div className="right-side">
+        {/* <div className="right-side">
           <div className="ctn-btn-signin">
             {isSigned ? (
               <React.Fragment>
@@ -96,7 +132,7 @@ class Header extends React.PureComponent {
               </Button>
             )}
           </div>
-        </div>
+        </div> */}
       </React.Fragment>
     )
   }

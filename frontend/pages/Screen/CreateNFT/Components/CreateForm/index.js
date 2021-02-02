@@ -1,10 +1,9 @@
 import React from 'react'
 import { withRouter } from 'next/router'
 import { connect } from 'react-redux'
-import { Button, Form, Input, Tooltip, Spin, Alert, Select } from 'antd'
+import { Button, Form, Input, Tooltip, Spin, Alert, Select, notification } from 'antd'
+const { Option } = Select
 import { Erc721Contract } from 'contract-api'
-import { scrollTop, showNotification, checkIsSigned } from 'common/function'
-import SwitchNotification from 'pages/Components/SwitchNotification'
 import Web3Service from 'controller/Web3'
 import './style.scss'
 
@@ -31,16 +30,26 @@ class CreateForm extends React.PureComponent {
       loading: false,
       createdDataNFT: null,
       networkID: null,
+      address: null,
     }
     this.formRef = React.createRef()
-    this.erc721Contract = new Erc721Contract()
+    // this.erc721Contract = new Erc721Contract()
   }
   componentDidMount() {
-    scrollTop && scrollTop()
-    Web3Service.getNetWorkId().then((networkID) => {
-      console.log(`networkID:${networkID}`)
-      this.setState({ networkID })
-    })
+    if (window.ethereum) {
+      window.ethereum
+        .enable()
+        .then((accounts) => {
+          this.erc721Contract = new Erc721Contract()
+          Web3Service.getNetWorkId().then((networkID) => {
+            console.log(`networkID:${networkID}`)
+            this.setState({ networkID, address: accounts[0] })
+          })
+        })
+        .catch((error) => {
+          console.error('window.ethereum.enable - Error:', error)
+        })
+    }
   }
 
   onChangeSwitch = (value) => {
@@ -82,15 +91,15 @@ class CreateForm extends React.PureComponent {
           : null,
       })
     }
-    const isSigned = checkIsSigned(this.props.userData, this.props.metamaskRedux)
+    const isSigned = this.state.address !== null //checkIsSigned(this.props.userData, this.props.metamaskRedux)
     if (!isSigned) {
-      showNotification(
-        <SwitchNotification
-          type={'no-login'}
-          callback={callbackOnFinish}
-          locale={this.props.locale}
-        />,
-      )
+      notification.open({
+        message: 'Metamask is locked',
+        description: 'Please click the Metamask to unlock it',
+        onClick: () => {
+          console.log('Notification Clicked!')
+        },
+      })
     } else {
       callbackOnFinish()
     }
@@ -99,7 +108,7 @@ class CreateForm extends React.PureComponent {
     const rand = Math.floor(Math.random() * (max - min + 1) + min)
     return rand
   }
-  onNftStandardChange = (value) => {}
+  onNftStandardChange = () => {}
   render() {
     const { loading, createdDataNFT, networkID } = this.state
     const layout = {

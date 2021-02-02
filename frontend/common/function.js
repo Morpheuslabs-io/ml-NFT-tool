@@ -52,7 +52,9 @@ export const isURL = (str) => {
 }
 
 export const checkIsSigned = (userData, metamaskRedux) => {
-  if (userData && metamaskRedux) {
+  if (userData && userData.address && metamaskRedux) {
+    console.log('metamaskRedux:', metamaskRedux);
+    console.log('userData:', userData);
     return metamaskRedux.account.toLowerCase() === userData.address.toLowerCase()
   } else {
     return false
