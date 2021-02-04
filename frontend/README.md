@@ -1,8 +1,18 @@
 # NFT Frontend Component
 
-Web app to facilitate in launching NFT to Ethereum network with the in-browser Metamask extension.
+Web app to facilitate in launching NFT to Ethereum network and Matic network with the in-browser Metamask extension.
 
-The target ETH network is determined by Metamask current connection.
+The target network is determined by Metamask current connection.
+
+## Metamask connected to Matic
+
+To get Metamask connected to Matic, please set the `Custom RPC` with the following info:
+
+- `Network Name`: `Matic Mumbai Testnet` or `Matic Mainnet`
+- `New RPC URL`: `https://rpc-mumbai.maticvigil.com` or `https://rpc-mainnet.maticvigil.com`
+- `Chain ID`: `80001` or `137`
+- `Currency symbol`: `MATIC`
+- `Block explorer URL`: `https://mumbai-explorer.matic.today` or `https://explorer-mainnet.maticvigil.com`
 
 ## Installation
 

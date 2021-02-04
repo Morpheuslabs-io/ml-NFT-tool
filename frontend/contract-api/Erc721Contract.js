@@ -5,13 +5,13 @@ import Web3Service from '../controller/Web3'
 let instance = null
 
 export default class Erc721Contract {
-  constructor() {
+  constructor(defaultAddress) {
     if (!instance) {
       instance = this
       this.web3 = Web3Service.getWeb3()
       this.contract = contract(Erc721ContractAbi)
       this.contract.setProvider(this.web3.currentProvider)
-      this.contract.defaults({ from: '0xa7fc2009cc8b36997ef533dec396d6b4b00760e4' })
+      this.contract.defaults({ from: defaultAddress })
     }
 
     return instance

@@ -7,12 +7,14 @@ import { Erc721Contract } from 'contract-api'
 import Web3Service from 'controller/Web3'
 import './style.scss'
 
-const etherscanLink = {
+const explorerLink = {
   1: 'https://etherscan.io',
   3: 'https://ropsten.etherscan.io',
   4: 'https://rinkeby.etherscan.io',
   5: 'https://goerli.etherscan.io',
   42: 'https://kovan.etherscan.io',
+  80001: 'https://mumbai-explorer.matic.today',
+  137: 'https://explorer.matic.network'
 }
 
 const networkName = {
@@ -21,6 +23,8 @@ const networkName = {
   4: 'Ethereum Testnet Rinkeby',
   5: 'Ethereum Testnet Goerli',
   42: 'Ethereum Testnet Kovan',
+  80001: 'Matic Mumbai Testnet',
+  137: 'Matic Mainnet'
 }
 
 class CreateForm extends React.PureComponent {
@@ -40,10 +44,11 @@ class CreateForm extends React.PureComponent {
       window.ethereum
         .enable()
         .then((accounts) => {
-          this.erc721Contract = new Erc721Contract()
+          const defaultAddress = accounts[0]
+          this.erc721Contract = new Erc721Contract(defaultAddress)
           Web3Service.getNetWorkId().then((networkID) => {
             console.log(`networkID:${networkID}`)
-            this.setState({ networkID, address: accounts[0] })
+            this.setState({ networkID, address: defaultAddress })
           })
         })
         .catch((error) => {
@@ -124,7 +129,7 @@ class CreateForm extends React.PureComponent {
             className="page-title"
             style={{ textAlign: 'center', color: '#ffffff', padding: '40px' }}
           >
-            {`Launch NFT to ${networkName[networkID] || 'Unknown Network'}`}
+            {`Launch NFT to ${networkName[networkID] || '...'}`}
           </div>
           <Form
             ref={this.formRef}
@@ -248,6 +253,7 @@ class CreateForm extends React.PureComponent {
               <Button type="primary" htmlType="submit" className="ant-big-btn" disabled={loading}>
                 {loading ? <Spin /> : 'Submit'}
               </Button>
+              <br />
               {loading && (
                 <Alert
                   message="NFT Token is being launched"
@@ -259,8 +265,8 @@ class CreateForm extends React.PureComponent {
           </Form>
           {!loading && createdDataNFT !== null && (
             <Alert
-              message={`NFT Token Address: ${etherscanLink[networkID]}/token/${createdDataNFT.address}`}
-              description={`Transaction Link: ${etherscanLink[networkID]}/tx/${createdDataNFT.tx}`}
+              message={`NFT Token Address: ${explorerLink[networkID]}/token/${createdDataNFT.address}`}
+              description={`Transaction Link: ${explorerLink[networkID]}/tx/${createdDataNFT.tx}`}
               type="success"
               closable
             />
