@@ -400,9 +400,9 @@
   "sourceMap": "",
   "deployedSourceMap": "",
   "source": "pragma solidity ^0.4.24;\n\nimport \"./ERC721Basic.sol\";\n\n\n/**\n * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension\n * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md\n */\ncontract ERC721Enumerable is ERC721Basic {\n  function totalSupply() public view returns (uint256);\n  function tokenOfOwnerByIndex(\n    address _owner,\n    uint256 _index\n  )\n    public\n    view\n    returns (uint256 _tokenId);\n\n  function tokenByIndex(uint256 _index) public view returns (uint256);\n}\n\n\n/**\n * @title ERC-721 Non-Fungible Token Standard, optional metadata extension\n * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md\n */\ncontract ERC721Metadata is ERC721Basic {\n  function name() external view returns (string _name);\n  function symbol() external view returns (string _symbol);\n  function tokenURI(uint256 _tokenId) public view returns (string);\n}\n\n\n/**\n * @title ERC-721 Non-Fungible Token Standard, full implementation interface\n * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md\n */\ncontract ERC721 is ERC721Basic, ERC721Enumerable, ERC721Metadata {\n}\n",
-  "sourcePath": "/home/trung/Work/reference/morphe/task/NFT/Demo-Create-NFT/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721.sol",
+  "sourcePath": "/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721.sol",
   "ast": {
-    "absolutePath": "/home/trung/Work/reference/morphe/task/NFT/Demo-Create-NFT/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721.sol",
+    "absolutePath": "/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721.sol",
     "exportedSymbols": {
       "ERC721": [
         322
@@ -429,7 +429,7 @@
         "src": "0:24:6"
       },
       {
-        "absolutePath": "/home/trung/Work/reference/morphe/task/NFT/Demo-Create-NFT/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721Basic.sol",
+        "absolutePath": "/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721Basic.sol",
         "file": "./ERC721Basic.sol",
         "id": 271,
         "nodeType": "ImportDirective",
@@ -1048,7 +1048,7 @@
     "src": "0:1129:6"
   },
   "legacyAST": {
-    "absolutePath": "/home/trung/Work/reference/morphe/task/NFT/Demo-Create-NFT/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721.sol",
+    "absolutePath": "/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721.sol",
     "exportedSymbols": {
       "ERC721": [
         322
@@ -1075,7 +1075,7 @@
         "src": "0:24:6"
       },
       {
-        "absolutePath": "/home/trung/Work/reference/morphe/task/NFT/Demo-Create-NFT/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721Basic.sol",
+        "absolutePath": "/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721Basic.sol",
         "file": "./ERC721Basic.sol",
         "id": 271,
         "nodeType": "ImportDirective",
@@ -1695,9 +1695,9 @@
   },
   "compiler": {
     "name": "solc",
-    "version": "0.4.24+commit.e67f0147.Emscripten.clang"
+    "version": "0.4.26+commit.4563c3fc.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "2.0.1",
-  "updatedAt": "2020-11-01T14:27:01.293Z"
+  "schemaVersion": "2.0.3",
+  "updatedAt": "2021-02-08T15:00:27.507Z"
 }
