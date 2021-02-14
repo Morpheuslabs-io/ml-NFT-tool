@@ -2,6 +2,8 @@
 
 Web app to facilitate in launching NFT to Ethereum network and Matic network with the in-browser Metamask extension.
 
+Both ERC721 and ERC1155 standards are supported.
+
 The target network is determined by Metamask current connection.
 
 ## Metamask connected to Matic

@@ -7,7 +7,8 @@ Details are described in README file of each component
 
 ## NFT Smart Contract
 
-Folder `erc721`
+  - Folder `erc721`
+  - Folder `erc1155`
 
 ## NFT Web Application
 

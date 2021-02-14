@@ -1,9 +1,10 @@
 import React from 'react'
 import { withRouter } from 'next/router'
 import { connect } from 'react-redux'
-import { Button, Form, Input, Tooltip, Spin, Alert, Select, notification } from 'antd'
+import { Button, Form, Input, Tooltip, Spin, Alert, Select, notification, Tag } from 'antd'
 const { Option } = Select
-import { Erc721Contract } from 'contract-api'
+import Erc721Contract from 'contract-api/Erc721Contract'
+import Erc1155Contract from 'contract-api/Erc1155Contract'
 import Web3Service from 'controller/Web3'
 import './style.scss'
 
@@ -35,9 +36,9 @@ class CreateForm extends React.PureComponent {
       createdDataNFT: null,
       networkID: null,
       address: null,
+      selectedNftStandard: 'ERC721'
     }
     this.formRef = React.createRef()
-    // this.erc721Contract = new Erc721Contract()
   }
   componentDidMount() {
     if (window.ethereum) {
@@ -46,6 +47,7 @@ class CreateForm extends React.PureComponent {
         .then((accounts) => {
           const defaultAddress = accounts[0]
           this.erc721Contract = new Erc721Contract(defaultAddress)
+          this.erc1155Contract = new Erc1155Contract(defaultAddress)
           Web3Service.getNetWorkId().then((networkID) => {
             console.log(`networkID:${networkID}`)
             this.setState({ networkID, address: defaultAddress })
@@ -79,13 +81,24 @@ class CreateForm extends React.PureComponent {
         loading: true,
       })
       const { nftName, nftSymbol, nftID, nftOwner, nftLink } = values
-      const result = await this.erc721Contract.create({
-        name: nftName,
-        symbol: nftSymbol,
-        to: nftOwner,
-        tokenID: nftID,
-        tokenURI: nftLink,
-      })
+
+      let result
+      if (this.state.selectedNftStandard === 'ERC721') {
+        result = await this.erc721Contract.create({
+          name: nftName,
+          symbol: nftSymbol,
+          to: nftOwner,
+          tokenID: nftID,
+          tokenURI: nftLink,
+        })
+      } else {
+        result = await this.erc1155Contract.create({
+          name: nftName,
+          symbol: nftSymbol,
+          to: nftOwner,
+          tokenURI: nftLink,
+        })
+      }
       this.setState({
         loading: false,
         createdDataNFT: result
@@ -110,12 +123,17 @@ class CreateForm extends React.PureComponent {
     }
   }
   generateNumber = (min = 1, max = 10000) => {
-    const rand = Math.floor(Math.random() * (max - min + 1) + min)
-    return rand
+    // const rand = Math.floor(Math.random() * (max - min + 1) + min)
+    // return rand
+    return 1
   }
-  onNftStandardChange = () => {}
+  onNftStandardChange = (e) => {
+    if (this.state.selectedNftStandard !== e) {
+      this.setState({selectedNftStandard: e})
+    }
+  }
   render() {
-    const { loading, createdDataNFT, networkID } = this.state
+    const { loading, createdDataNFT, networkID, selectedNftStandard } = this.state
     const layout = {
       labelCol: { span: 13 },
       wrapperCol: { span: 11 },
@@ -153,7 +171,7 @@ class CreateForm extends React.PureComponent {
               })
             }}
           >
-            <Tooltip title="ERC1155 Standard is to be supported soon">
+            <Tooltip title="Select a token standard">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Standard</div>}
                 name="nftStandard"
@@ -166,12 +184,16 @@ class CreateForm extends React.PureComponent {
               >
                 <Select defaultValue="ERC721" onChange={this.onNftStandardChange}>
                   <Option value="ERC721">ERC721</Option>
-                  <Option value="ERC1155" disabled>
+                  <Option value="ERC1155">
                     ERC1155
                   </Option>
                 </Select>
               </Form.Item>
             </Tooltip>
+
+            <Tag color='blue' style={{fontSize: '16px'}}>
+              Your {selectedNftStandard} Standard NFT Token
+            </Tag>
 
             <Tooltip title="This is your NFT name">
               <Form.Item
@@ -203,21 +225,27 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip title="This is your NFT ID (auto generated)">
-              <Form.Item
-                label={<div className="text text-bold text-color-4 text-size-3x">ID</div>}
-                name="nftID"
-                rules={[
-                  {
-                    required: true,
-                  },
-                ]}
-              >
-                <Input disabled />
-              </Form.Item>
-            </Tooltip>
+            <hr style={{color: '#f0f0f0'}}/>
 
-            <Tooltip title="This is Ethereum address as the NFT owner">
+            <Tag color='blue' style={{fontSize: '16px'}}>Your First {selectedNftStandard} Standard NFT Token</Tag>
+
+            { selectedNftStandard === 'ERC721' && (
+              <Tooltip title="This is your NFT Token ID">
+                <Form.Item
+                  label={<div className="text text-bold text-color-4 text-size-3x">ID</div>}
+                  name="nftID"
+                  rules={[
+                    {
+                      required: true,
+                    },
+                  ]}
+                >
+                  <Input disabled />
+                </Form.Item>
+              </Tooltip>)
+            }
+
+            <Tooltip title="This is Ethereum owner address of the NFT token">
               <Form.Item
                 label={
                   <div className="text text-bold text-color-4 text-size-3x">Owner Address</div>
@@ -234,9 +262,13 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip title="This is your NFT link that can be to some website or some image">
+            <Tooltip title="This is your NFT token link to the metadata">
               <Form.Item
-                label={<div className="text text-bold text-color-4 text-size-3x">Link</div>}
+                label={
+                  <div className="text text-bold text-color-4 text-size-3x">
+                    {selectedNftStandard === 'ERC721' ? 'Link' : 'Base Metadata URI'} 
+                  </div>
+                }
                 name="nftLink"
                 rules={[
                   {
