@@ -1,18 +1,7 @@
 import React from 'react'
 import { withRouter } from 'next/router'
 import { connect } from 'react-redux'
-import {
-  Button,
-  Form,
-  Input,
-  Tooltip,
-  Spin,
-  Alert,
-  Select,
-  notification,
-  Tag,
-  Upload,
-} from 'antd'
+import { Button, Form, Input, Tooltip, Spin, Alert, Select, notification, Tag, Upload } from 'antd'
 import ImgCrop from 'antd-img-crop'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
@@ -41,12 +30,12 @@ const networkName = {
   137: 'Matic Mainnet',
 }
 
-
 class CreateForm extends React.PureComponent {
   constructor(props) {
     super(props)
     this.state = {
       loading: false,
+      imgLoading: false,
       imgBase64: null,
       createdDataNFT: null,
       networkID: null,
@@ -94,33 +83,35 @@ class CreateForm extends React.PureComponent {
     const callbackOnFinish = async () => {
       this.setState({
         loading: true,
+        createdDataNFT: null,
       })
-      const { nftName, nftSymbol, nftDescription, nftOwner, nftImage } = values
+      const { nftName, nftSymbol, nftDescription, nftImage } = values
+      const { imgBase64, address } = this.state
 
       // Upload to IPFS
-      const ipfsResult = await ipfs.add(Buffer(this.state.imgBase64))
+      const ipfsResult = await ipfs.add(Buffer(imgBase64))
       const ipfsHash = ipfsResult[0].hash
       const image = `https://ipfs.io/ipfs/${ipfsHash}`
 
-      const tokenURI = {
+      const tokenURI = JSON.stringify({
         name: nftName,
         description: nftDescription,
         image,
-      }
+      })
 
       let result
       if (this.state.selectedNftStandard === 'ERC721') {
         result = await this.erc721Contract.create({
           name: nftName,
           symbol: nftSymbol,
-          to: nftOwner,
+          to: address,
           tokenURI,
         })
       } else {
         result = await this.erc1155Contract.create({
           name: nftName,
           symbol: nftSymbol,
-          to: nftOwner,
+          to: address,
           tokenURI: nftImage,
         })
       }
@@ -134,7 +125,7 @@ class CreateForm extends React.PureComponent {
           : null,
       })
     }
-    const isSigned = this.state.address !== null //checkIsSigned(this.props.userData, this.props.metamaskRedux)
+    const isSigned = this.state.address !== null
     if (!isSigned) {
       notification.open({
         message: 'Metamask is locked',
@@ -161,10 +152,10 @@ class CreateForm extends React.PureComponent {
           const defaultAddress = accounts[0]
           return resolve(defaultAddress)
         })
-        .catch(e => {
-          console.error(e);
+        .catch((e) => {
+          console.error(e)
         })
-    }) 
+    })
   }
   onNftStandardChange = (e) => {
     if (this.state.selectedNftStandard !== e) {
@@ -174,14 +165,14 @@ class CreateForm extends React.PureComponent {
 
   handleChange = (info) => {
     if (info.file.status === 'uploading') {
-      this.setState({ loading: true })
+      this.setState({ imgLoading: true })
       return
     }
     if (info.file.status === 'done') {
       const reader = new FileReader()
       reader.readAsArrayBuffer(info.file.originFileObj) // convert file to array for buffer
       reader.onloadend = () => {
-        this.setState({ imgBase64: Buffer(reader.result), loading: false })
+        this.setState({ imgBase64: Buffer(reader.result), imgLoading: false })
       }
     }
   }
@@ -231,15 +222,10 @@ class CreateForm extends React.PureComponent {
               enableSend: true,
               ownerMessage: '',
               nftID: this.generateNumber(),
-              nftOwner: '',
+              // nftOwner: '',
               nftStandard: 'ERC721',
             }}
             onFinish={this.onFinish}
-            onValuesChange={(changedValues, allValues) => {
-              this.setState({
-                formData: allValues,
-              })
-            }}
           >
             <Tooltip title="Select NFT token standard">
               <Form.Item
@@ -261,9 +247,9 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tag color="blue" style={{ fontSize: '16px' }}>
+            {/* <Tag color="blue" style={{ fontSize: '16px' }}>
               Your {selectedNftStandard} Token
-            </Tag>
+            </Tag> */}
 
             <Tooltip title="NFT token name">
               <Form.Item
@@ -295,13 +281,13 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <hr style={{ color: '#f0f0f0' }} />
+            {/* <hr style={{ color: '#f0f0f0' }} /> */}
 
-            <Tag color="blue" style={{ fontSize: '16px' }}>
+            {/* <Tag color="blue" style={{ fontSize: '16px' }}>
               Your First {selectedNftStandard} Token
-            </Tag>
+            </Tag> */}
 
-            <Tooltip title="NFT token owner address">
+            {/* <Tooltip title="NFT token owner address">
               <Form.Item
                 label={
                   <div className="text text-bold text-color-4 text-size-3x">Owner Address</div>
@@ -316,13 +302,11 @@ class CreateForm extends React.PureComponent {
               >
                 <Input />
               </Form.Item>
-            </Tooltip>
+            </Tooltip> */}
 
             <Tooltip title="NFT token description">
               <Form.Item
-                label={
-                  <div className="text text-bold text-color-4 text-size-3x">Description</div>
-                }
+                label={<div className="text text-bold text-color-4 text-size-3x">Description</div>}
                 name="nftDescription"
                 rules={[
                   {
@@ -357,7 +341,9 @@ class CreateForm extends React.PureComponent {
                     className="avatar-uploader"
                     onChange={this.handleChange}
                     onPreview={this.onPreview}
-                    handleRemove={() => this.setState({imgBase64: null})}
+                    onRemove={() => {
+                      this.setState({ imgBase64: null })
+                    }}
                   >
                     {!imgBase64 && '+ Upload'}
                   </Upload>
@@ -378,15 +364,21 @@ class CreateForm extends React.PureComponent {
                 />
               )}
             </Form.Item>
+            {!loading && createdDataNFT !== null && (
+              <div style={{ justifyContent: 'center' }}>
+                <a
+                  href={`${explorerLink[networkID]}/token/${createdDataNFT.address}`}
+                  target="_blank"
+                >
+                  NFT Token Address
+                </a>
+                <br />
+                <a href={`${explorerLink[networkID]}/tx/${createdDataNFT.tx}`} target="_blank">
+                  Transaction Link
+                </a>
+              </div>
+            )}
           </Form>
-          {!loading && createdDataNFT !== null && (
-            <Alert
-              message={`NFT Token Address: ${explorerLink[networkID]}/token/${createdDataNFT.address}`}
-              description={`Transaction Link: ${explorerLink[networkID]}/tx/${createdDataNFT.tx}`}
-              type="success"
-              closable
-            />
-          )}
         </div>
       </div>
     )
@@ -394,9 +386,7 @@ class CreateForm extends React.PureComponent {
 }
 
 const mapStateToProps = (state) => ({
-  locale: state.locale,
-  userData: state.userData,
-  metamaskRedux: state.metamaskRedux,
+  
 })
 
 export default withRouter(connect(mapStateToProps, null)(CreateForm))
