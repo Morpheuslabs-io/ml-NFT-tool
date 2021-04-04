@@ -1,7 +1,21 @@
 import React from 'react'
 import { withRouter } from 'next/router'
 import { connect } from 'react-redux'
-import { Button, Form, Input, Tooltip, Spin, Alert, Select, notification, Tag } from 'antd'
+import {
+  Button,
+  Form,
+  Input,
+  Tooltip,
+  Spin,
+  Alert,
+  Select,
+  notification,
+  Tag,
+  Upload,
+  message,
+} from 'antd'
+import ImgCrop from 'antd-img-crop'
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
@@ -15,7 +29,7 @@ const explorerLink = {
   5: 'https://goerli.etherscan.io',
   42: 'https://kovan.etherscan.io',
   80001: 'https://mumbai-explorer.matic.today',
-  137: 'https://explorer.matic.network'
+  137: 'https://explorer.matic.network',
 }
 
 const networkName = {
@@ -25,18 +39,26 @@ const networkName = {
   5: 'Ethereum Testnet Goerli',
   42: 'Ethereum Testnet Kovan',
   80001: 'Matic Mumbai Testnet',
-  137: 'Matic Mainnet'
+  137: 'Matic Mainnet',
 }
+
+function getBase64(img, callback) {
+  const reader = new FileReader()
+  reader.addEventListener('load', () => callback(reader.result))
+  reader.readAsDataURL(img)
+}
+
 
 class CreateForm extends React.PureComponent {
   constructor(props) {
     super(props)
     this.state = {
       loading: false,
+      imageUrl: null,
       createdDataNFT: null,
       networkID: null,
       address: null,
-      selectedNftStandard: 'ERC721'
+      selectedNftStandard: 'ERC721',
     }
     this.formRef = React.createRef()
   }
@@ -129,16 +151,50 @@ class CreateForm extends React.PureComponent {
   }
   onNftStandardChange = (e) => {
     if (this.state.selectedNftStandard !== e) {
-      this.setState({selectedNftStandard: e})
+      this.setState({ selectedNftStandard: e })
     }
   }
+
+  handleChange = (info) => {
+    if (info.file.status === 'uploading') {
+      this.setState({ loading: true })
+      return
+    }
+    if (info.file.status === 'done') {
+      // Get this url from response in real world.
+      getBase64(info.file.originFileObj, (imageUrl) =>
+        this.setState({
+          imageUrl,
+          loading: false,
+        }),
+      )
+    }
+  }
+
+  onPreview = async file => {
+    let src = file.url;
+    if (!src) {
+      src = await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file.originFileObj);
+        reader.onload = () => resolve(reader.result);
+      });
+    }
+    const image = new Image();
+    image.src = src;
+    const imgWindow = window.open(src);
+    imgWindow.document.write(image.outerHTML);
+  };
+
   render() {
-    const { loading, createdDataNFT, networkID, selectedNftStandard } = this.state
+    const { createdDataNFT, networkID, selectedNftStandard } = this.state
     const layout = {
       labelCol: { span: 13 },
       wrapperCol: { span: 11 },
     }
     const defaultAttributeFields = [{ key: 0, name: '', value: '' }]
+
+    const { loading, imageUrl } = this.state
 
     return (
       <div className="create-form-container">
@@ -184,15 +240,15 @@ class CreateForm extends React.PureComponent {
               >
                 <Select defaultValue="ERC721" onChange={this.onNftStandardChange}>
                   <Option value="ERC721">ERC721</Option>
-                  <Option value="ERC1155">
+                  <Option value="ERC1155" disabled={true}>
                     ERC1155
                   </Option>
                 </Select>
               </Form.Item>
             </Tooltip>
 
-            <Tag color='blue' style={{fontSize: '16px'}}>
-              Your {selectedNftStandard} Standard NFT Token
+            <Tag color="blue" style={{ fontSize: '16px' }}>
+              Your {selectedNftStandard} Token
             </Tag>
 
             <Tooltip title="This is your NFT name">
@@ -225,25 +281,11 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <hr style={{color: '#f0f0f0'}}/>
+            <hr style={{ color: '#f0f0f0' }} />
 
-            <Tag color='blue' style={{fontSize: '16px'}}>Your First {selectedNftStandard} Standard NFT Token</Tag>
-
-            { selectedNftStandard === 'ERC721' && (
-              <Tooltip title="This is your NFT Token ID">
-                <Form.Item
-                  label={<div className="text text-bold text-color-4 text-size-3x">ID</div>}
-                  name="nftID"
-                  rules={[
-                    {
-                      required: true,
-                    },
-                  ]}
-                >
-                  <Input disabled />
-                </Form.Item>
-              </Tooltip>)
-            }
+            <Tag color="blue" style={{ fontSize: '16px' }}>
+              Your First {selectedNftStandard} Token
+            </Tag>
 
             <Tooltip title="This is Ethereum owner address of the NFT token">
               <Form.Item
@@ -262,11 +304,11 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip title="This is your NFT token link to the metadata">
+            <Tooltip title="Please upload your NFT token image">
               <Form.Item
                 label={
                   <div className="text text-bold text-color-4 text-size-3x">
-                    {selectedNftStandard === 'ERC721' ? 'Link' : 'Base Metadata URI'} 
+                    {selectedNftStandard === 'ERC721' ? 'Image' : 'Base Metadata URI'}
                   </div>
                 }
                 name="nftLink"
@@ -277,7 +319,20 @@ class CreateForm extends React.PureComponent {
                   },
                 ]}
               >
-                <Input />
+                <ImgCrop rotate>
+                  <Upload
+                    name="avatar"
+                    listType="picture-card"
+                    className="avatar-uploader"
+                    // showUploadList={false}
+                    // action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
+                    // beforeUpload={beforeUpload}
+                    onChange={this.handleChange}
+                    onPreview={this.onPreview}
+                  >
+                    {!imageUrl && '+ Upload'}
+                  </Upload>
+                </ImgCrop>
               </Form.Item>
             </Tooltip>
 
