@@ -7,8 +7,10 @@ const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import Web3Service from 'controller/Web3'
-import ipfs from './ipfs'
+import IPFS from 'ipfs-http-client'
 import './style.scss'
+
+const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
 
 const explorerLink = {
   1: 'https://etherscan.io',
@@ -91,12 +93,20 @@ class CreateForm extends React.PureComponent {
       // Upload to IPFS
       const ipfsResult = await ipfs.add(Buffer(imgBase64))
       const ipfsHash = ipfsResult[0].hash
-      const image = `https://ipfs.io/ipfs/${ipfsHash}`
+      const external_link = `https://ipfs.io/ipfs/${ipfsHash}`
+      const image = `ipfs://${ipfsHash}`
 
       const tokenURI = JSON.stringify({
         name: nftName,
         description: nftDescription,
+        external_link,
         image,
+        // attributes: [
+        //   {
+        //     trait_type: 'trait',
+        //     value: 100,
+        //   },
+        // ],
       })
 
       let result
@@ -385,8 +395,6 @@ class CreateForm extends React.PureComponent {
   }
 }
 
-const mapStateToProps = (state) => ({
-  
-})
+const mapStateToProps = (state) => ({})
 
 export default withRouter(connect(mapStateToProps, null)(CreateForm))
