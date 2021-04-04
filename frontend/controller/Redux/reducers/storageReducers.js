@@ -16,9 +16,3 @@ export const locale = createReducer(localeEN, {
     }
   },
 })
-
-export const userData = createReducer(initState.userData, {
-  [KEY_STORE.SET_USER](state, action) {
-    return action.payload
-  },
-})
