@@ -12,14 +12,13 @@ import {
   notification,
   Tag,
   Upload,
-  message,
 } from 'antd'
 import ImgCrop from 'antd-img-crop'
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import Web3Service from 'controller/Web3'
+import ipfs from './ipfs'
 import './style.scss'
 
 const explorerLink = {
@@ -42,19 +41,13 @@ const networkName = {
   137: 'Matic Mainnet',
 }
 
-function getBase64(img, callback) {
-  const reader = new FileReader()
-  reader.addEventListener('load', () => callback(reader.result))
-  reader.readAsDataURL(img)
-}
-
 
 class CreateForm extends React.PureComponent {
   constructor(props) {
     super(props)
     this.state = {
       loading: false,
-      imageUrl: null,
+      imgBase64: null,
       createdDataNFT: null,
       networkID: null,
       address: null,
@@ -71,7 +64,7 @@ class CreateForm extends React.PureComponent {
           this.erc721Contract = new Erc721Contract(defaultAddress)
           this.erc1155Contract = new Erc1155Contract(defaultAddress)
           Web3Service.getNetWorkId().then((networkID) => {
-            console.log(`networkID:${networkID}`)
+            console.log(`defaultAddress:${defaultAddress}`)
             this.setState({ networkID, address: defaultAddress })
           })
         })
@@ -102,7 +95,18 @@ class CreateForm extends React.PureComponent {
       this.setState({
         loading: true,
       })
-      const { nftName, nftSymbol, nftID, nftOwner, nftLink } = values
+      const { nftName, nftSymbol, nftDescription, nftOwner, nftImage } = values
+
+      // Upload to IPFS
+      const ipfsResult = await ipfs.add(Buffer(this.state.imgBase64))
+      const ipfsHash = ipfsResult[0].hash
+      const image = `https://ipfs.io/ipfs/${ipfsHash}`
+
+      const tokenURI = {
+        name: nftName,
+        description: nftDescription,
+        image,
+      }
 
       let result
       if (this.state.selectedNftStandard === 'ERC721') {
@@ -110,15 +114,14 @@ class CreateForm extends React.PureComponent {
           name: nftName,
           symbol: nftSymbol,
           to: nftOwner,
-          tokenID: nftID,
-          tokenURI: nftLink,
+          tokenURI,
         })
       } else {
         result = await this.erc1155Contract.create({
           name: nftName,
           symbol: nftSymbol,
           to: nftOwner,
-          tokenURI: nftLink,
+          tokenURI: nftImage,
         })
       }
       this.setState({
@@ -149,6 +152,20 @@ class CreateForm extends React.PureComponent {
     // return rand
     return 1
   }
+
+  getCurrAddress = async () => {
+    return new Promise((resolve) => {
+      window.ethereum
+        .enable()
+        .then((accounts) => {
+          const defaultAddress = accounts[0]
+          return resolve(defaultAddress)
+        })
+        .catch(e => {
+          console.error(e);
+        })
+    }) 
+  }
   onNftStandardChange = (e) => {
     if (this.state.selectedNftStandard !== e) {
       this.setState({ selectedNftStandard: e })
@@ -161,30 +178,28 @@ class CreateForm extends React.PureComponent {
       return
     }
     if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj, (imageUrl) =>
-        this.setState({
-          imageUrl,
-          loading: false,
-        }),
-      )
+      const reader = new FileReader()
+      reader.readAsArrayBuffer(info.file.originFileObj) // convert file to array for buffer
+      reader.onloadend = () => {
+        this.setState({ imgBase64: Buffer(reader.result), loading: false })
+      }
     }
   }
 
-  onPreview = async file => {
-    let src = file.url;
+  onPreview = async (file) => {
+    let src = file.url
     if (!src) {
-      src = await new Promise(resolve => {
-        const reader = new FileReader();
-        reader.readAsDataURL(file.originFileObj);
-        reader.onload = () => resolve(reader.result);
-      });
+      src = await new Promise((resolve) => {
+        const reader = new FileReader()
+        reader.readAsDataURL(file.originFileObj)
+        reader.onload = () => resolve(reader.result)
+      })
     }
-    const image = new Image();
-    image.src = src;
-    const imgWindow = window.open(src);
-    imgWindow.document.write(image.outerHTML);
-  };
+    const image = new Image()
+    image.src = src
+    const imgWindow = window.open(src)
+    imgWindow.document.write(image.outerHTML)
+  }
 
   render() {
     const { createdDataNFT, networkID, selectedNftStandard } = this.state
@@ -192,9 +207,8 @@ class CreateForm extends React.PureComponent {
       labelCol: { span: 13 },
       wrapperCol: { span: 11 },
     }
-    const defaultAttributeFields = [{ key: 0, name: '', value: '' }]
 
-    const { loading, imageUrl } = this.state
+    const { loading, imgBase64 } = this.state
 
     return (
       <div className="create-form-container">
@@ -213,11 +227,11 @@ class CreateForm extends React.PureComponent {
             initialValues={{
               numberOfIssuing: 1,
               remember: true,
-              nftDetail: defaultAttributeFields,
+              nftDescription: '',
               enableSend: true,
               ownerMessage: '',
               nftID: this.generateNumber(),
-              nftOwner: this.props.userData ? this.props.userData.address : '',
+              nftOwner: '',
               nftStandard: 'ERC721',
             }}
             onFinish={this.onFinish}
@@ -227,14 +241,14 @@ class CreateForm extends React.PureComponent {
               })
             }}
           >
-            <Tooltip title="Select a token standard">
+            <Tooltip title="Select NFT token standard">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Standard</div>}
                 name="nftStandard"
                 rules={[
                   {
                     required: true,
-                    message: 'NFT standard is required',
+                    message: 'NFT token standard is required',
                   },
                 ]}
               >
@@ -251,14 +265,14 @@ class CreateForm extends React.PureComponent {
               Your {selectedNftStandard} Token
             </Tag>
 
-            <Tooltip title="This is your NFT name">
+            <Tooltip title="NFT token name">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
                 name="nftName"
                 rules={[
                   {
                     required: true,
-                    message: 'NFT Name is required',
+                    message: 'NFT token name is required',
                   },
                 ]}
               >
@@ -266,14 +280,14 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip title="This is your NFT symbol">
+            <Tooltip title="NFT token symbol">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Symbol</div>}
                 name="nftSymbol"
                 rules={[
                   {
                     required: true,
-                    message: 'NFT Symbol is required',
+                    message: 'NFT token symbol is required',
                   },
                 ]}
               >
@@ -287,7 +301,7 @@ class CreateForm extends React.PureComponent {
               Your First {selectedNftStandard} Token
             </Tag>
 
-            <Tooltip title="This is Ethereum owner address of the NFT token">
+            <Tooltip title="NFT token owner address">
               <Form.Item
                 label={
                   <div className="text text-bold text-color-4 text-size-3x">Owner Address</div>
@@ -296,7 +310,7 @@ class CreateForm extends React.PureComponent {
                 rules={[
                   {
                     required: true,
-                    message: 'Please specify Ethereum address as the NFT owner',
+                    message: 'NFT token owner address is required',
                   },
                 ]}
               >
@@ -304,18 +318,35 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            <Tooltip title="Please upload your NFT token image">
+            <Tooltip title="NFT token description">
+              <Form.Item
+                label={
+                  <div className="text text-bold text-color-4 text-size-3x">Description</div>
+                }
+                name="nftDescription"
+                rules={[
+                  {
+                    required: true,
+                    message: 'NFT token description is required',
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Tooltip>
+
+            <Tooltip title="NFT token image">
               <Form.Item
                 label={
                   <div className="text text-bold text-color-4 text-size-3x">
                     {selectedNftStandard === 'ERC721' ? 'Image' : 'Base Metadata URI'}
                   </div>
                 }
-                name="nftLink"
+                name="nftImage"
                 rules={[
                   {
-                    required: true,
-                    message: 'NFT link is required',
+                    // required: true,
+                    // message: 'NFT link is required',
                   },
                 ]}
               >
@@ -324,13 +355,11 @@ class CreateForm extends React.PureComponent {
                     name="avatar"
                     listType="picture-card"
                     className="avatar-uploader"
-                    // showUploadList={false}
-                    // action="https://www.mocky.io/v2/5cc8019d300000980a055e76"
-                    // beforeUpload={beforeUpload}
                     onChange={this.handleChange}
                     onPreview={this.onPreview}
+                    handleRemove={() => this.setState({imgBase64: null})}
                   >
-                    {!imageUrl && '+ Upload'}
+                    {!imgBase64 && '+ Upload'}
                   </Upload>
                 </ImgCrop>
               </Form.Item>
