@@ -8,10 +8,11 @@ import Erc721Contract from 'contract-api/Erc721Contract'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import Web3Service from 'controller/Web3'
 import IPFS from 'ipfs-http-client'
+import axios from 'axios'
 import './style.scss'
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
-
+const DEFAULT_GAS_PRICE = 50 // GWei
 const explorerLink = {
   1: 'https://etherscan.io',
   3: 'https://ropsten.etherscan.io',
@@ -81,6 +82,17 @@ class CreateForm extends React.PureComponent {
     })
     this.onChangeKeyAndValue('ownerMessage', value)
   }
+  queryGasPrice = async () => {
+    return new Promise((resolve, reject) => {
+      axios
+        .get('https://ethgasstation.info/json/ethgasAPI.json')
+        .then((res) => {
+          const gasPrice = Number(res.data.average) / 10
+          resolve(gasPrice)
+        })
+        .catch((err) => {resolve(DEFAULT_GAS_PRICE)})
+    })
+  }
   onFinish = async (values) => {
     const callbackOnFinish = async () => {
       this.setState({
@@ -91,23 +103,26 @@ class CreateForm extends React.PureComponent {
       const { imgBase64, address } = this.state
 
       // Upload to IPFS
-      const ipfsResult = await ipfs.add(Buffer(imgBase64))
+      let ipfsResult = await ipfs.add(Buffer(imgBase64))
       const ipfsHash = ipfsResult[0].hash
       const external_link = `https://ipfs.io/ipfs/${ipfsHash}`
       const image = `ipfs://${ipfsHash}`
 
-      const tokenURI = JSON.stringify({
+      // This is only the content that the tokenURI returns
+      const tokenURIContent = JSON.stringify({
         name: nftName,
         description: nftDescription,
         external_link,
         image,
-        // attributes: [
-        //   {
-        //     trait_type: 'trait',
-        //     value: 100,
-        //   },
-        // ],
       })
+
+      // Upload the entire JSON to get the tokenURI
+      ipfsResult = await ipfs.add(Buffer(tokenURIContent))
+      const tokenURI = ipfsResult[0].hash
+      console.log('tokenURI:', tokenURI);
+
+      let gasPrice = await this.queryGasPrice();
+      gasPrice = gasPrice * Math.pow(10, 9 )
 
       let result
       if (this.state.selectedNftStandard === 'ERC721') {
@@ -116,6 +131,7 @@ class CreateForm extends React.PureComponent {
           symbol: nftSymbol,
           to: address,
           tokenURI,
+          gasPrice
         })
       } else {
         result = await this.erc1155Contract.create({
@@ -374,17 +390,13 @@ class CreateForm extends React.PureComponent {
                 />
               )}
             </Form.Item>
-            {!loading && createdDataNFT !== null && (
+            {!loading && createdDataNFT !== null && createdDataNFT.address && (
               <div style={{ justifyContent: 'center' }}>
                 <a
                   href={`${explorerLink[networkID]}/token/${createdDataNFT.address}`}
                   target="_blank"
                 >
-                  NFT Token Address
-                </a>
-                <br />
-                <a href={`${explorerLink[networkID]}/tx/${createdDataNFT.tx}`} target="_blank">
-                  Transaction Link
+                  NFT Token Address: {createdDataNFT.address}
                 </a>
               </div>
             )}
