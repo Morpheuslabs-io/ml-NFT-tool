@@ -18,13 +18,12 @@ export default class Erc721Contract {
   }
 
   async create(data) {
-    const { name, symbol, to, tokenID, tokenURI } = data
+    const { name, symbol, to, tokenURI } = data
     try {
       const contractInstance = await this.contract.new(
         name,
         symbol,
         Web3Service.toChecksumAddress(to),
-        Number(tokenID),
         tokenURI,
       )
       return contractInstance
