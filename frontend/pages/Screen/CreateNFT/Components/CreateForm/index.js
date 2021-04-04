@@ -99,20 +99,21 @@ class CreateForm extends React.PureComponent {
         loading: true,
         createdDataNFT: null,
       })
-      const { nftName, nftSymbol, nftDescription, nftImage } = values
+      const { nftName, nftSymbol, nftDescription, nftExternalLink, nftImage } = values
       const { imgBase64, address } = this.state
 
       // Upload to IPFS
       let ipfsResult = await ipfs.add(Buffer(imgBase64))
       const ipfsHash = ipfsResult[0].hash
-      const external_link = `https://ipfs.io/ipfs/${ipfsHash}`
+      let external_url = nftExternalLink !== '' ? nftExternalLink : null
       const image = `ipfs://${ipfsHash}`
+      console.log('nftExternalLink:', nftExternalLink);
 
       // This is only the content that the tokenURI returns
       const tokenURIContent = JSON.stringify({
         name: nftName,
         description: nftDescription,
-        external_link,
+        external_url,
         image,
       })
 
@@ -245,6 +246,7 @@ class CreateForm extends React.PureComponent {
               numberOfIssuing: 1,
               remember: true,
               nftDescription: '',
+              nftExternalLink: 'https://',
               enableSend: true,
               ownerMessage: '',
               nftID: this.generateNumber(),
@@ -338,6 +340,21 @@ class CreateForm extends React.PureComponent {
                   {
                     required: true,
                     message: 'NFT token description is required',
+                  },
+                ]}
+              >
+                <Input />
+              </Form.Item>
+            </Tooltip>
+
+            <Tooltip title="External link to the NFT token">
+              <Form.Item
+                label={<div className="text text-bold text-color-4 text-size-3x">External Link</div>}
+                name="nftExternalLink"
+                rules={[
+                  {
+                    required: false,
+                    message: 'NFT token external link is required',
                   },
                 ]}
               >
