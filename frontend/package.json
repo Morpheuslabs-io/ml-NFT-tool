@@ -3,9 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build-pm2": "npm run build && pm2 start server/index.js --name 'client-nft'",
     "start": "rm -rf .next && node server/index.js",
-    "build": "rm -rf .next && next build",
     "export": "next export",
     "reset": "rm -rf package-lock.json && rm -rf ./node_modules && npm install"
   },
