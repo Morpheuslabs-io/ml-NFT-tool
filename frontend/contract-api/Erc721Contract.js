@@ -1,5 +1,5 @@
 import Erc721ContractAbi from '../erc721/contracts/CustomERC721.json'
-import contract from 'truffle-contract'
+import contract from '@truffle/contract'
 import Web3Service from '../controller/Web3'
 
 let instance = null
@@ -19,7 +19,7 @@ export default class Erc721Contract {
 
   async create(data) {
     const { name, symbol, to, tokenURI, gasPrice } = data
-    console.log('gasPrice:', gasPrice);
+    console.log('gasPrice:', gasPrice)
     try {
       const contractInstance = await this.contract.new(
         name,
@@ -27,10 +27,35 @@ export default class Erc721Contract {
         Web3Service.toChecksumAddress(to),
         tokenURI,
         {
-          gasPrice
-        }
+          gasPrice,
+        },
       )
       return contractInstance
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async name(contractAddress) {
+    try {
+      console.log('contractAddress:', contractAddress)
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.name()
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async createCollectible(data) {
+    const { contractAddress, tokenURI, gasPrice } = data
+    try {
+      console.log('contractAddress:', contractAddress)
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.createCollectible(tokenURI, {
+        gasPrice,
+      })
     } catch (err) {
       console.log(err)
       return null

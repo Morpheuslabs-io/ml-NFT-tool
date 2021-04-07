@@ -1,5 +1,5 @@
 import ERC1155ContractAbi from '../erc1155/contracts/ERC1155Tradable.json'
-import contract from 'truffle-contract'
+import contract from '@truffle/contract'
 import Web3Service from '../controller/Web3'
 
 let instance = null
@@ -33,9 +33,20 @@ export default class ERC1155Contract {
         symbol,
         this.addSlashToUri(tokenURI),
         Web3Service.toChecksumAddress(to),
-        1
+        1,
       )
       return contractInstance
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async name(contractAddress) {
+    try {
+      console.log('contractAddress:', contractAddress)
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.name()
     } catch (err) {
       console.log(err)
       return null

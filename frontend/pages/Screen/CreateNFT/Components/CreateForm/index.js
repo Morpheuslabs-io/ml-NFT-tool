@@ -1,7 +1,7 @@
 import React from 'react'
 import { withRouter } from 'next/router'
 import { connect } from 'react-redux'
-import { Button, Form, Input, Tooltip, Spin, Alert, Select, notification, Tag, Upload } from 'antd'
+import { Button, Form, Input, Tooltip, Spin, Alert, notification, Select, Upload, Tag } from 'antd'
 import ImgCrop from 'antd-img-crop'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
@@ -40,10 +40,12 @@ class CreateForm extends React.PureComponent {
       loading: false,
       imgLoading: false,
       imgBase64: null,
-      createdDataNFT: null,
+      nftOpResult: null,
       networkID: null,
       address: null,
       selectedNftStandard: 'ERC721',
+      isCreateCollection: true,
+      nftColelctionName: null,
     }
     this.formRef = React.createRef()
   }
@@ -64,6 +66,14 @@ class CreateForm extends React.PureComponent {
           console.error('window.ethereum.enable - Error:', error)
         })
     }
+  }
+
+  handleSelectChange = (value) => {
+    // value: create_collection or create_item
+    this.setState({
+      isCreateCollection: value === 'create_collection',
+      nftColelctionName: null,
+    })
   }
 
   onChangeSwitch = (value) => {
@@ -90,24 +100,50 @@ class CreateForm extends React.PureComponent {
           const gasPrice = Number(res.data.average) / 10
           resolve(gasPrice)
         })
-        .catch((err) => {resolve(DEFAULT_GAS_PRICE)})
+        .catch((err) => {
+          resolve(DEFAULT_GAS_PRICE)
+        })
     })
   }
   onFinish = async (values) => {
     const callbackOnFinish = async () => {
       this.setState({
         loading: true,
-        createdDataNFT: null,
+        nftOpResult: null,
       })
-      const { nftName, nftSymbol, nftDescription, nftExternalLink, nftImage } = values
-      const { imgBase64, address } = this.state
+      const {
+        nftName,
+        nftSymbol,
+        nftColelctionAddress,
+        nftDescription,
+        nftExternalLink,
+        nftImage,
+      } = values
+      const { imgBase64, address, isCreateCollection } = this.state
+
+      // let retrievedNftName
+      // if (!isCreateCollection) {
+      //   retrievedNftName = await this.erc721Contract.name(nftColelctionAddress)
+      //   if (!retrievedNftName) {
+      //     notification.open({
+      //       message: 'Collection address not found',
+      //       description: `Please ensure collection address is valid on ${
+      //         networkName[this.state.networkID] || '...'
+      //       }`,
+      //     })
+      //     this.setState({ nftColelctionName: null })
+      //     return
+      //   }
+      //   this.setState({ nftColelctionName: retrievedNftName })
+      //   console.log('retrievedNftName:', retrievedNftName)
+      // }
 
       // Upload to IPFS
       let ipfsResult = await ipfs.add(Buffer(imgBase64))
       const ipfsHash = ipfsResult[0].hash
       let external_url = nftExternalLink !== '' ? nftExternalLink : null
       const image = `ipfs://${ipfsHash}`
-      console.log('nftExternalLink:', nftExternalLink);
+      console.log('nftExternalLink:', nftExternalLink)
 
       // This is only the content that the tokenURI returns
       const tokenURIContent = JSON.stringify({
@@ -120,37 +156,65 @@ class CreateForm extends React.PureComponent {
       // Upload the entire JSON to get the tokenURI
       ipfsResult = await ipfs.add(Buffer(tokenURIContent))
       const tokenURI = ipfsResult[0].hash
-      console.log('tokenURI:', tokenURI);
+      console.log('tokenURI:', tokenURI)
 
-      let gasPrice = await this.queryGasPrice();
-      gasPrice = gasPrice * Math.pow(10, 9 )
+      let gasPrice = await this.queryGasPrice()
+      gasPrice = gasPrice * Math.pow(10, 9)
 
-      let result
-      if (this.state.selectedNftStandard === 'ERC721') {
-        result = await this.erc721Contract.create({
-          name: nftName,
-          symbol: nftSymbol,
-          to: address,
-          tokenURI,
-          gasPrice
+      if (isCreateCollection) {
+        let result
+        if (this.state.selectedNftStandard === 'ERC721') {
+          result = await this.erc721Contract.create({
+            name: nftName,
+            symbol: nftSymbol,
+            to: address,
+            tokenURI,
+            gasPrice,
+          })
+        } else {
+          result = await this.erc1155Contract.create({
+            name: nftName,
+            symbol: nftSymbol,
+            to: address,
+            tokenURI: nftImage,
+          })
+        }
+        this.setState({
+          loading: false,
+          nftOpResult: result
+            ? {
+                address: result.address,
+                tx: result.transactionHash,
+              }
+            : null,
         })
       } else {
-        result = await this.erc1155Contract.create({
-          name: nftName,
-          symbol: nftSymbol,
-          to: address,
-          tokenURI: nftImage,
+        let result
+        if (this.state.selectedNftStandard === 'ERC721') {
+          result = await this.erc721Contract.createCollectible({
+            contractAddress: nftColelctionAddress,
+            tokenURI,
+            gasPrice,
+          })
+        } else {
+          // result = await this.erc1155Contract.create({
+          //   name: nftName,
+          //   symbol: nftSymbol,
+          //   to: address,
+          //   tokenURI: nftImage,
+          // })
+        }
+        console.log('result:', result)
+        this.setState({
+          loading: false,
+          nftOpResult: result
+            ? {
+                // address: result.address,
+                tx: result.tx,
+              }
+            : null,
         })
       }
-      this.setState({
-        loading: false,
-        createdDataNFT: result
-          ? {
-              address: result.address,
-              tx: result.transactionHash,
-            }
-          : null,
-      })
     }
     const isSigned = this.state.address !== null
     if (!isSigned) {
@@ -219,14 +283,30 @@ class CreateForm extends React.PureComponent {
     imgWindow.document.write(image.outerHTML)
   }
 
+  onBlur = async (e) => {
+    console.log('onBlur - e.target:', e.target.value)
+    const retrievedNftName = await this.erc721Contract.name(e.target.value)
+    if (!retrievedNftName) {
+      notification.open({
+        message: 'Collection address not found',
+        description: `Please ensure collection address is valid on ${
+          networkName[this.state.networkID] || '...'
+        }`,
+      })
+      this.setState({ nftColelctionName: null })
+      return
+    }
+    this.setState({ nftColelctionName: retrievedNftName })
+  }
+
   render() {
-    const { createdDataNFT, networkID, selectedNftStandard } = this.state
+    const { nftOpResult, networkID, selectedNftStandard, nftColelctionName } = this.state
     const layout = {
       labelCol: { span: 13 },
       wrapperCol: { span: 11 },
     }
 
-    const { loading, imgBase64 } = this.state
+    const { loading, imgBase64, isCreateCollection } = this.state
 
     return (
       <div className="create-form-container">
@@ -252,9 +332,17 @@ class CreateForm extends React.PureComponent {
               nftID: this.generateNumber(),
               // nftOwner: '',
               nftStandard: 'ERC721',
+              nftColelctionAddress: '',
             }}
             onFinish={this.onFinish}
           >
+            <Form.Item>
+              <Select defaultValue="create_collection" onChange={this.handleSelectChange}>
+                <Option value="create_collection">Create new collection</Option>
+                <Option value="create_item">Create item to an existing collection</Option>
+              </Select>
+            </Form.Item>
+
             <Tooltip title="Select NFT token standard">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Standard</div>}
@@ -279,35 +367,79 @@ class CreateForm extends React.PureComponent {
               Your {selectedNftStandard} Token
             </Tag> */}
 
-            <Tooltip title="NFT token name">
-              <Form.Item
-                label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
-                name="nftName"
-                rules={[
-                  {
-                    required: true,
-                    message: 'NFT token name is required',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Tooltip>
+            {isCreateCollection ? (
+              <>
+                <Tooltip title="NFT token name">
+                  <Form.Item
+                    label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
+                    name="nftName"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'NFT token name is required',
+                      },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Tooltip>
 
-            <Tooltip title="NFT token symbol">
-              <Form.Item
-                label={<div className="text text-bold text-color-4 text-size-3x">Symbol</div>}
-                name="nftSymbol"
-                rules={[
-                  {
-                    required: true,
-                    message: 'NFT token symbol is required',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Tooltip>
+                <Tooltip title="NFT token symbol">
+                  <Form.Item
+                    label={<div className="text text-bold text-color-4 text-size-3x">Symbol</div>}
+                    name="nftSymbol"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'NFT token symbol is required',
+                      },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Tooltip>
+              </>
+            ) : (
+              <>
+                <Tooltip title="This is the NFT token address after creating new collection">
+                  <Form.Item
+                    label={
+                      <div className="text text-bold text-color-4 text-size-3x">
+                        Collection Address
+                      </div>
+                    }
+                    name="nftColelctionAddress"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'NFT token address is required',
+                      },
+                    ]}
+                  >
+                    <Input onBlur={(e) => this.onBlur(e)} />
+                  </Form.Item>
+                </Tooltip>
+                {nftColelctionName && (
+                  <Tooltip title="This is the NFT token name">
+                    <Form.Item
+                      label={
+                        <div className="text text-bold text-color-4 text-size-3x">
+                          Collection Name
+                        </div>
+                      }
+                      name=""
+                      rules={[
+                        {
+                          required: false,
+                        },
+                      ]}
+                    >
+                      <Input defaultValue={nftColelctionName} disabled={true} />
+                    </Form.Item>
+                  </Tooltip>
+                )}
+              </>
+            )}
 
             {/* <hr style={{ color: '#f0f0f0' }} /> */}
 
@@ -349,7 +481,9 @@ class CreateForm extends React.PureComponent {
 
             <Tooltip title="External link to the NFT token">
               <Form.Item
-                label={<div className="text text-bold text-color-4 text-size-3x">External Link</div>}
+                label={
+                  <div className="text text-bold text-color-4 text-size-3x">External Link</div>
+                }
                 name="nftExternalLink"
                 rules={[
                   {
@@ -393,7 +527,6 @@ class CreateForm extends React.PureComponent {
                 </ImgCrop>
               </Form.Item>
             </Tooltip>
-
             <Form.Item xs={24} md={24}>
               <Button type="primary" htmlType="submit" className="ant-big-btn" disabled={loading}>
                 {loading ? <Spin /> : 'Submit'}
@@ -401,20 +534,30 @@ class CreateForm extends React.PureComponent {
               <br />
               {loading && (
                 <Alert
-                  message="NFT Token is being launched"
+                  message={
+                    isCreateCollection
+                      ? 'NFT Token is being launched'
+                      : 'Collection item is being created'
+                  }
                   description="Please wait!"
                   type="info"
                 />
               )}
             </Form.Item>
-            {!loading && createdDataNFT !== null && createdDataNFT.address && (
+            {!loading && nftOpResult !== null && (
               <div style={{ justifyContent: 'center' }}>
-                <a
-                  href={`${explorerLink[networkID]}/token/${createdDataNFT.address}`}
-                  target="_blank"
-                >
-                  NFT Token Address: {createdDataNFT.address}
-                </a>
+                {isCreateCollection ? (
+                  <a
+                    href={`${explorerLink[networkID]}/token/${nftOpResult.address}`}
+                    target="_blank"
+                  >
+                    NFT Token Address: {nftOpResult.address}
+                  </a>
+                ) : (
+                  <a href={`${explorerLink[networkID]}/tx/${nftOpResult.tx}`} target="_blank">
+                    Transaction: {nftOpResult.tx}
+                  </a>
+                )}
               </div>
             )}
           </Form>
