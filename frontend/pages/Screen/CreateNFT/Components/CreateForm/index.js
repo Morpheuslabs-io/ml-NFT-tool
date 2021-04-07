@@ -339,7 +339,7 @@ class CreateForm extends React.PureComponent {
             <Form.Item>
               <Select defaultValue="create_collection" onChange={this.handleSelectChange}>
                 <Option value="create_collection">Create new collection</Option>
-                <Option value="create_item">Create item to an existing collection</Option>
+                <Option value="create_item">Add item to an existing collection</Option>
               </Select>
             </Form.Item>
 
@@ -529,7 +529,7 @@ class CreateForm extends React.PureComponent {
             </Tooltip>
             <Form.Item xs={24} md={24}>
               <Button type="primary" htmlType="submit" className="ant-big-btn" disabled={loading}>
-                {loading ? <Spin /> : 'Submit'}
+                {loading ? <Spin /> : `${isCreateCollection ? 'Create Collection' : 'Add Item'}`}
               </Button>
               <br />
               {loading && (
