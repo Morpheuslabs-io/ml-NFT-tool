@@ -217,13 +217,10 @@ class CreateForm extends React.PureComponent {
       }
     }
     const isSigned = this.state.address !== null
-    if (!isSigned) {
+    if (!isSigned || !this.erc721Contract) {
       notification.open({
         message: 'Metamask is locked',
         description: 'Please click the Metamask to unlock it',
-        onClick: () => {
-          console.log('Notification Clicked!')
-        },
       })
     } else {
       callbackOnFinish()
@@ -284,6 +281,13 @@ class CreateForm extends React.PureComponent {
   }
 
   onBlur = async (e) => {
+    if (!this.erc721Contract) {
+      notification.open({
+        message: 'Metamask is locked',
+        description: 'Please click the Metamask to unlock it',
+      })
+      return
+    }
     if (e.target && e.target.value !== '' && this.erc721Contract) {
       const retrievedNftName = await this.erc721Contract.name(e.target.value)
       if (!retrievedNftName) {
