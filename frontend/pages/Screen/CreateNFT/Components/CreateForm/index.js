@@ -46,6 +46,7 @@ class CreateForm extends React.PureComponent {
       selectedNftStandard: 'ERC721',
       isCreateCollection: true,
       nftColelctionName: null,
+      nftColelctionSymbol: null,
     }
     this.formRef = React.createRef()
   }
@@ -54,6 +55,13 @@ class CreateForm extends React.PureComponent {
       window.ethereum
         .enable()
         .then((accounts) => {
+          if (!accounts || !accounts[0]) {
+            notification.open({
+              message: 'Metamask is locked',
+              description: 'Please click the Metamask to unlock it',
+            })
+            return
+          }
           const defaultAddress = accounts[0]
           this.erc721Contract = new Erc721Contract(defaultAddress)
           this.erc1155Contract = new Erc1155Contract(defaultAddress)
@@ -64,7 +72,18 @@ class CreateForm extends React.PureComponent {
         })
         .catch((error) => {
           console.error('window.ethereum.enable - Error:', error)
+          notification.open({
+            message: 'Metamask is locked',
+            description: 'Please click the Metamask to unlock it',
+          })
+          return
         })
+    } else {
+      notification.open({
+        message: 'Metamask is not available',
+        description: 'Please install Metamask on your web browser',
+      })
+      return
     }
   }
 
@@ -73,6 +92,7 @@ class CreateForm extends React.PureComponent {
     this.setState({
       isCreateCollection: value === 'create_collection',
       nftColelctionName: null,
+      nftColelctionSymbol: null,
     })
   }
 
@@ -281,6 +301,7 @@ class CreateForm extends React.PureComponent {
   }
 
   onBlur = async (e) => {
+    e.preventDefault()
     if (!this.erc721Contract) {
       notification.open({
         message: 'Metamask is locked',
@@ -288,24 +309,35 @@ class CreateForm extends React.PureComponent {
       })
       return
     }
-    if (e.target && e.target.value !== '' && this.erc721Contract) {
-      const retrievedNftName = await this.erc721Contract.name(e.target.value)
-      if (!retrievedNftName) {
+    if (e && e.target && e.target.value !== '' && this.erc721Contract) {
+      const contractAddr = e.target.value
+      const retrievedNftName = await this.erc721Contract.name(contractAddr)
+      const retrievedNftSymbol = await this.erc721Contract.symbol(contractAddr)
+      if (!retrievedNftName || !retrievedNftSymbol) {
         notification.open({
           message: 'Collection address not found',
           description: `Please ensure collection address is valid on ${
             networkName[this.state.networkID] || '...'
           }`,
         })
-        this.setState({ nftColelctionName: null })
+        this.setState({ nftColelctionName: null, nftColelctionName: null })
         return
       }
-      this.setState({ nftColelctionName: retrievedNftName })
+      this.setState({
+        nftColelctionName: retrievedNftName,
+        nftColelctionSymbol: retrievedNftSymbol,
+      })
     }
   }
 
   render() {
-    const { nftOpResult, networkID, selectedNftStandard, nftColelctionName } = this.state
+    const {
+      nftOpResult,
+      networkID,
+      selectedNftStandard,
+      nftColelctionName,
+      nftColelctionSymbol,
+    } = this.state
     const layout = {
       labelCol: { span: 13 },
       wrapperCol: { span: 11 },
@@ -440,6 +472,25 @@ class CreateForm extends React.PureComponent {
                       ]}
                     >
                       <Input defaultValue={nftColelctionName} disabled={true} />
+                    </Form.Item>
+                  </Tooltip>
+                )}
+                {nftColelctionSymbol && (
+                  <Tooltip title="This is the NFT token symbol">
+                    <Form.Item
+                      label={
+                        <div className="text text-bold text-color-4 text-size-3x">
+                          Collection Symbol
+                        </div>
+                      }
+                      name=""
+                      rules={[
+                        {
+                          required: false,
+                        },
+                      ]}
+                    >
+                      <Input defaultValue={nftColelctionSymbol} disabled={true} />
                     </Form.Item>
                   </Tooltip>
                 )}

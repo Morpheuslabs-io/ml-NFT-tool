@@ -48,6 +48,17 @@ export default class Erc721Contract {
     }
   }
 
+  async symbol(contractAddress) {
+    try {
+      console.log('contractAddress:', contractAddress)
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.symbol()
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
   async createCollectible(data) {
     const { contractAddress, tokenURI, gasPrice } = data
     try {
