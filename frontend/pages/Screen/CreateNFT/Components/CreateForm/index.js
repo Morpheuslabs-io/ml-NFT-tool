@@ -284,19 +284,20 @@ class CreateForm extends React.PureComponent {
   }
 
   onBlur = async (e) => {
-    console.log('onBlur - e.target:', e.target.value)
-    const retrievedNftName = await this.erc721Contract.name(e.target.value)
-    if (!retrievedNftName) {
-      notification.open({
-        message: 'Collection address not found',
-        description: `Please ensure collection address is valid on ${
-          networkName[this.state.networkID] || '...'
-        }`,
-      })
-      this.setState({ nftColelctionName: null })
-      return
+    if (e.target && e.target.value !== '' && this.erc721Contract) {
+      const retrievedNftName = await this.erc721Contract.name(e.target.value)
+      if (!retrievedNftName) {
+        notification.open({
+          message: 'Collection address not found',
+          description: `Please ensure collection address is valid on ${
+            networkName[this.state.networkID] || '...'
+          }`,
+        })
+        this.setState({ nftColelctionName: null })
+        return
+      }
+      this.setState({ nftColelctionName: retrievedNftName })
     }
-    this.setState({ nftColelctionName: retrievedNftName })
   }
 
   render() {
@@ -315,7 +316,7 @@ class CreateForm extends React.PureComponent {
             className="page-title"
             style={{ textAlign: 'center', color: '#ffffff', padding: '40px' }}
           >
-            {`Launch NFT to ${networkName[networkID] || '...'}`}
+            {`NFT Launch Pad for ${networkName[networkID] || '...'}`}
           </div>
           <Form
             ref={this.formRef}
