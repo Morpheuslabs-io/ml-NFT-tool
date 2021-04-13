@@ -4,8 +4,13 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./EIP712MetaTransaction.sol";
 
-contract CustomERC721 is Ownable, ERC721URIStorage {
+contract CustomERC721 is Ownable, ERC721URIStorage, EIP712MetaTransaction {
+    
+    string private constant DOMAIN_NAME = "morpheuslabs.io";
+    string private constant DOMAIN_VERSION = "1";
+    
     uint256 public tokenId = 0;
     
     // Authorized list
@@ -16,7 +21,7 @@ contract CustomERC721 is Ownable, ERC721URIStorage {
         string memory _symbol,
         address _to,
         string memory _tokenURI
-    ) ERC721(_name, _symbol) {
+    ) ERC721(_name, _symbol) EIP712MetaTransaction(DOMAIN_NAME, DOMAIN_VERSION) {
         _mint(_to, tokenId);
         _setTokenURI(tokenId, _tokenURI);
     }
