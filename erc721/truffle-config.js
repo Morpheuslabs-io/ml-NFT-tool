@@ -10,4 +10,16 @@ module.exports = {
       network_id: "*", // Match any network id
     },
   },
+  compilers: {
+    solc: {
+      version: "0.8.0",
+      parser: "solcjs",
+      settings: {
+        optimizer: {
+          enabled: true,
+          runs: 200,
+        },
+      },
+    },
+  },
 };

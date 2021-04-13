@@ -1,24 +1,50 @@
-pragma solidity ^0.4.23;
+// SPDX-License-Identifier: MIT
 
-import "../node_modules/zeppelin-solidity/contracts/token/ERC721/ERC721Token.sol";
+pragma solidity ^0.8.0;
 
-contract CustomERC721 is ERC721Token {
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract CustomERC721 is Ownable, ERC721URIStorage {
     uint256 public tokenId = 0;
+    
+    // Authorized list
+    mapping(address => bool) public authorized;
+    
     constructor(
-        string _name,
-        string _symbol,
+        string memory _name,
+        string memory _symbol,
         address _to,
-        string _tokenURI
-    ) public ERC721Token(_name, _symbol) {
-        super._mint(_to, tokenId);
-        super._setTokenURI(tokenId, _tokenURI);
-        tokenId = tokenId + 1;
+        string memory _tokenURI
+    ) ERC721(_name, _symbol) {
+        _mint(_to, tokenId);
+        _setTokenURI(tokenId, _tokenURI);
     }
 
-    function createCollectible(string tokenURI) public returns (uint256) {
-        super._mint(msg.sender, tokenId);
-        super._setTokenURI(tokenId, tokenURI);
+    modifier isAuthorized() {
+        require(
+            msg.sender == owner() || authorized[msg.sender] == true, 
+            "CustomERC721: unauthorized"
+        );
+        _;
+    }
+
+    function createCollectible(string memory tokenURI) public isAuthorized returns (uint256) {
         tokenId = tokenId + 1;
+        _mint(msg.sender, tokenId);
+        _setTokenURI(tokenId, tokenURI);
         return tokenId;
+    }
+
+    function addAuthorized(address auth) public onlyOwner {
+        authorized[auth] = true;
+    }
+
+    function clearAuthorized(address auth) public onlyOwner {
+        authorized[auth] = false;
+    }
+
+    function checkAuthorized(address auth) public view returns (bool) {
+        return authorized[auth];
     }
 }

@@ -211,6 +211,18 @@ class CreateForm extends React.PureComponent {
       } else {
         let result
         if (this.state.selectedNftStandard === 'ERC721') {
+          const authorized = await this.erc721Contract.checkAuthorized(address)
+          if (!authorized) {
+            notification.open({
+              message: 'Unauthorized',
+              description: 'You are neither the owner nor authorized',
+            })
+            this.setState({
+              loading: false,
+              nftOpResult: null,
+            })
+            return
+          }
           result = await this.erc721Contract.createCollectible({
             contractAddress: nftColelctionAddress,
             tokenURI,

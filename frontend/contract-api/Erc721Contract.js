@@ -59,6 +59,17 @@ export default class Erc721Contract {
     }
   }
 
+  async checkAuthorized(contractAddress, checkAddress) {
+    try {
+      console.log('contractAddress:', contractAddress)
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.checkAuthorized(checkAddress)
+    } catch (err) {
+      console.log(err)
+      return false
+    }
+  }
+
   async createCollectible(data) {
     const { contractAddress, tokenURI, gasPrice } = data
     try {
