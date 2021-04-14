@@ -84,8 +84,9 @@ export default class Erc721Contract {
 
   async createCollectibleFuncSig(contractAddress, tokenURI) {
     console.log('contractAddress:', contractAddress)
-    const contractInstance = await this.contract.at(contractAddress)
-    return contractInstance.createCollectible(tokenURI).encodeABI()
+    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
+    // const contractInstance = await this.contract.at(contractAddress)
+    return contractInstance.methods.createCollectible(tokenURI).encodeABI()
   }
 
   async createCollectible(data) {
