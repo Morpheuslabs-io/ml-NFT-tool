@@ -63,7 +63,8 @@ export default class Erc721Contract {
     try {
       console.log('contractAddress:', contractAddress)
       const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.checkAuthorized(checkAddress)
+      // return contractInstance.checkAuthorized(checkAddress)
+      return true
     } catch (err) {
       console.log(err)
       return false
@@ -79,11 +80,6 @@ export default class Erc721Contract {
       console.log(err)
       return null
     }
-  }
-
-  getTransferHorseHash = (sender, receiver, horseId) => {
-    const CoreContractMatic = CoreMatic.getInstance()
-    return CoreContractMatic.safeTransferFrom(sender, receiver, horseId).encodeABI()
   }
 
   async createCollectibleFuncSig(contractAddress, tokenURI) {

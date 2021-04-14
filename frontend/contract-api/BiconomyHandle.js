@@ -124,9 +124,12 @@ const getTypedData = function ({
 }
 
 export const createCollectibleMetaTx = async (erc721Contract, senderAddress, tokenURI) => {
-  const nonce = await erc721Contract.getSenderNonce(senderAddress)
+  const nonce = await erc721Contract.getSenderNonce(customERC721ContractAddress, senderAddress)
 
-  const functionSignature = await erc721Contract.createCollectibleFuncSig(tokenURI)
+  const functionSignature = await erc721Contract.createCollectibleFuncSig(
+    customERC721ContractAddress,
+    tokenURI,
+  )
   const dataToSign = getTypedData({
     name: DOMAIN_NAME,
     version: DOMAIN_VERSION,

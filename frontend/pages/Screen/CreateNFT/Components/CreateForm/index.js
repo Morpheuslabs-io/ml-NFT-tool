@@ -213,7 +213,10 @@ class CreateForm extends React.PureComponent {
       } else {
         let result
         if (this.state.selectedNftStandard === 'ERC721') {
-          const authorized = await this.erc721Contract.checkAuthorized(address)
+          const authorized = await this.erc721Contract.checkAuthorized(
+            nftColelctionAddress,
+            address,
+          )
           if (!authorized) {
             notification.open({
               message: 'Unauthorized',
@@ -230,7 +233,7 @@ class CreateForm extends React.PureComponent {
           //   tokenURI,
           //   gasPrice,
           // })
-          result = await createCollectibleMetaTx(nftColelctionAddress, address, tokenURI)
+          result = await createCollectibleMetaTx(this.erc721Contract, address, tokenURI)
         } else {
           // result = await this.erc1155Contract.create({
           //   name: nftName,
