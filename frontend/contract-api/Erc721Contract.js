@@ -70,6 +70,28 @@ export default class Erc721Contract {
     }
   }
 
+  async getSenderNonce(contractAddress, senderAddress) {
+    try {
+      console.log('contractAddress:', contractAddress)
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.getNonce(senderAddress)
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  getTransferHorseHash = (sender, receiver, horseId) => {
+    const CoreContractMatic = CoreMatic.getInstance()
+    return CoreContractMatic.safeTransferFrom(sender, receiver, horseId).encodeABI()
+  }
+
+  async createCollectibleFuncSig(contractAddress, tokenURI) {
+    console.log('contractAddress:', contractAddress)
+    const contractInstance = await this.contract.at(contractAddress)
+    return contractInstance.createCollectible(tokenURI).encodeABI()
+  }
+
   async createCollectible(data) {
     const { contractAddress, tokenURI, gasPrice } = data
     try {

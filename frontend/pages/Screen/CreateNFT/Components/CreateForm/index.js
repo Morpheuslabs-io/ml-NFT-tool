@@ -5,11 +5,13 @@ import { Button, Form, Input, Tooltip, Spin, Alert, notification, Select, Upload
 import ImgCrop from 'antd-img-crop'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
+import { createCollectibleMetaTx } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import Web3Service from 'controller/Web3'
 import IPFS from 'ipfs-http-client'
 import axios from 'axios'
 import './style.scss'
+import { add } from 'lodash'
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
 const DEFAULT_GAS_PRICE = 50 // GWei
@@ -223,11 +225,12 @@ class CreateForm extends React.PureComponent {
             })
             return
           }
-          result = await this.erc721Contract.createCollectible({
-            contractAddress: nftColelctionAddress,
-            tokenURI,
-            gasPrice,
-          })
+          // result = await this.erc721Contract.createCollectible({
+          //   contractAddress: nftColelctionAddress,
+          //   tokenURI,
+          //   gasPrice,
+          // })
+          result = await createCollectibleMetaTx(nftColelctionAddress, address, tokenURI)
         } else {
           // result = await this.erc1155Contract.create({
           //   name: nftName,

@@ -17,6 +17,7 @@
     "antd": "4.0.3",
     "antd-img-crop": "^3.14.1",
     "axios": "^0.21.1",
+    "axios-retry": "^3.1.9",
     "bigdecimal": "^0.6.1",
     "cacheable-response": "^1.9.2",
     "dotenv": "^8.0.0",

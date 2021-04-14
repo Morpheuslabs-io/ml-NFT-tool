@@ -10,21 +10,17 @@ contract CustomERC721 is Ownable, ERC721URIStorage, EIP712MetaTransaction {
     
     string private constant DOMAIN_NAME = "morpheuslabs.io";
     string private constant DOMAIN_VERSION = "1";
+
+    string private constant TOKEN_NAME = "Morpheus-MITx";
+    string private constant TOKEN_SYMBOL = "MMITx";
     
     uint256 public tokenId = 0;
     
     // Authorized list
     mapping(address => bool) public authorized;
     
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        address _to,
-        string memory _tokenURI
-    ) ERC721(_name, _symbol) EIP712MetaTransaction(DOMAIN_NAME, DOMAIN_VERSION) {
-        _mint(_to, tokenId);
-        _setTokenURI(tokenId, _tokenURI);
-    }
+    constructor() ERC721(TOKEN_NAME, TOKEN_SYMBOL) EIP712MetaTransaction(DOMAIN_NAME, DOMAIN_VERSION) 
+    {}
 
     modifier isAuthorized() {
         require(
