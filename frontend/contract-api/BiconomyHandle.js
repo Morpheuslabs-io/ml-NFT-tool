@@ -6,13 +6,14 @@ axiosRetry(axios, { retries: 3 })
 const BICONOMY_REGISTER = {
   API_URL: 'https://api.biconomy.io/api/v2/meta-tx/native',
   API_KEY: '5JPFVRvIC.296e1370-db70-433d-8a12-080508ace510',
-  customERC721DappApiId: '54d28af4-1064-4f67-b0e9-1540201cf548',
+  customERC721DappApiId: 'f5bca071-4605-4ff6-b3c6-b3895478d9e2',
 }
 
 const DOMAIN_NAME = 'morpheuslabs.io'
 const DOMAIN_VERSION = '1'
+const CHAIN_ID = 80001 // Matic testnet
 
-const customERC721ContractAddress = '0x09d38d3eF81dcf5d669cb61E52297969ed1764A1'
+const customERC721ContractAddress = '0x22B815FAF3b8c5b789aD3dB7B2E37fbb4E7c5a58'
 
 const forwardMetaTx = async (body) => {
   const { API_URL, API_KEY } = BICONOMY_REGISTER
@@ -64,15 +65,8 @@ const getSignatureParameters = (sig) => {
 
 // Reference:
 // https://github.com/nglglhtr/ETHOnline-Workshop/blob/6b615b8a4ef00553c17729c721572529303c8e1b/2-network-agnostic-transfer/meta-tx.js
-const getTypedData = function ({
-  name,
-  version,
-  salt,
-  verifyingContract,
-  nonce,
-  from,
-  functionSignature,
-}) {
+const getTypedData = (data) => {
+  const { name, version, chainId, verifyingContract, nonce, from, functionSignature } = data
   return {
     types: {
       EIP712Domain: [
@@ -112,11 +106,11 @@ const getTypedData = function ({
       name,
       version,
       verifyingContract,
-      salt,
+      salt: '0x' + chainId.toString(16).padStart(64, '0'),
     },
     primaryType: 'MetaTransaction',
     message: {
-      nonce,
+      nonce: parseInt(nonce),
       from,
       functionSignature,
     },
@@ -133,7 +127,7 @@ export const createCollectibleMetaTx = async (erc721Contract, senderAddress, tok
   const dataToSign = getTypedData({
     name: DOMAIN_NAME,
     version: DOMAIN_VERSION,
-    salt: '0x0000000000000000000000000000000000000000000000000000000000013881',
+    chainId: CHAIN_ID, //'0x' + CHAIN_ID.toString(16).padStart(64, '0'),
     verifyingContract: customERC721ContractAddress,
     nonce: nonce,
     from: senderAddress,

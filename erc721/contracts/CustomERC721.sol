@@ -19,8 +19,10 @@ contract CustomERC721 is Ownable, ERC721URIStorage, EIP712MetaTransaction {
     // Authorized list
     mapping(address => bool) public authorized;
     
-    constructor() ERC721(TOKEN_NAME, TOKEN_SYMBOL) EIP712MetaTransaction(DOMAIN_NAME, DOMAIN_VERSION) 
-    {}
+    constructor(uint256 chainId) 
+        ERC721(TOKEN_NAME, TOKEN_SYMBOL) 
+        EIP712Base(DOMAIN_NAME, DOMAIN_VERSION, chainId) {
+    }
 
     modifier isAuthorized() {
         require(
