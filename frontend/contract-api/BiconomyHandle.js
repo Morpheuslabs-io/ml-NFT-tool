@@ -6,14 +6,14 @@ axiosRetry(axios, { retries: 3 })
 const BICONOMY_REGISTER = {
   API_URL: 'https://api.biconomy.io/api/v2/meta-tx/native',
   API_KEY: '5JPFVRvIC.296e1370-db70-433d-8a12-080508ace510',
-  customERC721DappApiId: 'f5bca071-4605-4ff6-b3c6-b3895478d9e2',
+  customERC721DappApiId: '6f4dd49f-0446-4b37-9823-0b8cb193f702',
 }
 
 const DOMAIN_NAME = 'morpheuslabs.io'
 const DOMAIN_VERSION = '1'
 const CHAIN_ID = 80001 // Matic testnet
 
-const customERC721ContractAddress = '0x22B815FAF3b8c5b789aD3dB7B2E37fbb4E7c5a58'
+const customERC721ContractAddress = '0x21569b5538f2CC5Fa60cD8B6C48D453C31a60bb1'
 
 const forwardMetaTx = async (body) => {
   const { API_URL, API_KEY } = BICONOMY_REGISTER

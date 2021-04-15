@@ -26,7 +26,7 @@ contract CustomERC721 is Ownable, ERC721URIStorage, EIP712MetaTransaction {
 
     modifier isAuthorized() {
         require(
-            msg.sender == owner() || authorized[msg.sender] == true, 
+            msgSender() == owner() || authorized[msgSender()] == true, 
             "CustomERC721: unauthorized"
         );
         _;
@@ -34,7 +34,7 @@ contract CustomERC721 is Ownable, ERC721URIStorage, EIP712MetaTransaction {
 
     function createCollectible(string memory tokenURI) public isAuthorized returns (uint256) {
         tokenId = tokenId + 1;
-        _mint(msg.sender, tokenId);
+        _mint(msgSender(), tokenId);
         _setTokenURI(tokenId, tokenURI);
         return tokenId;
     }
