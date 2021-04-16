@@ -11,17 +11,14 @@ contract CustomERC721 is Ownable, ERC721URIStorage, EIP712MetaTransaction {
     string private constant DOMAIN_NAME = "morpheuslabs.io";
     string private constant DOMAIN_VERSION = "1";
 
-    string private constant TOKEN_NAME = "Morpheus-MITx";
-    string private constant TOKEN_SYMBOL = "MMITx";
-    
     uint256 public tokenId = 0;
     
     // Authorized list
     mapping(address => bool) public authorized;
     
-    constructor(uint256 chainId) 
-        ERC721(TOKEN_NAME, TOKEN_SYMBOL) 
-        EIP712Base(DOMAIN_NAME, DOMAIN_VERSION, chainId) {
+    constructor(string memory name_, string memory symbol_, uint256 chainId_) 
+        ERC721(name_, symbol_) 
+        EIP712Base(DOMAIN_NAME, DOMAIN_VERSION, chainId_) {
     }
 
     modifier isAuthorized() {
@@ -48,6 +45,10 @@ contract CustomERC721 is Ownable, ERC721URIStorage, EIP712MetaTransaction {
     }
 
     function checkAuthorized(address auth) public view returns (bool) {
-        return authorized[auth];
+        if (msgSender() == owner()) {
+            return true;
+        } else {
+            return authorized[auth];
+        }
     }
 }
