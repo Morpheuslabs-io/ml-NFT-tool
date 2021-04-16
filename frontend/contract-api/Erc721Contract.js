@@ -17,19 +17,14 @@ export default class Erc721Contract {
     return instance
   }
 
+  // Launch a brandnew NFT token
   async create(data) {
-    const { name, symbol, to, tokenURI, gasPrice } = data
+    const { name, symbol, chainId, gasPrice } = data
     console.log('gasPrice:', gasPrice)
     try {
-      const contractInstance = await this.contract.new(
-        name,
-        symbol,
-        Web3Service.toChecksumAddress(to),
-        tokenURI,
-        {
-          gasPrice,
-        },
-      )
+      const contractInstance = await this.contract.new(name, symbol, chainId, {
+        gasPrice,
+      })
       return contractInstance
     } catch (err) {
       console.log(err)
@@ -63,7 +58,7 @@ export default class Erc721Contract {
     try {
       console.log('contractAddress:', contractAddress)
       const contractInstance = await this.contract.at(contractAddress)
-      // return contractInstance.checkAuthorized(checkAddress)
+      return contractInstance.checkAuthorized(checkAddress)
       return true
     } catch (err) {
       console.log(err)

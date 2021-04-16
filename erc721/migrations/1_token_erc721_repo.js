@@ -1,4 +1,4 @@
-const CustomERC721 = artifacts.require("CustomERC721");
+const CustomERC721Repo = artifacts.require("CustomERC721Repo");
 
 module.exports = function (deployer, network, accounts) {
   deployer.then(async () => {
@@ -34,10 +34,9 @@ module.exports = function (deployer, network, accounts) {
       from: deployerAccount,
     };
 
-    // Deploy CustomERC721
-    const CustomERC721Contract = await deployer.deploy(
-      CustomERC721,
-      chainId,
+    // Deploy CustomERC721Repo
+    const CustomERC721RepoContract = await deployer.deploy(
+      CustomERC721Repo,
       opts
     );
   });

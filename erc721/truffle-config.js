@@ -58,6 +58,21 @@ module.exports = {
       timeoutBlocks: 200,
       skipDryRun: true,
     },
+    maticmainnet: {
+      provider: () => {
+        const privatekey = fs
+          .readFileSync(`${path.dirname(__filename)}/.secret.maticmainnet`)
+          .toString();
+        return new HDWalletProvider(
+          privatekey,
+          "https://rpc-mainnet.maticvigil.com/"
+        );
+      },
+      network_id: 137,
+      confirmations: 2,
+      timeoutBlocks: 200,
+      skipDryRun: true,
+    },
   },
   compilers: {
     solc: {

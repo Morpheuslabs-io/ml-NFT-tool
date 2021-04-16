@@ -26,7 +26,8 @@
     "deploy-rinkeby": "npx truffle migrate --reset --network rinkeby",
     "deploy-mainnet": "npx truffle migrate --reset --network mainnet",
     "deploy-ganache": "npx truffle migrate --reset --network development",
-    "deploy-matictestnet": "npx truffle migrate --reset --network matictestnet"
+    "deploy-matictestnet": "npx truffle migrate --reset --network matictestnet",
+    "deploy-maticmainnet": "npx truffle migrate --reset --network maticmainnet"
   },
   "author": "",
   "license": "ISC"
