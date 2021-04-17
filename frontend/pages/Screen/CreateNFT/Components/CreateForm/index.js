@@ -54,10 +54,10 @@ class CreateForm extends React.PureComponent {
       address: null,
       selectedNftStandard: 'ERC721',
       isCreateCollection: true,
-      nftColelctionName: null,
-      nftColelctionSymbol: null,
-      contractList: [],
-      selectedContract: null,
+      nftColelctionName: '',
+      nftColelctionSymbol: '',
+      collectionAddressList: [],
+      selectedCollection: null,
     }
     this.formRef = React.createRef()
   }
@@ -126,22 +126,28 @@ class CreateForm extends React.PureComponent {
         imgLoading: false,
         imgBase64: null,
         nftOpResult: null,
-        nftColelctionName: null,
-        nftColelctionSymbol: null,
-        contractList: [],
-        selectedContract: null,
+        nftColelctionName: '',
+        nftColelctionSymbol: '',
+        collectionAddressList: [],
+        selectedCollection: null,
       },
       async () => {
         if (value === 'create_item') {
+          if (!this.erc721RepoContract) {
+            window.location.reload()
+          }
           let userCreatedContractList = await this.erc721RepoContract.get({
             userAddr: address,
             gasPrice,
           })
+          if (!userCreatedContractList) {
+            window.location.reload()
+          }
           if (!userCreatedContractList.includes(erc721ContractGasless)) {
             userCreatedContractList = [erc721ContractGasless, ...userCreatedContractList]
           }
           this.setState({
-            contractList: userCreatedContractList,
+            collectionAddressList: userCreatedContractList,
           })
         }
       },
@@ -181,11 +187,18 @@ class CreateForm extends React.PureComponent {
         nftExternalLink,
         nftImage,
       } = values
-      const { imgBase64, address, isCreateCollection, networkID } = this.state
+      const {
+        imgBase64,
+        address,
+        isCreateCollection,
+        networkID,
+        selectedNftStandard,
+        selectedCollection,
+      } = this.state
 
       if (isCreateCollection) {
         let result
-        if (this.state.selectedNftStandard === 'ERC721') {
+        if (selectedNftStandard === 'ERC721') {
           result = await this.erc721Contract.create({
             name: nftName,
             symbol: nftSymbol,
@@ -239,7 +252,7 @@ class CreateForm extends React.PureComponent {
         ///////////
 
         let result
-        if (this.state.selectedNftStandard === 'ERC721') {
+        if (selectedNftStandard === 'ERC721') {
           const authorized = await this.erc721Contract.checkAuthorized(
             nftCollectionAddress,
             address,
@@ -255,12 +268,21 @@ class CreateForm extends React.PureComponent {
             })
             return
           }
-          // result = await this.erc721Contract.createCollectible({
-          //   contractAddress: nftCollectionAddress,
-          //   tokenURI,
-          //   gasPrice,
-          // })
-          result = await createCollectibleMetaTx(this.erc721Contract, address, tokenURI)
+
+          if (selectedCollection === erc721ContractGasless) {
+            result = await createCollectibleMetaTx(
+              this.erc721Contract,
+              selectedCollection,
+              address,
+              tokenURI,
+            )
+          } else {
+            result = await this.erc721Contract.createCollectible({
+              contractAddress: selectedCollection,
+              tokenURI,
+              gasPrice,
+            })
+          }
         } else {
           // result = await this.erc1155Contract.create({
           //   name: nftName,
@@ -275,7 +297,7 @@ class CreateForm extends React.PureComponent {
           nftOpResult: result
             ? {
                 // address: result.address,
-                tx: result.tx,
+                tx: result.tx || result,
               }
             : null,
         })
@@ -316,12 +338,20 @@ class CreateForm extends React.PureComponent {
     }
   }
 
-  onContractListChange = (e) => {
-    const { selectedContract } = this.state
-    if (!selectedContract || selectedContract !== e) {
-      this.setState({ selectedContract: e }, () => {
-        this.getContractInfo(e)
-      })
+  onCollectionAddressListChange = (e) => {
+    const { selectedCollection } = this.state
+    if (!selectedCollection || selectedCollection !== e) {
+      this.setState(
+        {
+          selectedCollection: e,
+          nftColelctionName: '',
+          nftColelctionSymbol: '',
+          nftOpResult: null,
+        },
+        () => {
+          this.getContractInfo(e)
+        },
+      )
     }
   }
 
@@ -354,35 +384,35 @@ class CreateForm extends React.PureComponent {
     imgWindow.document.write(image.outerHTML)
   }
 
-  onBlur = async (e) => {
-    e.preventDefault()
-    if (!this.erc721Contract) {
-      notification.open({
-        message: 'Metamask is locked',
-        description: 'Please click the Metamask to unlock it',
-      })
-      return
-    }
-    if (e && e.target && e.target.value !== '' && this.erc721Contract) {
-      const contractAddr = e.target.value
-      const retrievedNftName = await this.erc721Contract.name(contractAddr)
-      const retrievedNftSymbol = await this.erc721Contract.symbol(contractAddr)
-      if (!retrievedNftName || !retrievedNftSymbol) {
-        notification.open({
-          message: 'Collection address not found',
-          description: `Please ensure collection address is valid on ${
-            networkName[this.state.networkID] || '...'
-          }`,
-        })
-        this.setState({ nftColelctionName: null, nftColelctionName: null })
-        return
-      }
-      this.setState({
-        nftColelctionName: retrievedNftName,
-        nftColelctionSymbol: retrievedNftSymbol,
-      })
-    }
-  }
+  // onBlur = async (e) => {
+  //   e.preventDefault()
+  //   if (!this.erc721Contract) {
+  //     notification.open({
+  //       message: 'Metamask is locked',
+  //       description: 'Please click the Metamask to unlock it',
+  //     })
+  //     return
+  //   }
+  //   if (e && e.target && e.target.value !== '' && this.erc721Contract) {
+  //     const contractAddr = e.target.value
+  //     const retrievedNftName = await this.erc721Contract.name(contractAddr)
+  //     const retrievedNftSymbol = await this.erc721Contract.symbol(contractAddr)
+  //     if (!retrievedNftName || !retrievedNftSymbol) {
+  //       notification.open({
+  //         message: 'Collection address not found',
+  //         description: `Please ensure collection address is valid on ${
+  //           networkName[this.state.networkID] || '...'
+  //         }`,
+  //       })
+  //       this.setState({ nftColelctionName: null, nftColelctionName: null })
+  //       return
+  //     }
+  //     this.setState({
+  //       nftColelctionName: retrievedNftName,
+  //       nftColelctionSymbol: retrievedNftSymbol,
+  //     })
+  //   }
+  // }
 
   getContractInfo = async (contractAddr) => {
     if (!this.erc721Contract || !this.erc721RepoContract) {
@@ -417,11 +447,11 @@ class CreateForm extends React.PureComponent {
       selectedNftStandard,
       nftColelctionName,
       nftColelctionSymbol,
-      contractList,
+      collectionAddressList,
       loading,
       imgBase64,
       isCreateCollection,
-      selectedContract,
+      selectedCollection,
     } = this.state
     const layout = {
       labelCol: { span: 13 },
@@ -542,9 +572,9 @@ class CreateForm extends React.PureComponent {
                     {/* <Input onBlur={(e) => this.onBlur(e)} /> */}
                     <Select
                       defaultValue={erc721ContractGasless}
-                      onChange={this.onContractListChange}
+                      onChange={this.onCollectionAddressListChange}
                     >
-                      {contractList.map((entry, idx) => {
+                      {collectionAddressList.map((entry, idx) => {
                         return (
                           <Option key={idx} value={entry}>
                             {entry === erc721ContractGasless ? `${entry} (gasless)` : entry}
@@ -554,44 +584,41 @@ class CreateForm extends React.PureComponent {
                     </Select>
                   </Form.Item>
                 </Tooltip>
-                {nftColelctionName && (
-                  <Tooltip title="This is the NFT token name">
-                    <Form.Item
-                      label={
-                        <div className="text text-bold text-color-4 text-size-3x">
-                          Collection Name
-                        </div>
-                      }
-                      name=""
-                      rules={[
-                        {
-                          required: false,
-                        },
-                      ]}
-                    >
-                      <Input defaultValue={nftColelctionName} disabled={true} />
-                    </Form.Item>
-                  </Tooltip>
-                )}
-                {nftColelctionSymbol && (
-                  <Tooltip title="This is the NFT token symbol">
-                    <Form.Item
-                      label={
-                        <div className="text text-bold text-color-4 text-size-3x">
-                          Collection Symbol
-                        </div>
-                      }
-                      name=""
-                      rules={[
-                        {
-                          required: false,
-                        },
-                      ]}
-                    >
-                      <Input defaultValue={nftColelctionSymbol} disabled={true} />
-                    </Form.Item>
-                  </Tooltip>
-                )}
+                <Tooltip title="This is the NFT token name">
+                  <Form.Item
+                    label={
+                      <div className="text text-bold text-color-4 text-size-3x">
+                        Collection Name
+                      </div>
+                    }
+                    name=""
+                    rules={[
+                      {
+                        required: false,
+                      },
+                    ]}
+                  >
+                    <Input placeholder={nftColelctionName} disabled={true} />
+                  </Form.Item>
+                </Tooltip>
+
+                <Tooltip title="This is the NFT token symbol">
+                  <Form.Item
+                    label={
+                      <div className="text text-bold text-color-4 text-size-3x">
+                        Collection Symbol
+                      </div>
+                    }
+                    name=""
+                    rules={[
+                      {
+                        required: false,
+                      },
+                    ]}
+                  >
+                    <Input placeholder={nftColelctionSymbol} disabled={true} />
+                  </Form.Item>
+                </Tooltip>
                 <Tooltip title="NFT token description">
                   <Form.Item
                     label={
@@ -695,7 +722,7 @@ class CreateForm extends React.PureComponent {
                   `${
                     isCreateCollection
                       ? 'Create Collection'
-                      : selectedContract === erc721ContractGasless
+                      : selectedCollection === erc721ContractGasless
                       ? 'Add Item (gasless)'
                       : 'Add Item'
                   }`

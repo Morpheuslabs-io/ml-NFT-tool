@@ -13,8 +13,6 @@ const DOMAIN_NAME = 'morpheuslabs.io'
 const DOMAIN_VERSION = '1'
 const CHAIN_ID = 80001 // Matic testnet
 
-const customERC721ContractAddress = '0x21569b5538f2CC5Fa60cD8B6C48D453C31a60bb1'
-
 const forwardMetaTx = async (body) => {
   const { API_URL, API_KEY } = BICONOMY_REGISTER
 
@@ -117,7 +115,12 @@ const getTypedData = (data) => {
   }
 }
 
-export const createCollectibleMetaTx = async (erc721Contract, senderAddress, tokenURI) => {
+export const createCollectibleMetaTx = async (
+  erc721Contract,
+  customERC721ContractAddress,
+  senderAddress,
+  tokenURI,
+) => {
   const nonce = await erc721Contract.getSenderNonce(customERC721ContractAddress, senderAddress)
 
   const functionSignature = await erc721Contract.createCollectibleFuncSig(
