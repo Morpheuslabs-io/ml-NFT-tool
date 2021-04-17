@@ -482,7 +482,7 @@ class CreateForm extends React.PureComponent {
               </Select>
             </Form.Item>
 
-            <Tooltip title="Select NFT token standard">
+            <Tooltip placement="bottomRight" title="Select NFT token standard">
               <Form.Item
                 label={<div className="text text-bold text-color-4 text-size-3x">Standard</div>}
                 name="nftStandard"
@@ -508,7 +508,7 @@ class CreateForm extends React.PureComponent {
 
             {isCreateCollection ? (
               <>
-                <Tooltip title="NFT token name">
+                <Tooltip placement="bottomRight" title="NFT token name">
                   <Form.Item
                     label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
                     name="nftName"
@@ -523,7 +523,7 @@ class CreateForm extends React.PureComponent {
                   </Form.Item>
                 </Tooltip>
 
-                <Tooltip title="NFT token symbol">
+                <Tooltip placement="bottomRight" title="NFT token symbol">
                   <Form.Item
                     label={<div className="text text-bold text-color-4 text-size-3x">Symbol</div>}
                     name="nftSymbol"
@@ -540,7 +540,10 @@ class CreateForm extends React.PureComponent {
               </>
             ) : (
               <>
-                <Tooltip title="This is the NFT token address after creating new collection">
+                <Tooltip
+                  placement="bottomRight"
+                  title="This is the NFT token address after creating new collection"
+                >
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">
@@ -570,7 +573,7 @@ class CreateForm extends React.PureComponent {
                     </Select>
                   </Form.Item>
                 </Tooltip>
-                <Tooltip title="This is the NFT token name">
+                <Tooltip placement="bottomRight" title="This is the NFT token name">
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">
@@ -588,7 +591,7 @@ class CreateForm extends React.PureComponent {
                   </Form.Item>
                 </Tooltip>
 
-                <Tooltip title="This is the NFT token symbol">
+                <Tooltip placement="bottomRight" title="This is the NFT token symbol">
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">
@@ -605,7 +608,7 @@ class CreateForm extends React.PureComponent {
                     <Input placeholder={nftColelctionSymbol} disabled={true} />
                   </Form.Item>
                 </Tooltip>
-                <Tooltip title="NFT token item name">
+                <Tooltip placement="bottomRight" title="NFT token item name">
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">Item Name</div>
@@ -621,7 +624,7 @@ class CreateForm extends React.PureComponent {
                     <Input />
                   </Form.Item>
                 </Tooltip>
-                <Tooltip title="NFT token item description">
+                <Tooltip placement="bottomRight" title="NFT token item description">
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">
@@ -640,7 +643,7 @@ class CreateForm extends React.PureComponent {
                   </Form.Item>
                 </Tooltip>
 
-                <Tooltip title="External link to the NFT token item">
+                <Tooltip placement="bottomRight" title="External link to the NFT token item">
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">
@@ -659,7 +662,7 @@ class CreateForm extends React.PureComponent {
                   </Form.Item>
                 </Tooltip>
 
-                <Tooltip title="NFT token item image">
+                <Tooltip placement="bottomRight" title="NFT token item image">
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">
@@ -699,7 +702,7 @@ class CreateForm extends React.PureComponent {
               Your First {selectedNftStandard} Token
             </Tag> */}
 
-            {/* <Tooltip title="NFT token owner address">
+            {/* <Tooltip placement="bottomRight"  title="NFT token owner address">
               <Form.Item
                 label={
                   <div className="text text-bold text-color-4 text-size-3x">Owner Address</div>
