@@ -6,7 +6,7 @@ axiosRetry(axios, { retries: 3 })
 const BICONOMY_REGISTER = {
   API_URL: 'https://api.biconomy.io/api/v2/meta-tx/native',
   API_KEY: '5JPFVRvIC.296e1370-db70-433d-8a12-080508ace510',
-  customERC721DappApiId: '6f4dd49f-0446-4b37-9823-0b8cb193f702',
+  customERC721DappApiId: 'a03fbcb7-9e18-46ca-b78c-2d5627db18fb',
 }
 
 const DOMAIN_NAME = 'morpheuslabs.io'

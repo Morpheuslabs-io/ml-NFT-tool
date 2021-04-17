@@ -11,8 +11,10 @@ import Erc1155Contract from 'contract-api/Erc1155Contract'
 import Web3Service from 'controller/Web3'
 import IPFS from 'ipfs-http-client'
 import axios from 'axios'
+import detectEthereumProvider from '@metamask/detect-provider'
+import web3Utils from 'web3-utils'
 import './style.scss'
-import { add } from 'lodash'
+import { chain } from 'lodash'
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
 const DEFAULT_GAS_PRICE = 50 // GWei
@@ -37,6 +39,7 @@ const networkName = {
 }
 
 const erc721RepoContractAddress = process.env.REACT_APP_ERC721_REPO_CONTRACT_ADDRESS
+const erc721ContractGasless = process.env.REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS
 
 let gasPrice
 class CreateForm extends React.PureComponent {
@@ -53,54 +56,68 @@ class CreateForm extends React.PureComponent {
       isCreateCollection: true,
       nftColelctionName: null,
       nftColelctionSymbol: null,
+      contractList: [],
+      selectedContract: null,
     }
     this.formRef = React.createRef()
   }
   componentDidMount() {
-    if (window.ethereum) {
-      window.ethereum
-        .enable()
-        .then((accounts) => {
-          if (!accounts || !accounts[0]) {
-            notification.open({
-              message: 'Metamask is locked',
-              description: 'Please click the Metamask to unlock it',
+    detectEthereumProvider()
+      .then(async (provider) => {
+        if (provider) {
+          if (provider !== window.ethereum) {
+            return notification.open({
+              message: 'Metamask conflict',
+              description: 'Do you have multiple wallets installed?',
             })
-            return
+          } else {
+            const accounts = await ethereum.request({ method: 'eth_accounts' })
+            if (accounts.length === 0) {
+              return notification.open({
+                message: 'Metamask is locked',
+                description: 'Please click the Metamask to unlock it',
+              })
+            } else {
+              const defaultAddress = accounts[0]
+              console.log(`defaultAddress:${defaultAddress}`)
+              this.erc721Contract = new Erc721Contract(defaultAddress)
+              this.erc1155Contract = new Erc1155Contract(defaultAddress)
+              this.erc721RepoContract = new Erc721RepoContract(
+                defaultAddress,
+                erc721RepoContractAddress,
+              )
+
+              let networkID = await ethereum.request({ method: 'eth_chainId' })
+              networkID = web3Utils.hexToNumber(networkID)
+              console.log('networkID:', networkID)
+              this.setState({ networkID, address: defaultAddress })
+              const gasPriceGwei = await this.queryGasPrice(networkID)
+              gasPrice = gasPriceGwei * Math.pow(10, 9)
+
+              window.ethereum.on('chainChanged', (chainId) => {
+                if (chainId !== this.state.networkID) {
+                  notification.open({
+                    message: 'Metamask network changed',
+                    description: 'Reload is to happen',
+                  })
+                  setTimeout(() => {
+                    window.location.reload()
+                  }, 1000)
+                }
+              })
+            }
           }
-          const defaultAddress = accounts[0]
-          this.erc721Contract = new Erc721Contract(defaultAddress)
-          this.erc1155Contract = new Erc1155Contract(defaultAddress)
-          this.erc721RepoContract = new Erc721RepoContract(
-            defaultAddress,
-            erc721RepoContractAddress,
-          )
-          Web3Service.getNetWorkId().then((networkID) => {
-            console.log(`defaultAddress:${defaultAddress}`)
-            this.setState({ networkID, address: defaultAddress })
-            this.queryGasPrice(networkID).then(
-              (gasPriceGwei) => (gasPrice = gasPriceGwei * Math.pow(10, 9)),
-            )
-          })
-        })
-        .catch((error) => {
-          console.error('window.ethereum.enable - Error:', error)
+        } else {
           notification.open({
-            message: 'Metamask is locked',
-            description: 'Please click the Metamask to unlock it',
+            message: 'Metamask is not available',
+            description: 'Please install Metamask on your web browser',
           })
-          return
-        })
-    } else {
-      notification.open({
-        message: 'Metamask is not available',
-        description: 'Please install Metamask on your web browser',
+        }
       })
-      return
-    }
+      .catch((err) => console.error(err))
   }
 
-  handleSelectChange = (value) => {
+  onCreateCollectionOrItemChange = (value) => {
     const { address } = this.state
     // value: create_collection or create_item
     this.setState(
@@ -111,31 +128,26 @@ class CreateForm extends React.PureComponent {
         nftOpResult: null,
         nftColelctionName: null,
         nftColelctionSymbol: null,
+        contractList: [],
+        selectedContract: null,
       },
       async () => {
         if (value === 'create_item') {
-          const contractList = await this.erc721RepoContract.get({ userAddr: address, gasPrice })
+          let userCreatedContractList = await this.erc721RepoContract.get({
+            userAddr: address,
+            gasPrice,
+          })
+          if (!userCreatedContractList.includes(erc721ContractGasless)) {
+            userCreatedContractList = [erc721ContractGasless, ...userCreatedContractList]
+          }
+          this.setState({
+            contractList: userCreatedContractList,
+          })
         }
       },
     )
   }
 
-  onChangeSwitch = (value) => {
-    this.setState(
-      {
-        enableSend: value,
-      },
-      () => {
-        this.onChangeKeyAndValue('enableSend', value)
-      },
-    )
-  }
-  onChangeOwnerMessage = (value) => {
-    this.setState({
-      ownerMessage: value,
-    })
-    this.onChangeKeyAndValue('ownerMessage', value)
-  }
   queryGasPrice = async (networkID) => {
     const isMatic = networkID === 80001 || networkID === 137
     const gasStationURL = isMatic
@@ -304,6 +316,15 @@ class CreateForm extends React.PureComponent {
     }
   }
 
+  onContractListChange = (e) => {
+    const { selectedContract } = this.state
+    if (!selectedContract || selectedContract !== e) {
+      this.setState({ selectedContract: e }, () => {
+        this.getContractInfo(e)
+      })
+    }
+  }
+
   handleChange = (info) => {
     if (info.file.status === 'uploading') {
       this.setState({ imgLoading: true })
@@ -363,6 +384,32 @@ class CreateForm extends React.PureComponent {
     }
   }
 
+  getContractInfo = async (contractAddr) => {
+    if (!this.erc721Contract || !this.erc721RepoContract) {
+      notification.open({
+        message: 'Metamask is locked',
+        description: 'Please click the Metamask to unlock it',
+      })
+      return
+    }
+    const retrievedNftName = await this.erc721Contract.name(contractAddr)
+    const retrievedNftSymbol = await this.erc721Contract.symbol(contractAddr)
+    if (!retrievedNftName || !retrievedNftSymbol) {
+      notification.open({
+        message: 'Collection address not found',
+        description: `Please ensure collection address is valid on ${
+          networkName[this.state.networkID] || '...'
+        }`,
+      })
+      this.setState({ nftColelctionName: null, nftColelctionName: null })
+      return
+    }
+    this.setState({
+      nftColelctionName: retrievedNftName,
+      nftColelctionSymbol: retrievedNftSymbol,
+    })
+  }
+
   render() {
     const {
       nftOpResult,
@@ -370,13 +417,16 @@ class CreateForm extends React.PureComponent {
       selectedNftStandard,
       nftColelctionName,
       nftColelctionSymbol,
+      contractList,
+      loading,
+      imgBase64,
+      isCreateCollection,
+      selectedContract,
     } = this.state
     const layout = {
       labelCol: { span: 13 },
       wrapperCol: { span: 11 },
     }
-
-    const { loading, imgBase64, isCreateCollection } = this.state
 
     return (
       <div className="create-form-container">
@@ -407,7 +457,10 @@ class CreateForm extends React.PureComponent {
             onFinish={this.onFinish}
           >
             <Form.Item>
-              <Select defaultValue="create_collection" onChange={this.handleSelectChange}>
+              <Select
+                defaultValue="create_collection"
+                onChange={this.onCreateCollectionOrItemChange}
+              >
                 <Option value="create_collection">Create new collection</Option>
                 <Option value="create_item">Add item to an existing collection</Option>
               </Select>
@@ -486,7 +539,19 @@ class CreateForm extends React.PureComponent {
                       },
                     ]}
                   >
-                    <Input onBlur={(e) => this.onBlur(e)} />
+                    {/* <Input onBlur={(e) => this.onBlur(e)} /> */}
+                    <Select
+                      defaultValue={erc721ContractGasless}
+                      onChange={this.onContractListChange}
+                    >
+                      {contractList.map((entry, idx) => {
+                        return (
+                          <Option key={idx} value={entry}>
+                            {entry === erc721ContractGasless ? `${entry} (gasless)` : entry}
+                          </Option>
+                        )
+                      })}
+                    </Select>
                   </Form.Item>
                 </Tooltip>
                 {nftColelctionName && (
@@ -624,7 +689,17 @@ class CreateForm extends React.PureComponent {
 
             <Form.Item xs={24} md={24}>
               <Button type="primary" htmlType="submit" className="ant-big-btn" disabled={loading}>
-                {loading ? <Spin /> : `${isCreateCollection ? 'Create Collection' : 'Add Item'}`}
+                {loading ? (
+                  <Spin />
+                ) : (
+                  `${
+                    isCreateCollection
+                      ? 'Create Collection'
+                      : selectedContract === erc721ContractGasless
+                      ? 'Add Item (gasless)'
+                      : 'Add Item'
+                  }`
+                )}
               </Button>
               <br />
               {loading && (
