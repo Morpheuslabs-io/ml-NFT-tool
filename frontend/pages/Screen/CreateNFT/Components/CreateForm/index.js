@@ -106,6 +106,18 @@ class CreateForm extends React.PureComponent {
                   }, 1000)
                 }
               })
+
+              ethereum.on('accountsChanged', (accounts) => {
+                if (accounts[0] !== this.state.address) {
+                  notification.open({
+                    message: 'Metamask account changed',
+                    description: 'Reload is to happen',
+                  })
+                  setTimeout(() => {
+                    window.location.reload()
+                  }, 1000)
+                }
+              })
             }
           }
         } else {
@@ -386,36 +398,6 @@ class CreateForm extends React.PureComponent {
     const imgWindow = window.open(src)
     imgWindow.document.write(image.outerHTML)
   }
-
-  // onBlur = async (e) => {
-  //   e.preventDefault()
-  //   if (!this.erc721Contract) {
-  //     notification.open({
-  //       message: 'Metamask is locked',
-  //       description: 'Please click the Metamask to unlock it',
-  //     })
-  //     return
-  //   }
-  //   if (e && e.target && e.target.value !== '' && this.erc721Contract) {
-  //     const contractAddr = e.target.value
-  //     const retrievedNftName = await this.erc721Contract.name(contractAddr)
-  //     const retrievedNftSymbol = await this.erc721Contract.symbol(contractAddr)
-  //     if (!retrievedNftName || !retrievedNftSymbol) {
-  //       notification.open({
-  //         message: 'Collection address not found',
-  //         description: `Please ensure collection address is valid on ${
-  //           networkName[this.state.networkID] || '...'
-  //         }`,
-  //       })
-  //       this.setState({ nftColelctionName: null, nftColelctionName: null })
-  //       return
-  //     }
-  //     this.setState({
-  //       nftColelctionName: retrievedNftName,
-  //       nftColelctionSymbol: retrievedNftSymbol,
-  //     })
-  //   }
-  // }
 
   getContractInfo = async (contractAddr) => {
     if (!this.erc721Contract || !this.erc721RepoContract) {
