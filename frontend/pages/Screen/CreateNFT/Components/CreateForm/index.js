@@ -55,6 +55,7 @@ class CreateForm extends React.PureComponent {
       address: null,
       selectedNftStandard: 'ERC721',
       isCreateCollection: true,
+      isAddItem: false,
       nftColelctionName: '',
       nftColelctionSymbol: '',
       collectionAddressList: [],
@@ -136,6 +137,7 @@ class CreateForm extends React.PureComponent {
     this.setState(
       {
         isCreateCollection: value === 'create_collection',
+        isAddItem: value === 'create_item',
         imgLoading: false,
         imgBase64: null,
         nftOpResult: null,
@@ -145,7 +147,11 @@ class CreateForm extends React.PureComponent {
         selectedCollection: null,
       },
       async () => {
-        if (value === 'create_item') {
+        if (
+          value === 'create_item' ||
+          value === 'add_authorized' ||
+          value === 'revoke_authorized'
+        ) {
           if (!this.erc721RepoContract) {
             window.location.reload()
           }
@@ -156,9 +162,13 @@ class CreateForm extends React.PureComponent {
           if (!userCreatedContractList) {
             window.location.reload()
           }
-          if (!userCreatedContractList.includes(erc721ContractGasless)) {
-            userCreatedContractList = [erc721ContractGasless, ...userCreatedContractList]
+
+          if (value === 'create_item') {
+            if (!userCreatedContractList.includes(erc721ContractGasless)) {
+              userCreatedContractList = [erc721ContractGasless, ...userCreatedContractList]
+            }
           }
+
           this.setState({
             collectionAddressList: userCreatedContractList,
           })
@@ -200,11 +210,13 @@ class CreateForm extends React.PureComponent {
         nftItemName,
         nftExternalLink,
         nftImage,
+        nftUserAddress,
       } = values
       const {
         imgBase64,
         address,
         isCreateCollection,
+        isAddItem,
         networkID,
         selectedNftStandard,
         selectedCollection,
@@ -243,7 +255,7 @@ class CreateForm extends React.PureComponent {
               }
             : null,
         })
-      } else {
+      } else if (isAddItem) {
         // Upload to IPFS
         let ipfsResult = await ipfs.add(Buffer(imgBase64))
         let ipfsHash = ipfsResult[0].hash
@@ -306,6 +318,22 @@ class CreateForm extends React.PureComponent {
           //   tokenURI: nftImage,
           // })
         }
+        console.log('result:', result)
+        this.setState({
+          loading: false,
+          nftOpResult: result
+            ? {
+                // address: result.address,
+                tx: result.tx || result,
+              }
+            : null,
+        })
+      } else {
+        let result = await this.erc721Contract.addAuthorized({
+          contractAddress: selectedCollection,
+          userAddress: nftUserAddress,
+          gasPrice,
+        })
         console.log('result:', result)
         this.setState({
           loading: false,
@@ -437,6 +465,7 @@ class CreateForm extends React.PureComponent {
       imgBase64,
       isCreateCollection,
       selectedCollection,
+      isAddItem,
     } = this.state
     const layout = {
       labelCol: { span: 13 },
@@ -462,6 +491,7 @@ class CreateForm extends React.PureComponent {
               remember: true,
               nftDescription: '',
               nftItemName: '',
+              nftUserAddress: '',
               nftExternalLink: 'https://',
               enableSend: true,
               ownerMessage: '',
@@ -479,6 +509,8 @@ class CreateForm extends React.PureComponent {
               >
                 <Option value="create_collection">Create new collection</Option>
                 <Option value="create_item">Add item to an existing collection</Option>
+                <Option value="add_authorized">Authorize address to add item</Option>
+                <Option value="revoke_authorized">Revoke authorized address</Option>
               </Select>
             </Form.Item>
 
@@ -608,91 +640,116 @@ class CreateForm extends React.PureComponent {
                     <Input placeholder={nftColelctionSymbol} disabled={true} />
                   </Form.Item>
                 </Tooltip>
-                <Tooltip placement="bottomRight" title="NFT token item name">
-                  <Form.Item
-                    label={
-                      <div className="text text-bold text-color-4 text-size-3x">Item Name</div>
-                    }
-                    name="nftItemName"
-                    rules={[
-                      {
-                        required: true,
-                        message: 'NFT token item name is required',
-                      },
-                    ]}
-                  >
-                    <Input />
-                  </Form.Item>
-                </Tooltip>
-                <Tooltip placement="bottomRight" title="NFT token item description">
-                  <Form.Item
-                    label={
-                      <div className="text text-bold text-color-4 text-size-3x">
-                        Item Description
-                      </div>
-                    }
-                    name="nftDescription"
-                    rules={[
-                      {
-                        required: true,
-                        message: 'NFT token item description is required',
-                      },
-                    ]}
-                  >
-                    <Input />
-                  </Form.Item>
-                </Tooltip>
-
-                <Tooltip placement="bottomRight" title="External link to the NFT token item">
-                  <Form.Item
-                    label={
-                      <div className="text text-bold text-color-4 text-size-3x">
-                        Item External Link
-                      </div>
-                    }
-                    name="nftExternalLink"
-                    rules={[
-                      {
-                        required: false,
-                        message: 'NFT token item external link is required',
-                      },
-                    ]}
-                  >
-                    <Input />
-                  </Form.Item>
-                </Tooltip>
-
-                <Tooltip placement="bottomRight" title="NFT token item image">
-                  <Form.Item
-                    label={
-                      <div className="text text-bold text-color-4 text-size-3x">
-                        {selectedNftStandard === 'ERC721' ? 'Item Image' : 'Base Metadata URI'}
-                      </div>
-                    }
-                    name="nftImage"
-                    rules={[
-                      {
-                        // required: true,
-                        // message: 'NFT link is required',
-                      },
-                    ]}
-                  >
-                    <ImgCrop rotate>
-                      <Upload
-                        name="avatar"
-                        listType="picture-card"
-                        className="avatar-uploader"
-                        onChange={this.handleChange}
-                        onPreview={this.onPreview}
-                        onRemove={() => {
-                          this.setState({ imgBase64: null })
-                        }}
+                {isAddItem ? (
+                  <>
+                    <Tooltip placement="bottomRight" title="NFT token item name">
+                      <Form.Item
+                        label={
+                          <div className="text text-bold text-color-4 text-size-3x">Item Name</div>
+                        }
+                        name="nftItemName"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'NFT token item name is required',
+                          },
+                        ]}
                       >
-                        {!imgBase64 && '+ Upload'}
-                      </Upload>
-                    </ImgCrop>
-                  </Form.Item>
-                </Tooltip>
+                        <Input />
+                      </Form.Item>
+                    </Tooltip>
+                    <Tooltip placement="bottomRight" title="NFT token item description">
+                      <Form.Item
+                        label={
+                          <div className="text text-bold text-color-4 text-size-3x">
+                            Item Description
+                          </div>
+                        }
+                        name="nftDescription"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'NFT token item description is required',
+                          },
+                        ]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Tooltip>
+
+                    <Tooltip placement="bottomRight" title="External link to the NFT token item">
+                      <Form.Item
+                        label={
+                          <div className="text text-bold text-color-4 text-size-3x">
+                            Item External Link
+                          </div>
+                        }
+                        name="nftExternalLink"
+                        rules={[
+                          {
+                            required: false,
+                            message: 'NFT token item external link is required',
+                          },
+                        ]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Tooltip>
+
+                    <Tooltip placement="bottomRight" title="NFT token item image">
+                      <Form.Item
+                        label={
+                          <div className="text text-bold text-color-4 text-size-3x">
+                            {selectedNftStandard === 'ERC721' ? 'Item Image' : 'Base Metadata URI'}
+                          </div>
+                        }
+                        name="nftImage"
+                        rules={[
+                          {
+                            // required: true,
+                            // message: 'NFT link is required',
+                          },
+                        ]}
+                      >
+                        <ImgCrop rotate>
+                          <Upload
+                            name="avatar"
+                            listType="picture-card"
+                            className="avatar-uploader"
+                            onChange={this.handleChange}
+                            onPreview={this.onPreview}
+                            onRemove={() => {
+                              this.setState({ imgBase64: null })
+                            }}
+                          >
+                            {!imgBase64 && '+ Upload'}
+                          </Upload>
+                        </ImgCrop>
+                      </Form.Item>
+                    </Tooltip>
+                  </>
+                ) : (
+                  <>
+                    <Tooltip placement="bottomRight" title="User wallet address to be authorized">
+                      <Form.Item
+                        label={
+                          <div className="text text-bold text-color-4 text-size-3x">
+                            User Wallet Address
+                          </div>
+                        }
+                        name="nftUserAddress"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'User wallet address is required',
+                          },
+                        ]}
+                      >
+                        <Input />
+                      </Form.Item>
+                    </Tooltip>
+                  </>
+                )}
               </>
             )}
 
@@ -727,9 +784,11 @@ class CreateForm extends React.PureComponent {
                   `${
                     isCreateCollection
                       ? 'Create Collection'
-                      : selectedCollection === erc721ContractGasless
-                      ? 'Add Item (gasless)'
-                      : 'Add Item'
+                      : isAddItem
+                      ? selectedCollection === erc721ContractGasless
+                        ? 'Add Item (gasless)'
+                        : 'Add Item'
+                      : 'Submit'
                   }`
                 )}
               </Button>
