@@ -17,6 +17,7 @@ import './style.scss'
 import { chain } from 'lodash'
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
+const IPFS_BASE_URL = 'https://ipfs.io/ipfs'
 const DEFAULT_GAS_PRICE = 50 // GWei
 const explorerLink = {
   1: 'https://etherscan.io',
@@ -184,6 +185,7 @@ class CreateForm extends React.PureComponent {
         nftSymbol,
         nftCollectionAddress,
         nftDescription,
+        nftItemName,
         nftExternalLink,
         nftImage,
       } = values
@@ -232,14 +234,14 @@ class CreateForm extends React.PureComponent {
       } else {
         // Upload to IPFS
         let ipfsResult = await ipfs.add(Buffer(imgBase64))
-        const ipfsHash = ipfsResult[0].hash
+        let ipfsHash = ipfsResult[0].hash
         let external_url = nftExternalLink !== '' ? nftExternalLink : null
-        const image = `ipfs://${ipfsHash}`
+        const image = `${IPFS_BASE_URL}/${ipfsHash}`
         console.log('nftExternalLink:', nftExternalLink)
 
         // This is only the content that the tokenURI returns
         const tokenURIContent = JSON.stringify({
-          name: nftName,
+          name: nftItemName,
           description: nftDescription,
           external_url,
           image,
@@ -247,7 +249,8 @@ class CreateForm extends React.PureComponent {
 
         // Upload the entire JSON to get the tokenURI
         ipfsResult = await ipfs.add(Buffer(tokenURIContent))
-        const tokenURI = ipfsResult[0].hash
+        ipfsHash = ipfsResult[0].hash
+        const tokenURI = `${IPFS_BASE_URL}/${ipfsHash}`
         console.log('tokenURI:', tokenURI)
         ///////////
 
@@ -476,6 +479,7 @@ class CreateForm extends React.PureComponent {
               numberOfIssuing: 1,
               remember: true,
               nftDescription: '',
+              nftItemName: '',
               nftExternalLink: 'https://',
               enableSend: true,
               ownerMessage: '',
@@ -619,7 +623,23 @@ class CreateForm extends React.PureComponent {
                     <Input placeholder={nftColelctionSymbol} disabled={true} />
                   </Form.Item>
                 </Tooltip>
-                <Tooltip title="NFT token description">
+                <Tooltip title="NFT token item name">
+                  <Form.Item
+                    label={
+                      <div className="text text-bold text-color-4 text-size-3x">Item Name</div>
+                    }
+                    name="nftItemName"
+                    rules={[
+                      {
+                        required: true,
+                        message: 'NFT token item name is required',
+                      },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
+                </Tooltip>
+                <Tooltip title="NFT token item description">
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">
@@ -630,7 +650,7 @@ class CreateForm extends React.PureComponent {
                     rules={[
                       {
                         required: true,
-                        message: 'NFT token description is required',
+                        message: 'NFT token item description is required',
                       },
                     ]}
                   >
@@ -638,7 +658,7 @@ class CreateForm extends React.PureComponent {
                   </Form.Item>
                 </Tooltip>
 
-                <Tooltip title="External link to the NFT token">
+                <Tooltip title="External link to the NFT token item">
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">
@@ -649,7 +669,7 @@ class CreateForm extends React.PureComponent {
                     rules={[
                       {
                         required: false,
-                        message: 'NFT token external link is required',
+                        message: 'NFT token item external link is required',
                       },
                     ]}
                   >
@@ -657,7 +677,7 @@ class CreateForm extends React.PureComponent {
                   </Form.Item>
                 </Tooltip>
 
-                <Tooltip title="NFT token image">
+                <Tooltip title="NFT token item image">
                   <Form.Item
                     label={
                       <div className="text text-bold text-color-4 text-size-3x">
