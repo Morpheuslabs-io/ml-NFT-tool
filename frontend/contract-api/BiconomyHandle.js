@@ -7,7 +7,7 @@ axiosRetry(axios, { retries: 3 })
 const BICONOMY_REGISTER = {
   API_URL: 'https://api.biconomy.io/api/v2/meta-tx/native',
   API_KEY: '5JPFVRvIC.296e1370-db70-433d-8a12-080508ace510',
-  morpheusNftManagerDappApiId: '3607e293-db5f-4e5a-ad8c-553056d07aa2',
+  morpheusNftManagerDappApiId: '0960ae9b-3ba2-434d-828e-916f7ebd9d56',
 }
 
 const DOMAIN_NAME = 'morpheuslabs.io'
@@ -78,8 +78,8 @@ const getTypedData = (data) => {
           type: 'string',
         },
         {
-          name: 'salt',
-          type: 'bytes32',
+          name: 'chainId',
+          type: 'uint256',
         },
         {
           name: 'verifyingContract',
@@ -104,12 +104,12 @@ const getTypedData = (data) => {
     domain: {
       name,
       version,
-      salt: web3Utils.toHex(chainId), //'0x' + chainId.toString(16).padStart(64, '0'),
+      chainId: Number(chainId),
       verifyingContract,
     },
     primaryType: 'MetaTransaction',
     message: {
-      nonce: parseInt(nonce),
+      nonce: Number(nonce),
       from,
       functionSignature,
     },

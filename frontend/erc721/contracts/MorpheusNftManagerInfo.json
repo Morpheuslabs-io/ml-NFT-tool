@@ -128,9 +128,9 @@
       "type": "function"
     }
   ],
-  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"contractAddr_\",\"type\":\"address\"}],\"name\":\"add\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"clear\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"collectionList\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"get\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/contracts/MorpheusNftManagerInfo.sol\":\"MorpheusNftManagerInfo\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/contracts/MorpheusNftManagerInfo.sol\":{\"keccak256\":\"0xa2e40379f259c9787c0504878e481011979a0a127063d547618eb3a08614c964\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://9f86f4c26c85c1ae50e08ae6596bb4e36b4e6654a10ab1d8f180fd00211d6b63\",\"dweb:/ipfs/QmST2dyjgdXNXCd9V9ZuBH9jbt3u5xWNf4T3P7RB5Kdccr\"]},\"@openzeppelin/contracts/access/Ownable.sol\":{\"keccak256\":\"0x1cae4f85f114ff17b90414f5da67365b1d00337abb5bce9bf944eb78a2c0673c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d5ff16b336ce8f906478d5f2eecc6435e00833bdc0b92f6b209cf9e92cb5b2b7\",\"dweb:/ipfs/QmRD1rAZEqQ73C33cdA3QoUyBDMEWnNKNMc6PNkAZWHeQQ\"]},\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0xf930d2df426bfcfc1f7415be724f04081c96f4fb9ec8d0e3a521c07692dface0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://fc2bfdea0d2562c76fb3c4cf70a86c6ba25c5a30e8f8515c95aafdf8383f8395\",\"dweb:/ipfs/QmTbFya18786ckJfLYUoWau9jBTKfmWnWm5XSViWvB7PXN\"]}},\"version\":1}",
-  "bytecode": "0x608060405234801561001057600080fd5b50600061001b61006a565b600080546001600160a01b0319166001600160a01b0383169081178255604051929350917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908290a35061006e565b3390565b6105f48061007d6000396000f3fe608060405234801561001057600080fd5b506004361061007d5760003560e01c80638da5cb5b1161005b5780638da5cb5b146100b2578063c2bc2efc146100d0578063d0165ee6146100f0578063f2fde38b146101035761007d565b80633d0a40611461008257806352c28fab14610097578063715018a6146100aa575b600080fd5b610095610090366004610466565b610116565b005b6100956100a5366004610487565b61018d565b6100956101ca565b6100ba610253565b6040516100c791906104e2565b60405180910390f35b6100e36100de366004610466565b610262565b6040516100c791906104f6565b6100ba6100fe3660046104b9565b6102d9565b610095610111366004610466565b610311565b61011e6103d1565b6001600160a01b031661012f610253565b6001600160a01b03161461015e5760405162461bcd60e51b815260040161015590610589565b60405180910390fd5b6001600160a01b0381166000908152600160205260409020606080519091610188916080906103d5565b505050565b6001600160a01b03918216600090815260016020818152604083208054928301815583529091200180546001600160a01b03191691909216179055565b6101d26103d1565b6001600160a01b03166101e3610253565b6001600160a01b0316146102095760405162461bcd60e51b815260040161015590610589565b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080546001600160a01b0319169055565b6000546001600160a01b031690565b6001600160a01b0381166000908152600160209081526040918290208054835181840281018401909452808452606093928301828280156102cc57602002820191906000526020600020905b81546001600160a01b031681526001909101906020018083116102ae575b505050505090505b919050565b600160205281600052604060002081815481106102f557600080fd5b6000918252602090912001546001600160a01b03169150829050565b6103196103d1565b6001600160a01b031661032a610253565b6001600160a01b0316146103505760405162461bcd60e51b815260040161015590610589565b6001600160a01b0381166103765760405162461bcd60e51b815260040161015590610543565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b3390565b82805482825590600052602060002090810192821561042a579160200282015b8281111561042a57825182546001600160a01b0319166001600160a01b039091161782556020909201916001909101906103f5565b5061043692915061043a565b5090565b5b80821115610436576000815560010161043b565b80356001600160a01b03811681146102d457600080fd5b600060208284031215610477578081fd5b6104808261044f565b9392505050565b60008060408385031215610499578081fd5b6104a28361044f565b91506104b06020840161044f565b90509250929050565b600080604083850312156104cb578182fd5b6104d48361044f565b946020939093013593505050565b6001600160a01b0391909116815260200190565b6020808252825182820181905260009190848201906040850190845b818110156105375783516001600160a01b031683529284019291840191600101610512565b50909695505050505050565b60208082526026908201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160408201526564647265737360d01b606082015260800190565b6020808252818101527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260408201526060019056fea264697066735822122090a3742d27bca54d803beba2be7e4ba8fe0f5360e7f27dfd81163b495757df5864736f6c63430008000033",
-  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061007d5760003560e01c80638da5cb5b1161005b5780638da5cb5b146100b2578063c2bc2efc146100d0578063d0165ee6146100f0578063f2fde38b146101035761007d565b80633d0a40611461008257806352c28fab14610097578063715018a6146100aa575b600080fd5b610095610090366004610466565b610116565b005b6100956100a5366004610487565b61018d565b6100956101ca565b6100ba610253565b6040516100c791906104e2565b60405180910390f35b6100e36100de366004610466565b610262565b6040516100c791906104f6565b6100ba6100fe3660046104b9565b6102d9565b610095610111366004610466565b610311565b61011e6103d1565b6001600160a01b031661012f610253565b6001600160a01b03161461015e5760405162461bcd60e51b815260040161015590610589565b60405180910390fd5b6001600160a01b0381166000908152600160205260409020606080519091610188916080906103d5565b505050565b6001600160a01b03918216600090815260016020818152604083208054928301815583529091200180546001600160a01b03191691909216179055565b6101d26103d1565b6001600160a01b03166101e3610253565b6001600160a01b0316146102095760405162461bcd60e51b815260040161015590610589565b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080546001600160a01b0319169055565b6000546001600160a01b031690565b6001600160a01b0381166000908152600160209081526040918290208054835181840281018401909452808452606093928301828280156102cc57602002820191906000526020600020905b81546001600160a01b031681526001909101906020018083116102ae575b505050505090505b919050565b600160205281600052604060002081815481106102f557600080fd5b6000918252602090912001546001600160a01b03169150829050565b6103196103d1565b6001600160a01b031661032a610253565b6001600160a01b0316146103505760405162461bcd60e51b815260040161015590610589565b6001600160a01b0381166103765760405162461bcd60e51b815260040161015590610543565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b3390565b82805482825590600052602060002090810192821561042a579160200282015b8281111561042a57825182546001600160a01b0319166001600160a01b039091161782556020909201916001909101906103f5565b5061043692915061043a565b5090565b5b80821115610436576000815560010161043b565b80356001600160a01b03811681146102d457600080fd5b600060208284031215610477578081fd5b6104808261044f565b9392505050565b60008060408385031215610499578081fd5b6104a28361044f565b91506104b06020840161044f565b90509250929050565b600080604083850312156104cb578182fd5b6104d48361044f565b946020939093013593505050565b6001600160a01b0391909116815260200190565b6020808252825182820181905260009190848201906040850190845b818110156105375783516001600160a01b031683529284019291840191600101610512565b50909695505050505050565b60208082526026908201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160408201526564647265737360d01b606082015260800190565b6020808252818101527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260408201526060019056fea264697066735822122090a3742d27bca54d803beba2be7e4ba8fe0f5360e7f27dfd81163b495757df5864736f6c63430008000033",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.0+commit.c7dfd78e\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"contractAddr_\",\"type\":\"address\"}],\"name\":\"add\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"clear\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"collectionList\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"userAddr_\",\"type\":\"address\"}],\"name\":\"get\",\"outputs\":[{\"internalType\":\"address[]\",\"name\":\"\",\"type\":\"address[]\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/contracts/MorpheusNftManagerInfo.sol\":\"MorpheusNftManagerInfo\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\"},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/contracts/MorpheusNftManagerInfo.sol\":{\"keccak256\":\"0x8293464266a0c93ec150f4006cc8f759a35ae7d15914ada84bc38de4eb1d4e02\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://b59361853a543a3b095a65210dd4084b360469cf91a24a43c60b3b297820fc70\",\"dweb:/ipfs/Qmd2WbsjXnUGUh5cGimkt7P5Pb4w4KirkAttzXSv99qbFS\"]},\"@openzeppelin/contracts/access/Ownable.sol\":{\"keccak256\":\"0x1cae4f85f114ff17b90414f5da67365b1d00337abb5bce9bf944eb78a2c0673c\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://d5ff16b336ce8f906478d5f2eecc6435e00833bdc0b92f6b209cf9e92cb5b2b7\",\"dweb:/ipfs/QmRD1rAZEqQ73C33cdA3QoUyBDMEWnNKNMc6PNkAZWHeQQ\"]},\"@openzeppelin/contracts/utils/Context.sol\":{\"keccak256\":\"0xf930d2df426bfcfc1f7415be724f04081c96f4fb9ec8d0e3a521c07692dface0\",\"license\":\"MIT\",\"urls\":[\"bzz-raw://fc2bfdea0d2562c76fb3c4cf70a86c6ba25c5a30e8f8515c95aafdf8383f8395\",\"dweb:/ipfs/QmTbFya18786ckJfLYUoWau9jBTKfmWnWm5XSViWvB7PXN\"]}},\"version\":1}",
+  "bytecode": "0x608060405234801561001057600080fd5b50600061001b61006a565b600080546001600160a01b0319166001600160a01b0383169081178255604051929350917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908290a35061006e565b3390565b6105f48061007d6000396000f3fe608060405234801561001057600080fd5b506004361061007d5760003560e01c80638da5cb5b1161005b5780638da5cb5b146100b2578063c2bc2efc146100d0578063d0165ee6146100f0578063f2fde38b146101035761007d565b80633d0a40611461008257806352c28fab14610097578063715018a6146100aa575b600080fd5b610095610090366004610466565b610116565b005b6100956100a5366004610487565b61018d565b6100956101ca565b6100ba610253565b6040516100c791906104e2565b60405180910390f35b6100e36100de366004610466565b610262565b6040516100c791906104f6565b6100ba6100fe3660046104b9565b6102d9565b610095610111366004610466565b610311565b61011e6103d1565b6001600160a01b031661012f610253565b6001600160a01b03161461015e5760405162461bcd60e51b815260040161015590610589565b60405180910390fd5b6001600160a01b0381166000908152600160205260409020606080519091610188916080906103d5565b505050565b6001600160a01b03918216600090815260016020818152604083208054928301815583529091200180546001600160a01b03191691909216179055565b6101d26103d1565b6001600160a01b03166101e3610253565b6001600160a01b0316146102095760405162461bcd60e51b815260040161015590610589565b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080546001600160a01b0319169055565b6000546001600160a01b031690565b6001600160a01b0381166000908152600160209081526040918290208054835181840281018401909452808452606093928301828280156102cc57602002820191906000526020600020905b81546001600160a01b031681526001909101906020018083116102ae575b505050505090505b919050565b600160205281600052604060002081815481106102f557600080fd5b6000918252602090912001546001600160a01b03169150829050565b6103196103d1565b6001600160a01b031661032a610253565b6001600160a01b0316146103505760405162461bcd60e51b815260040161015590610589565b6001600160a01b0381166103765760405162461bcd60e51b815260040161015590610543565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b3390565b82805482825590600052602060002090810192821561042a579160200282015b8281111561042a57825182546001600160a01b0319166001600160a01b039091161782556020909201916001909101906103f5565b5061043692915061043a565b5090565b5b80821115610436576000815560010161043b565b80356001600160a01b03811681146102d457600080fd5b600060208284031215610477578081fd5b6104808261044f565b9392505050565b60008060408385031215610499578081fd5b6104a28361044f565b91506104b06020840161044f565b90509250929050565b600080604083850312156104cb578182fd5b6104d48361044f565b946020939093013593505050565b6001600160a01b0391909116815260200190565b6020808252825182820181905260009190848201906040850190845b818110156105375783516001600160a01b031683529284019291840191600101610512565b50909695505050505050565b60208082526026908201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160408201526564647265737360d01b606082015260800190565b6020808252818101527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260408201526060019056fea26469706673582212209162b50104e2d5b3e1ebe89e1bac3be1adfaa452f2ddff4f40f7721baaf7a22b64736f6c63430008000033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061007d5760003560e01c80638da5cb5b1161005b5780638da5cb5b146100b2578063c2bc2efc146100d0578063d0165ee6146100f0578063f2fde38b146101035761007d565b80633d0a40611461008257806352c28fab14610097578063715018a6146100aa575b600080fd5b610095610090366004610466565b610116565b005b6100956100a5366004610487565b61018d565b6100956101ca565b6100ba610253565b6040516100c791906104e2565b60405180910390f35b6100e36100de366004610466565b610262565b6040516100c791906104f6565b6100ba6100fe3660046104b9565b6102d9565b610095610111366004610466565b610311565b61011e6103d1565b6001600160a01b031661012f610253565b6001600160a01b03161461015e5760405162461bcd60e51b815260040161015590610589565b60405180910390fd5b6001600160a01b0381166000908152600160205260409020606080519091610188916080906103d5565b505050565b6001600160a01b03918216600090815260016020818152604083208054928301815583529091200180546001600160a01b03191691909216179055565b6101d26103d1565b6001600160a01b03166101e3610253565b6001600160a01b0316146102095760405162461bcd60e51b815260040161015590610589565b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080546001600160a01b0319169055565b6000546001600160a01b031690565b6001600160a01b0381166000908152600160209081526040918290208054835181840281018401909452808452606093928301828280156102cc57602002820191906000526020600020905b81546001600160a01b031681526001909101906020018083116102ae575b505050505090505b919050565b600160205281600052604060002081815481106102f557600080fd5b6000918252602090912001546001600160a01b03169150829050565b6103196103d1565b6001600160a01b031661032a610253565b6001600160a01b0316146103505760405162461bcd60e51b815260040161015590610589565b6001600160a01b0381166103765760405162461bcd60e51b815260040161015590610543565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080546001600160a01b0319166001600160a01b0392909216919091179055565b3390565b82805482825590600052602060002090810192821561042a579160200282015b8281111561042a57825182546001600160a01b0319166001600160a01b039091161782556020909201916001909101906103f5565b5061043692915061043a565b5090565b5b80821115610436576000815560010161043b565b80356001600160a01b03811681146102d457600080fd5b600060208284031215610477578081fd5b6104808261044f565b9392505050565b60008060408385031215610499578081fd5b6104a28361044f565b91506104b06020840161044f565b90509250929050565b600080604083850312156104cb578182fd5b6104d48361044f565b946020939093013593505050565b6001600160a01b0391909116815260200190565b6020808252825182820181905260009190848201906040850190845b818110156105375783516001600160a01b031683529284019291840191600101610512565b50909695505050505050565b60208082526026908201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160408201526564647265737360d01b606082015260800190565b6020808252818101527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260408201526060019056fea26469706673582212209162b50104e2d5b3e1ebe89e1bac3be1adfaa452f2ddff4f40f7721baaf7a22b64736f6c63430008000033",
   "immutableReferences": {},
   "generatedSources": [],
   "deployedGeneratedSources": [
@@ -1892,29 +1892,29 @@
       "name": "#utility.yul"
     }
   ],
-  "sourceMap": "138:602:4:-:0;;;;;;;;;;;;-1:-1:-1;867:17:5;887:12;:10;:12::i;:::-;909:6;:18;;-1:-1:-1;;;;;;909:18:5;-1:-1:-1;;;;;909:18:5;;;;;;;942:43;;909:18;;-1:-1:-1;909:18:5;942:43;;909:6;;942:43;842:150;138:602:4;;586:96:13;665:10;586:96;:::o;138:602:4:-;;;;;;;",
-  "deployedSourceMap": "138:602:4:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;605:133;;;;;;:::i;:::-;;:::i;:::-;;349:124;;;;;;:::i;:::-;;:::i;1700:145:5:-;;;:::i;1068:85::-;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;479:120:4;;;;;;:::i;:::-;;:::i;:::-;;;;;;;:::i;259:51::-;;;;;;:::i;:::-;;:::i;1994:240:5:-;;;;;;:::i;:::-;;:::i;605:133:4:-;1291:12:5;:10;:12::i;:::-;-1:-1:-1;;;;;1280:23:5;:7;:5;:7::i;:::-;-1:-1:-1;;;;;1280:23:5;;1272:68;;;;-1:-1:-1;;;1272:68:5;;;;;;;:::i;:::-;;;;;;;;;-1:-1:-1;;;;;698:25:4;::::1;;::::0;;;:14:::1;:25;::::0;;;;666:22:::1;698:33:::0;;666:22;;698:33:::1;::::0;;;::::1;:::i;:::-;;1350:1:5;605:133:4::0;:::o;349:124::-;-1:-1:-1;;;;;421:25:4;;;;;;;:14;:25;;;;;;;:45;;;;;;;;;;;;;;;-1:-1:-1;;;;;;421:45:4;;;;;;;;349:124::o;1700:145:5:-;1291:12;:10;:12::i;:::-;-1:-1:-1;;;;;1280:23:5;:7;:5;:7::i;:::-;-1:-1:-1;;;;;1280:23:5;;1272:68;;;;-1:-1:-1;;;1272:68:5;;;;;;;:::i;:::-;1806:1:::1;1790:6:::0;;1769:40:::1;::::0;-1:-1:-1;;;;;1790:6:5;;::::1;::::0;1769:40:::1;::::0;1806:1;;1769:40:::1;1836:1;1819:19:::0;;-1:-1:-1;;;;;;1819:19:5::1;::::0;;1700:145::o;1068:85::-;1114:7;1140:6;-1:-1:-1;;;;;1140:6:5;1068:85;:::o;479:120:4:-;-1:-1:-1;;;;;567:25:4;;;;;;:14;:25;;;;;;;;;560:32;;;;;;;;;;;;;;;;;532:16;;560:32;;;567:25;560:32;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;560:32:4;;;;;;;;;;;;;;;;;;;;;;;479:120;;;;:::o;259:51::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;259:51:4;;-1:-1:-1;259:51:4;;-1:-1:-1;259:51:4:o;1994:240:5:-;1291:12;:10;:12::i;:::-;-1:-1:-1;;;;;1280:23:5;:7;:5;:7::i;:::-;-1:-1:-1;;;;;1280:23:5;;1272:68;;;;-1:-1:-1;;;1272:68:5;;;;;;;:::i;:::-;-1:-1:-1;;;;;2082:22:5;::::1;2074:73;;;;-1:-1:-1::0;;;2074:73:5::1;;;;;;;:::i;:::-;2183:6;::::0;;2162:38:::1;::::0;-1:-1:-1;;;;;2162:38:5;;::::1;::::0;2183:6;::::1;::::0;2162:38:::1;::::0;::::1;2210:6;:17:::0;;-1:-1:-1;;;;;;2210:17:5::1;-1:-1:-1::0;;;;;2210:17:5;;;::::1;::::0;;;::::1;::::0;;1994:240::o;586:96:13:-;665:10;586:96;:::o;-1:-1:-1:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;14:175:18;84:20;;-1:-1:-1;;;;;133:31:18;;123:42;;113:2;;179:1;176;169:12;194:198;;306:2;294:9;285:7;281:23;277:32;274:2;;;327:6;319;312:22;274:2;355:31;376:9;355:31;:::i;:::-;345:41;264:128;-1:-1:-1;;;264:128:18:o;397:274::-;;;526:2;514:9;505:7;501:23;497:32;494:2;;;547:6;539;532:22;494:2;575:31;596:9;575:31;:::i;:::-;565:41;;625:40;661:2;650:9;646:18;625:40;:::i;:::-;615:50;;484:187;;;;;:::o;676:266::-;;;805:2;793:9;784:7;780:23;776:32;773:2;;;826:6;818;811:22;773:2;854:31;875:9;854:31;:::i;:::-;844:41;932:2;917:18;;;;904:32;;-1:-1:-1;;;763:179:18:o;947:203::-;-1:-1:-1;;;;;1111:32:18;;;;1093:51;;1081:2;1066:18;;1048:102::o;1155:661::-;1326:2;1378:21;;;1448:13;;1351:18;;;1470:22;;;1155:661;;1326:2;1549:15;;;;1523:2;1508:18;;;1155:661;1595:195;1609:6;1606:1;1603:13;1595:195;;;1674:13;;-1:-1:-1;;;;;1670:39:18;1658:52;;1765:15;;;;1730:12;;;;1706:1;1624:9;1595:195;;;-1:-1:-1;1807:3:18;;1306:510;-1:-1:-1;;;;;;1306:510:18:o;1821:402::-;2023:2;2005:21;;;2062:2;2042:18;;;2035:30;2101:34;2096:2;2081:18;;2074:62;-1:-1:-1;;;2167:2:18;2152:18;;2145:36;2213:3;2198:19;;1995:228::o;2228:356::-;2430:2;2412:21;;;2449:18;;;2442:30;2508:34;2503:2;2488:18;;2481:62;2575:2;2560:18;;2402:182::o",
-  "source": "// SPDX-License-Identifier: MIT\n\npragma solidity ^0.8.0;\n\nimport \"@openzeppelin/contracts/access/Ownable.sol\";\n\n// MorpheusNftManagerInfo\ncontract MorpheusNftManagerInfo is Ownable {\n    \n    // One user address can create multiple NFT contract addresses\n    mapping(address => address[]) public collectionList;\n\n    // Extend for itemList\n    \n    function add(address userAddr_, address contractAddr_) public {\n        collectionList[userAddr_].push(contractAddr_);\n    }\n\n    function get(address userAddr_) public view returns (address[] memory) {\n        return collectionList[userAddr_];\n    }\n\n    function clear(address userAddr_) public onlyOwner {\n        address[] memory empty;\n        collectionList[userAddr_] = empty;\n    }\n}\n",
+  "sourceMap": "112:602:4:-:0;;;;;;;;;;;;-1:-1:-1;867:17:5;887:12;:10;:12::i;:::-;909:6;:18;;-1:-1:-1;;;;;;909:18:5;-1:-1:-1;;;;;909:18:5;;;;;;;942:43;;909:18;;-1:-1:-1;909:18:5;942:43;;909:6;;942:43;842:150;112:602:4;;586:96:13;665:10;586:96;:::o;112:602:4:-;;;;;;;",
+  "deployedSourceMap": "112:602:4:-:0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;579:133;;;;;;:::i;:::-;;:::i;:::-;;323:124;;;;;;:::i;:::-;;:::i;1700:145:5:-;;;:::i;1068:85::-;;;:::i;:::-;;;;;;;:::i;:::-;;;;;;;;453:120:4;;;;;;:::i;:::-;;:::i;:::-;;;;;;;:::i;233:51::-;;;;;;:::i;:::-;;:::i;1994:240:5:-;;;;;;:::i;:::-;;:::i;579:133:4:-;1291:12:5;:10;:12::i;:::-;-1:-1:-1;;;;;1280:23:5;:7;:5;:7::i;:::-;-1:-1:-1;;;;;1280:23:5;;1272:68;;;;-1:-1:-1;;;1272:68:5;;;;;;;:::i;:::-;;;;;;;;;-1:-1:-1;;;;;672:25:4;::::1;;::::0;;;:14:::1;:25;::::0;;;;640:22:::1;672:33:::0;;640:22;;672:33:::1;::::0;;;::::1;:::i;:::-;;1350:1:5;579:133:4::0;:::o;323:124::-;-1:-1:-1;;;;;395:25:4;;;;;;;:14;:25;;;;;;;:45;;;;;;;;;;;;;;;-1:-1:-1;;;;;;395:45:4;;;;;;;;323:124::o;1700:145:5:-;1291:12;:10;:12::i;:::-;-1:-1:-1;;;;;1280:23:5;:7;:5;:7::i;:::-;-1:-1:-1;;;;;1280:23:5;;1272:68;;;;-1:-1:-1;;;1272:68:5;;;;;;;:::i;:::-;1806:1:::1;1790:6:::0;;1769:40:::1;::::0;-1:-1:-1;;;;;1790:6:5;;::::1;::::0;1769:40:::1;::::0;1806:1;;1769:40:::1;1836:1;1819:19:::0;;-1:-1:-1;;;;;;1819:19:5::1;::::0;;1700:145::o;1068:85::-;1114:7;1140:6;-1:-1:-1;;;;;1140:6:5;1068:85;:::o;453:120:4:-;-1:-1:-1;;;;;541:25:4;;;;;;:14;:25;;;;;;;;;534:32;;;;;;;;;;;;;;;;;506:16;;534:32;;;541:25;534:32;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;534:32:4;;;;;;;;;;;;;;;;;;;;;;;453:120;;;;:::o;233:51::-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;-1:-1:-1;;;;;233:51:4;;-1:-1:-1;233:51:4;;-1:-1:-1;233:51:4:o;1994:240:5:-;1291:12;:10;:12::i;:::-;-1:-1:-1;;;;;1280:23:5;:7;:5;:7::i;:::-;-1:-1:-1;;;;;1280:23:5;;1272:68;;;;-1:-1:-1;;;1272:68:5;;;;;;;:::i;:::-;-1:-1:-1;;;;;2082:22:5;::::1;2074:73;;;;-1:-1:-1::0;;;2074:73:5::1;;;;;;;:::i;:::-;2183:6;::::0;;2162:38:::1;::::0;-1:-1:-1;;;;;2162:38:5;;::::1;::::0;2183:6;::::1;::::0;2162:38:::1;::::0;::::1;2210:6;:17:::0;;-1:-1:-1;;;;;;2210:17:5::1;-1:-1:-1::0;;;;;2210:17:5;;;::::1;::::0;;;::::1;::::0;;1994:240::o;586:96:13:-;665:10;586:96;:::o;-1:-1:-1:-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;:::i;:::-;;;:::o;:::-;;;;;;;;;;;;;;;14:175:18;84:20;;-1:-1:-1;;;;;133:31:18;;123:42;;113:2;;179:1;176;169:12;194:198;;306:2;294:9;285:7;281:23;277:32;274:2;;;327:6;319;312:22;274:2;355:31;376:9;355:31;:::i;:::-;345:41;264:128;-1:-1:-1;;;264:128:18:o;397:274::-;;;526:2;514:9;505:7;501:23;497:32;494:2;;;547:6;539;532:22;494:2;575:31;596:9;575:31;:::i;:::-;565:41;;625:40;661:2;650:9;646:18;625:40;:::i;:::-;615:50;;484:187;;;;;:::o;676:266::-;;;805:2;793:9;784:7;780:23;776:32;773:2;;;826:6;818;811:22;773:2;854:31;875:9;854:31;:::i;:::-;844:41;932:2;917:18;;;;904:32;;-1:-1:-1;;;763:179:18:o;947:203::-;-1:-1:-1;;;;;1111:32:18;;;;1093:51;;1081:2;1066:18;;1048:102::o;1155:661::-;1326:2;1378:21;;;1448:13;;1351:18;;;1470:22;;;1155:661;;1326:2;1549:15;;;;1523:2;1508:18;;;1155:661;1595:195;1609:6;1606:1;1603:13;1595:195;;;1674:13;;-1:-1:-1;;;;;1670:39:18;1658:52;;1765:15;;;;1730:12;;;;1706:1;1624:9;1595:195;;;-1:-1:-1;1807:3:18;;1306:510;-1:-1:-1;;;;;;1306:510:18:o;1821:402::-;2023:2;2005:21;;;2062:2;2042:18;;;2035:30;2101:34;2096:2;2081:18;;2074:62;-1:-1:-1;;;2167:2:18;2152:18;;2145:36;2213:3;2198:19;;1995:228::o;2228:356::-;2430:2;2412:21;;;2449:18;;;2442:30;2508:34;2503:2;2488:18;;2481:62;2575:2;2560:18;;2402:182::o",
+  "source": "// SPDX-License-Identifier: MIT\n\npragma solidity ^0.8.0;\n\nimport \"@openzeppelin/contracts/access/Ownable.sol\";\n\ncontract MorpheusNftManagerInfo is Ownable {\n    \n    // One user address can create multiple NFT contract addresses\n    mapping(address => address[]) public collectionList;\n\n    // Extend for itemList\n    \n    function add(address userAddr_, address contractAddr_) public {\n        collectionList[userAddr_].push(contractAddr_);\n    }\n\n    function get(address userAddr_) public view returns (address[] memory) {\n        return collectionList[userAddr_];\n    }\n\n    function clear(address userAddr_) public onlyOwner {\n        address[] memory empty;\n        collectionList[userAddr_] = empty;\n    }\n}\n",
   "sourcePath": "/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/contracts/MorpheusNftManagerInfo.sol",
   "ast": {
     "absolutePath": "/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/contracts/MorpheusNftManagerInfo.sol",
     "exportedSymbols": {
       "Context": [
-        2152
+        2149
       ],
       "MorpheusNftManagerInfo": [
-        582
+        579
       ],
       "Ownable": [
-        692
+        689
       ]
     },
-    "id": 583,
+    "id": 580,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 525,
+        "id": 522,
         "literals": [
           "solidity",
           "^",
@@ -1927,10 +1927,10 @@
       {
         "absolutePath": "@openzeppelin/contracts/access/Ownable.sol",
         "file": "@openzeppelin/contracts/access/Ownable.sol",
-        "id": 526,
+        "id": 523,
         "nodeType": "ImportDirective",
-        "scope": 583,
-        "sourceUnit": 693,
+        "scope": 580,
+        "sourceUnit": 690,
         "src": "58:52:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -1940,28 +1940,28 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 527,
+              "id": 524,
               "name": "Ownable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 692,
-              "src": "173:7:4"
+              "referencedDeclaration": 689,
+              "src": "147:7:4"
             },
-            "id": 528,
+            "id": 525,
             "nodeType": "InheritanceSpecifier",
-            "src": "173:7:4"
+            "src": "147:7:4"
           }
         ],
         "contractDependencies": [
-          692,
-          2152
+          689,
+          2149
         ],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "id": 582,
+        "id": 579,
         "linearizedBaseContracts": [
-          582,
-          692,
-          2152
+          579,
+          689,
+          2149
         ],
         "name": "MorpheusNftManagerInfo",
         "nodeType": "ContractDefinition",
@@ -1969,12 +1969,12 @@
           {
             "constant": false,
             "functionSelector": "d0165ee6",
-            "id": 533,
+            "id": 530,
             "mutability": "mutable",
             "name": "collectionList",
             "nodeType": "VariableDeclaration",
-            "scope": 582,
-            "src": "259:51:4",
+            "scope": 579,
+            "src": "233:51:4",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -1982,38 +1982,38 @@
               "typeString": "mapping(address => address[])"
             },
             "typeName": {
-              "id": 532,
+              "id": 529,
               "keyType": {
-                "id": 529,
+                "id": 526,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "267:7:4",
+                "src": "241:7:4",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "259:29:4",
+              "src": "233:29:4",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_address_$dyn_storage_$",
                 "typeString": "mapping(address => address[])"
               },
               "valueType": {
                 "baseType": {
-                  "id": 530,
+                  "id": 527,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "278:7:4",
+                  "src": "252:7:4",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
                   }
                 },
-                "id": 531,
+                "id": 528,
                 "nodeType": "ArrayTypeName",
-                "src": "278:9:4",
+                "src": "252:9:4",
                 "typeDescriptions": {
                   "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                   "typeString": "address[]"
@@ -2024,20 +2024,20 @@
           },
           {
             "body": {
-              "id": 547,
+              "id": 544,
               "nodeType": "Block",
-              "src": "411:62:4",
+              "src": "385:62:4",
               "statements": [
                 {
                   "expression": {
                     "arguments": [
                       {
-                        "id": 544,
+                        "id": 541,
                         "name": "contractAddr_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 537,
-                        "src": "452:13:4",
+                        "referencedDeclaration": 534,
+                        "src": "426:13:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2053,25 +2053,25 @@
                       ],
                       "expression": {
                         "baseExpression": {
-                          "id": 540,
+                          "id": 537,
                           "name": "collectionList",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 533,
-                          "src": "421:14:4",
+                          "referencedDeclaration": 530,
+                          "src": "395:14:4",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_address_$dyn_storage_$",
                             "typeString": "mapping(address => address[] storage ref)"
                           }
                         },
-                        "id": 542,
+                        "id": 539,
                         "indexExpression": {
-                          "id": 541,
+                          "id": 538,
                           "name": "userAddr_",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 535,
-                          "src": "436:9:4",
+                          "referencedDeclaration": 532,
+                          "src": "410:9:4",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -2082,26 +2082,26 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "421:25:4",
+                        "src": "395:25:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_storage",
                           "typeString": "address[] storage ref"
                         }
                       },
-                      "id": 543,
+                      "id": 540,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "push",
                       "nodeType": "MemberAccess",
-                      "src": "421:30:4",
+                      "src": "395:30:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_arraypush_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 545,
+                    "id": 542,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2109,38 +2109,38 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "421:45:4",
+                    "src": "395:45:4",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 546,
+                  "id": 543,
                   "nodeType": "ExpressionStatement",
-                  "src": "421:45:4"
+                  "src": "395:45:4"
                 }
               ]
             },
             "functionSelector": "52c28fab",
-            "id": 548,
+            "id": 545,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "add",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 538,
+              "id": 535,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 535,
+                  "id": 532,
                   "mutability": "mutable",
                   "name": "userAddr_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 548,
-                  "src": "362:17:4",
+                  "scope": 545,
+                  "src": "336:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2148,10 +2148,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 534,
+                    "id": 531,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "362:7:4",
+                    "src": "336:7:4",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2162,12 +2162,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 537,
+                  "id": 534,
                   "mutability": "mutable",
                   "name": "contractAddr_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 548,
-                  "src": "381:21:4",
+                  "scope": 545,
+                  "src": "355:21:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2175,10 +2175,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 536,
+                    "id": 533,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "381:7:4",
+                    "src": "355:7:4",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2188,48 +2188,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "361:42:4"
+              "src": "335:42:4"
             },
             "returnParameters": {
-              "id": 539,
+              "id": 536,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "411:0:4"
+              "src": "385:0:4"
             },
-            "scope": 582,
-            "src": "349:124:4",
+            "scope": 579,
+            "src": "323:124:4",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 560,
+              "id": 557,
               "nodeType": "Block",
-              "src": "550:49:4",
+              "src": "524:49:4",
               "statements": [
                 {
                   "expression": {
                     "baseExpression": {
-                      "id": 556,
+                      "id": 553,
                       "name": "collectionList",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 533,
-                      "src": "567:14:4",
+                      "referencedDeclaration": 530,
+                      "src": "541:14:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_address_$dyn_storage_$",
                         "typeString": "mapping(address => address[] storage ref)"
                       }
                     },
-                    "id": 558,
+                    "id": 555,
                     "indexExpression": {
-                      "id": 557,
+                      "id": 554,
                       "name": "userAddr_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 550,
-                      "src": "582:9:4",
+                      "referencedDeclaration": 547,
+                      "src": "556:9:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -2240,38 +2240,38 @@
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "567:25:4",
+                    "src": "541:25:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 555,
-                  "id": 559,
+                  "functionReturnParameters": 552,
+                  "id": 556,
                   "nodeType": "Return",
-                  "src": "560:32:4"
+                  "src": "534:32:4"
                 }
               ]
             },
             "functionSelector": "c2bc2efc",
-            "id": 561,
+            "id": 558,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "get",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 551,
+              "id": 548,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 550,
+                  "id": 547,
                   "mutability": "mutable",
                   "name": "userAddr_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 561,
-                  "src": "492:17:4",
+                  "scope": 558,
+                  "src": "466:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2279,10 +2279,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 549,
+                    "id": 546,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "492:7:4",
+                    "src": "466:7:4",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2292,20 +2292,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "491:19:4"
+              "src": "465:19:4"
             },
             "returnParameters": {
-              "id": 555,
+              "id": 552,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 554,
+                  "id": 551,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 561,
-                  "src": "532:16:4",
+                  "scope": 558,
+                  "src": "506:16:4",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2314,19 +2314,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 552,
+                      "id": 549,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "532:7:4",
+                      "src": "506:7:4",
                       "stateMutability": "nonpayable",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 553,
+                    "id": 550,
                     "nodeType": "ArrayTypeName",
-                    "src": "532:9:4",
+                    "src": "506:9:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -2335,33 +2335,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "531:18:4"
+              "src": "505:18:4"
             },
-            "scope": 582,
-            "src": "479:120:4",
+            "scope": 579,
+            "src": "453:120:4",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 580,
+              "id": 577,
               "nodeType": "Block",
-              "src": "656:82:4",
+              "src": "630:82:4",
               "statements": [
                 {
                   "assignments": [
-                    572
+                    569
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 572,
+                      "id": 569,
                       "mutability": "mutable",
                       "name": "empty",
                       "nodeType": "VariableDeclaration",
-                      "scope": 580,
-                      "src": "666:22:4",
+                      "scope": 577,
+                      "src": "640:22:4",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -2370,18 +2370,18 @@
                       },
                       "typeName": {
                         "baseType": {
-                          "id": 570,
+                          "id": 567,
                           "name": "address",
                           "nodeType": "ElementaryTypeName",
-                          "src": "666:7:4",
+                          "src": "640:7:4",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "id": 571,
+                        "id": 568,
                         "nodeType": "ArrayTypeName",
-                        "src": "666:9:4",
+                        "src": "640:9:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                           "typeString": "address[]"
@@ -2390,38 +2390,38 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 573,
+                  "id": 570,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "666:22:4"
+                  "src": "640:22:4"
                 },
                 {
                   "expression": {
-                    "id": 578,
+                    "id": 575,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "baseExpression": {
-                        "id": 574,
+                        "id": 571,
                         "name": "collectionList",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 533,
-                        "src": "698:14:4",
+                        "referencedDeclaration": 530,
+                        "src": "672:14:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_address_$dyn_storage_$",
                           "typeString": "mapping(address => address[] storage ref)"
                         }
                       },
-                      "id": 576,
+                      "id": 573,
                       "indexExpression": {
-                        "id": 575,
+                        "id": 572,
                         "name": "userAddr_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 563,
-                        "src": "713:9:4",
+                        "referencedDeclaration": 560,
+                        "src": "687:9:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2432,7 +2432,7 @@
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "698:25:4",
+                      "src": "672:25:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_array$_t_address_$dyn_storage",
                         "typeString": "address[] storage ref"
@@ -2441,61 +2441,61 @@
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
-                      "id": 577,
+                      "id": 574,
                       "name": "empty",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 572,
-                      "src": "726:5:4",
+                      "referencedDeclaration": 569,
+                      "src": "700:5:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                         "typeString": "address[] memory"
                       }
                     },
-                    "src": "698:33:4",
+                    "src": "672:33:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "id": 579,
+                  "id": 576,
                   "nodeType": "ExpressionStatement",
-                  "src": "698:33:4"
+                  "src": "672:33:4"
                 }
               ]
             },
             "functionSelector": "3d0a4061",
-            "id": 581,
+            "id": 578,
             "implemented": true,
             "kind": "function",
             "modifiers": [
               {
-                "id": 566,
+                "id": 563,
                 "modifierName": {
-                  "id": 565,
+                  "id": 562,
                   "name": "onlyOwner",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 641,
-                  "src": "646:9:4"
+                  "referencedDeclaration": 638,
+                  "src": "620:9:4"
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "646:9:4"
+                "src": "620:9:4"
               }
             ],
             "name": "clear",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 564,
+              "id": 561,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 563,
+                  "id": 560,
                   "mutability": "mutable",
                   "name": "userAddr_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 581,
-                  "src": "620:17:4",
+                  "scope": 578,
+                  "src": "594:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2503,10 +2503,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 562,
+                    "id": 559,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "620:7:4",
+                    "src": "594:7:4",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2516,46 +2516,46 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "619:19:4"
+              "src": "593:19:4"
             },
             "returnParameters": {
-              "id": 567,
+              "id": 564,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "656:0:4"
+              "src": "630:0:4"
             },
-            "scope": 582,
-            "src": "605:133:4",
+            "scope": 579,
+            "src": "579:133:4",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           }
         ],
-        "scope": 583,
-        "src": "138:602:4"
+        "scope": 580,
+        "src": "112:602:4"
       }
     ],
-    "src": "33:708:4"
+    "src": "33:682:4"
   },
   "legacyAST": {
     "absolutePath": "/home/trung/Work/reference/morphe/task/dApp/ml-NFT-tool/erc721/contracts/MorpheusNftManagerInfo.sol",
     "exportedSymbols": {
       "Context": [
-        2152
+        2149
       ],
       "MorpheusNftManagerInfo": [
-        582
+        579
       ],
       "Ownable": [
-        692
+        689
       ]
     },
-    "id": 583,
+    "id": 580,
     "license": "MIT",
     "nodeType": "SourceUnit",
     "nodes": [
       {
-        "id": 525,
+        "id": 522,
         "literals": [
           "solidity",
           "^",
@@ -2568,10 +2568,10 @@
       {
         "absolutePath": "@openzeppelin/contracts/access/Ownable.sol",
         "file": "@openzeppelin/contracts/access/Ownable.sol",
-        "id": 526,
+        "id": 523,
         "nodeType": "ImportDirective",
-        "scope": 583,
-        "sourceUnit": 693,
+        "scope": 580,
+        "sourceUnit": 690,
         "src": "58:52:4",
         "symbolAliases": [],
         "unitAlias": ""
@@ -2581,28 +2581,28 @@
         "baseContracts": [
           {
             "baseName": {
-              "id": 527,
+              "id": 524,
               "name": "Ownable",
               "nodeType": "IdentifierPath",
-              "referencedDeclaration": 692,
-              "src": "173:7:4"
+              "referencedDeclaration": 689,
+              "src": "147:7:4"
             },
-            "id": 528,
+            "id": 525,
             "nodeType": "InheritanceSpecifier",
-            "src": "173:7:4"
+            "src": "147:7:4"
           }
         ],
         "contractDependencies": [
-          692,
-          2152
+          689,
+          2149
         ],
         "contractKind": "contract",
         "fullyImplemented": true,
-        "id": 582,
+        "id": 579,
         "linearizedBaseContracts": [
-          582,
-          692,
-          2152
+          579,
+          689,
+          2149
         ],
         "name": "MorpheusNftManagerInfo",
         "nodeType": "ContractDefinition",
@@ -2610,12 +2610,12 @@
           {
             "constant": false,
             "functionSelector": "d0165ee6",
-            "id": 533,
+            "id": 530,
             "mutability": "mutable",
             "name": "collectionList",
             "nodeType": "VariableDeclaration",
-            "scope": 582,
-            "src": "259:51:4",
+            "scope": 579,
+            "src": "233:51:4",
             "stateVariable": true,
             "storageLocation": "default",
             "typeDescriptions": {
@@ -2623,38 +2623,38 @@
               "typeString": "mapping(address => address[])"
             },
             "typeName": {
-              "id": 532,
+              "id": 529,
               "keyType": {
-                "id": 529,
+                "id": 526,
                 "name": "address",
                 "nodeType": "ElementaryTypeName",
-                "src": "267:7:4",
+                "src": "241:7:4",
                 "typeDescriptions": {
                   "typeIdentifier": "t_address",
                   "typeString": "address"
                 }
               },
               "nodeType": "Mapping",
-              "src": "259:29:4",
+              "src": "233:29:4",
               "typeDescriptions": {
                 "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_address_$dyn_storage_$",
                 "typeString": "mapping(address => address[])"
               },
               "valueType": {
                 "baseType": {
-                  "id": 530,
+                  "id": 527,
                   "name": "address",
                   "nodeType": "ElementaryTypeName",
-                  "src": "278:7:4",
+                  "src": "252:7:4",
                   "stateMutability": "nonpayable",
                   "typeDescriptions": {
                     "typeIdentifier": "t_address",
                     "typeString": "address"
                   }
                 },
-                "id": 531,
+                "id": 528,
                 "nodeType": "ArrayTypeName",
-                "src": "278:9:4",
+                "src": "252:9:4",
                 "typeDescriptions": {
                   "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                   "typeString": "address[]"
@@ -2665,20 +2665,20 @@
           },
           {
             "body": {
-              "id": 547,
+              "id": 544,
               "nodeType": "Block",
-              "src": "411:62:4",
+              "src": "385:62:4",
               "statements": [
                 {
                   "expression": {
                     "arguments": [
                       {
-                        "id": 544,
+                        "id": 541,
                         "name": "contractAddr_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 537,
-                        "src": "452:13:4",
+                        "referencedDeclaration": 534,
+                        "src": "426:13:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -2694,25 +2694,25 @@
                       ],
                       "expression": {
                         "baseExpression": {
-                          "id": 540,
+                          "id": 537,
                           "name": "collectionList",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 533,
-                          "src": "421:14:4",
+                          "referencedDeclaration": 530,
+                          "src": "395:14:4",
                           "typeDescriptions": {
                             "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_address_$dyn_storage_$",
                             "typeString": "mapping(address => address[] storage ref)"
                           }
                         },
-                        "id": 542,
+                        "id": 539,
                         "indexExpression": {
-                          "id": 541,
+                          "id": 538,
                           "name": "userAddr_",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 535,
-                          "src": "436:9:4",
+                          "referencedDeclaration": 532,
+                          "src": "410:9:4",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
@@ -2723,26 +2723,26 @@
                         "isPure": false,
                         "lValueRequested": false,
                         "nodeType": "IndexAccess",
-                        "src": "421:25:4",
+                        "src": "395:25:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_storage",
                           "typeString": "address[] storage ref"
                         }
                       },
-                      "id": 543,
+                      "id": 540,
                       "isConstant": false,
                       "isLValue": false,
                       "isPure": false,
                       "lValueRequested": false,
                       "memberName": "push",
                       "nodeType": "MemberAccess",
-                      "src": "421:30:4",
+                      "src": "395:30:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_arraypush_nonpayable$_t_address_$returns$__$",
                         "typeString": "function (address)"
                       }
                     },
-                    "id": 545,
+                    "id": 542,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
@@ -2750,38 +2750,38 @@
                     "lValueRequested": false,
                     "names": [],
                     "nodeType": "FunctionCall",
-                    "src": "421:45:4",
+                    "src": "395:45:4",
                     "tryCall": false,
                     "typeDescriptions": {
                       "typeIdentifier": "t_tuple$__$",
                       "typeString": "tuple()"
                     }
                   },
-                  "id": 546,
+                  "id": 543,
                   "nodeType": "ExpressionStatement",
-                  "src": "421:45:4"
+                  "src": "395:45:4"
                 }
               ]
             },
             "functionSelector": "52c28fab",
-            "id": 548,
+            "id": 545,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "add",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 538,
+              "id": 535,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 535,
+                  "id": 532,
                   "mutability": "mutable",
                   "name": "userAddr_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 548,
-                  "src": "362:17:4",
+                  "scope": 545,
+                  "src": "336:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2789,10 +2789,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 534,
+                    "id": 531,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "362:7:4",
+                    "src": "336:7:4",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2803,12 +2803,12 @@
                 },
                 {
                   "constant": false,
-                  "id": 537,
+                  "id": 534,
                   "mutability": "mutable",
                   "name": "contractAddr_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 548,
-                  "src": "381:21:4",
+                  "scope": 545,
+                  "src": "355:21:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2816,10 +2816,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 536,
+                    "id": 533,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "381:7:4",
+                    "src": "355:7:4",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2829,48 +2829,48 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "361:42:4"
+              "src": "335:42:4"
             },
             "returnParameters": {
-              "id": 539,
+              "id": 536,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "411:0:4"
+              "src": "385:0:4"
             },
-            "scope": 582,
-            "src": "349:124:4",
+            "scope": 579,
+            "src": "323:124:4",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 560,
+              "id": 557,
               "nodeType": "Block",
-              "src": "550:49:4",
+              "src": "524:49:4",
               "statements": [
                 {
                   "expression": {
                     "baseExpression": {
-                      "id": 556,
+                      "id": 553,
                       "name": "collectionList",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 533,
-                      "src": "567:14:4",
+                      "referencedDeclaration": 530,
+                      "src": "541:14:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_address_$dyn_storage_$",
                         "typeString": "mapping(address => address[] storage ref)"
                       }
                     },
-                    "id": 558,
+                    "id": 555,
                     "indexExpression": {
-                      "id": 557,
+                      "id": 554,
                       "name": "userAddr_",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 550,
-                      "src": "582:9:4",
+                      "referencedDeclaration": 547,
+                      "src": "556:9:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
@@ -2881,38 +2881,38 @@
                     "isPure": false,
                     "lValueRequested": false,
                     "nodeType": "IndexAccess",
-                    "src": "567:25:4",
+                    "src": "541:25:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "functionReturnParameters": 555,
-                  "id": 559,
+                  "functionReturnParameters": 552,
+                  "id": 556,
                   "nodeType": "Return",
-                  "src": "560:32:4"
+                  "src": "534:32:4"
                 }
               ]
             },
             "functionSelector": "c2bc2efc",
-            "id": 561,
+            "id": 558,
             "implemented": true,
             "kind": "function",
             "modifiers": [],
             "name": "get",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 551,
+              "id": 548,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 550,
+                  "id": 547,
                   "mutability": "mutable",
                   "name": "userAddr_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 561,
-                  "src": "492:17:4",
+                  "scope": 558,
+                  "src": "466:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -2920,10 +2920,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 549,
+                    "id": 546,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "492:7:4",
+                    "src": "466:7:4",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -2933,20 +2933,20 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "491:19:4"
+              "src": "465:19:4"
             },
             "returnParameters": {
-              "id": 555,
+              "id": 552,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 554,
+                  "id": 551,
                   "mutability": "mutable",
                   "name": "",
                   "nodeType": "VariableDeclaration",
-                  "scope": 561,
-                  "src": "532:16:4",
+                  "scope": 558,
+                  "src": "506:16:4",
                   "stateVariable": false,
                   "storageLocation": "memory",
                   "typeDescriptions": {
@@ -2955,19 +2955,19 @@
                   },
                   "typeName": {
                     "baseType": {
-                      "id": 552,
+                      "id": 549,
                       "name": "address",
                       "nodeType": "ElementaryTypeName",
-                      "src": "532:7:4",
+                      "src": "506:7:4",
                       "stateMutability": "nonpayable",
                       "typeDescriptions": {
                         "typeIdentifier": "t_address",
                         "typeString": "address"
                       }
                     },
-                    "id": 553,
+                    "id": 550,
                     "nodeType": "ArrayTypeName",
-                    "src": "532:9:4",
+                    "src": "506:9:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                       "typeString": "address[]"
@@ -2976,33 +2976,33 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "531:18:4"
+              "src": "505:18:4"
             },
-            "scope": 582,
-            "src": "479:120:4",
+            "scope": 579,
+            "src": "453:120:4",
             "stateMutability": "view",
             "virtual": false,
             "visibility": "public"
           },
           {
             "body": {
-              "id": 580,
+              "id": 577,
               "nodeType": "Block",
-              "src": "656:82:4",
+              "src": "630:82:4",
               "statements": [
                 {
                   "assignments": [
-                    572
+                    569
                   ],
                   "declarations": [
                     {
                       "constant": false,
-                      "id": 572,
+                      "id": 569,
                       "mutability": "mutable",
                       "name": "empty",
                       "nodeType": "VariableDeclaration",
-                      "scope": 580,
-                      "src": "666:22:4",
+                      "scope": 577,
+                      "src": "640:22:4",
                       "stateVariable": false,
                       "storageLocation": "memory",
                       "typeDescriptions": {
@@ -3011,18 +3011,18 @@
                       },
                       "typeName": {
                         "baseType": {
-                          "id": 570,
+                          "id": 567,
                           "name": "address",
                           "nodeType": "ElementaryTypeName",
-                          "src": "666:7:4",
+                          "src": "640:7:4",
                           "typeDescriptions": {
                             "typeIdentifier": "t_address",
                             "typeString": "address"
                           }
                         },
-                        "id": 571,
+                        "id": 568,
                         "nodeType": "ArrayTypeName",
-                        "src": "666:9:4",
+                        "src": "640:9:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
                           "typeString": "address[]"
@@ -3031,38 +3031,38 @@
                       "visibility": "internal"
                     }
                   ],
-                  "id": 573,
+                  "id": 570,
                   "nodeType": "VariableDeclarationStatement",
-                  "src": "666:22:4"
+                  "src": "640:22:4"
                 },
                 {
                   "expression": {
-                    "id": 578,
+                    "id": 575,
                     "isConstant": false,
                     "isLValue": false,
                     "isPure": false,
                     "lValueRequested": false,
                     "leftHandSide": {
                       "baseExpression": {
-                        "id": 574,
+                        "id": 571,
                         "name": "collectionList",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 533,
-                        "src": "698:14:4",
+                        "referencedDeclaration": 530,
+                        "src": "672:14:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_mapping$_t_address_$_t_array$_t_address_$dyn_storage_$",
                           "typeString": "mapping(address => address[] storage ref)"
                         }
                       },
-                      "id": 576,
+                      "id": 573,
                       "indexExpression": {
-                        "id": 575,
+                        "id": 572,
                         "name": "userAddr_",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 563,
-                        "src": "713:9:4",
+                        "referencedDeclaration": 560,
+                        "src": "687:9:4",
                         "typeDescriptions": {
                           "typeIdentifier": "t_address",
                           "typeString": "address"
@@ -3073,7 +3073,7 @@
                       "isPure": false,
                       "lValueRequested": true,
                       "nodeType": "IndexAccess",
-                      "src": "698:25:4",
+                      "src": "672:25:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_array$_t_address_$dyn_storage",
                         "typeString": "address[] storage ref"
@@ -3082,61 +3082,61 @@
                     "nodeType": "Assignment",
                     "operator": "=",
                     "rightHandSide": {
-                      "id": 577,
+                      "id": 574,
                       "name": "empty",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 572,
-                      "src": "726:5:4",
+                      "referencedDeclaration": 569,
+                      "src": "700:5:4",
                       "typeDescriptions": {
                         "typeIdentifier": "t_array$_t_address_$dyn_memory_ptr",
                         "typeString": "address[] memory"
                       }
                     },
-                    "src": "698:33:4",
+                    "src": "672:33:4",
                     "typeDescriptions": {
                       "typeIdentifier": "t_array$_t_address_$dyn_storage",
                       "typeString": "address[] storage ref"
                     }
                   },
-                  "id": 579,
+                  "id": 576,
                   "nodeType": "ExpressionStatement",
-                  "src": "698:33:4"
+                  "src": "672:33:4"
                 }
               ]
             },
             "functionSelector": "3d0a4061",
-            "id": 581,
+            "id": 578,
             "implemented": true,
             "kind": "function",
             "modifiers": [
               {
-                "id": 566,
+                "id": 563,
                 "modifierName": {
-                  "id": 565,
+                  "id": 562,
                   "name": "onlyOwner",
                   "nodeType": "IdentifierPath",
-                  "referencedDeclaration": 641,
-                  "src": "646:9:4"
+                  "referencedDeclaration": 638,
+                  "src": "620:9:4"
                 },
                 "nodeType": "ModifierInvocation",
-                "src": "646:9:4"
+                "src": "620:9:4"
               }
             ],
             "name": "clear",
             "nodeType": "FunctionDefinition",
             "parameters": {
-              "id": 564,
+              "id": 561,
               "nodeType": "ParameterList",
               "parameters": [
                 {
                   "constant": false,
-                  "id": 563,
+                  "id": 560,
                   "mutability": "mutable",
                   "name": "userAddr_",
                   "nodeType": "VariableDeclaration",
-                  "scope": 581,
-                  "src": "620:17:4",
+                  "scope": 578,
+                  "src": "594:17:4",
                   "stateVariable": false,
                   "storageLocation": "default",
                   "typeDescriptions": {
@@ -3144,10 +3144,10 @@
                     "typeString": "address"
                   },
                   "typeName": {
-                    "id": 562,
+                    "id": 559,
                     "name": "address",
                     "nodeType": "ElementaryTypeName",
-                    "src": "620:7:4",
+                    "src": "594:7:4",
                     "stateMutability": "nonpayable",
                     "typeDescriptions": {
                       "typeIdentifier": "t_address",
@@ -3157,26 +3157,26 @@
                   "visibility": "internal"
                 }
               ],
-              "src": "619:19:4"
+              "src": "593:19:4"
             },
             "returnParameters": {
-              "id": 567,
+              "id": 564,
               "nodeType": "ParameterList",
               "parameters": [],
-              "src": "656:0:4"
+              "src": "630:0:4"
             },
-            "scope": 582,
-            "src": "605:133:4",
+            "scope": 579,
+            "src": "579:133:4",
             "stateMutability": "nonpayable",
             "virtual": false,
             "visibility": "public"
           }
         ],
-        "scope": 583,
-        "src": "138:602:4"
+        "scope": 580,
+        "src": "112:602:4"
       }
     ],
-    "src": "33:708:4"
+    "src": "33:682:4"
   },
   "compiler": {
     "name": "solc",
@@ -3184,7 +3184,7 @@
   },
   "networks": {},
   "schemaVersion": "3.3.4",
-  "updatedAt": "2021-04-18T08:02:17.220Z",
+  "updatedAt": "2021-04-18T08:30:33.692Z",
   "devdoc": {
     "kind": "dev",
     "methods": {
