@@ -36,12 +36,40 @@ export default class Erc721InfoContract {
 
   async getCollection(data) {
     const { userAddr, gasPrice } = data
-    console.log('Erc721InfoContract.getCollection - userAddr:', userAddr)
     try {
       const result = await this.contractInstance.getCollection(userAddr, {
         gasPrice,
       })
       console.log('Erc721InfoContract.getCollection - result:', result)
+      return result
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async addItemTx(data) {
+    const { userAddr, txHash, gasPrice } = data
+
+    try {
+      const result = await this.contractInstance.addItemTx(userAddr, txHash, {
+        gasPrice,
+      })
+      console.log('Erc721InfoContract.addItemTx - result:', result)
+      return result
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async getItemTx(data) {
+    const { userAddr, gasPrice } = data
+    try {
+      const result = await this.contractInstance.getItemTx(userAddr, {
+        gasPrice,
+      })
+      console.log('Erc721InfoContract.getItemTx - result:', result)
       return result
     } catch (err) {
       console.log(err)

@@ -29,6 +29,14 @@ contract MorpheusNftManager is Ownable, ERC721URIStorage, EIP712MetaTransaction 
         _;
     }
 
+    modifier isOwner() {
+        require(
+            msgSender() == owner(), 
+            "MorpheusNftManager: not owner"
+        );
+        _;
+    }
+
     function createCollectible(string memory tokenURI) public isAuthorized returns (uint256) {
         tokenId = tokenId + 1;
         _mint(msgSender(), tokenId);
@@ -36,11 +44,11 @@ contract MorpheusNftManager is Ownable, ERC721URIStorage, EIP712MetaTransaction 
         return tokenId;
     }
 
-    function addAuthorized(address auth) public onlyOwner {
+    function addAuthorized(address auth) public isOwner {
         authorized[auth] = true;
     }
 
-    function clearAuthorized(address auth) public onlyOwner {
+    function clearAuthorized(address auth) public isOwner {
         authorized[auth] = false;
     }
 

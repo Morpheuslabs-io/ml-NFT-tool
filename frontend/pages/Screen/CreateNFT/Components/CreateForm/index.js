@@ -67,6 +67,7 @@ class CreateForm extends React.PureComponent {
       nftColelctionSymbol: '',
       collectionAddressList: [],
       selectedCollection: null,
+      isOwner: false,
     }
     this.formRef = React.createRef()
   }
@@ -108,10 +109,18 @@ class CreateForm extends React.PureComponent {
                 erc721InfoContractAddress,
               )
 
+              const contractGaslessOwner = await this.erc721Contract.owner(erc721ContractGasless)
+
               let networkID = await ethereum.request({ method: 'eth_chainId' })
               networkID = web3Utils.hexToNumber(networkID)
               console.log('networkID:', networkID)
-              this.setState({ networkID, address: defaultAddress })
+              this.setState({
+                networkID,
+                address: defaultAddress,
+                isOwner:
+                  web3Utils.toChecksumAddress(contractGaslessOwner) ===
+                  web3Utils.toChecksumAddress(defaultAddress),
+              })
               const gasPriceGwei = await this.queryGasPrice(networkID)
               gasPrice = gasPriceGwei * Math.pow(10, 9)
 
@@ -170,7 +179,7 @@ class CreateForm extends React.PureComponent {
           if (!this.erc721InfoContract) {
             window.location.reload()
           }
-          let userCreatedContractList = await this.erc721InfoContract.get({
+          let userCreatedContractList = await this.erc721InfoContract.getCollection({
             userAddr: address,
             gasPrice,
           })
@@ -233,7 +242,7 @@ class CreateForm extends React.PureComponent {
 
     // Add the newly-deployed NFT address
     if (result && result.address) {
-      const tx = await this.erc721InfoContract.add({
+      const tx = await this.erc721InfoContract.addCollection({
         userAddr: address,
         contractAddr: result.address,
         gasPrice,
@@ -295,8 +304,8 @@ class CreateForm extends React.PureComponent {
           this.erc721Contract,
           selectedCollection,
           address,
-          tokenURI,
           networkID,
+          tokenURI,
         )
       } else {
         result = await this.erc721Contract.createCollectible({
@@ -504,6 +513,7 @@ class CreateForm extends React.PureComponent {
       isCreateCollection,
       selectedCollection,
       isAddItem,
+      isOwner,
     } = this.state
     const layout = {
       labelCol: { span: 13 },
@@ -544,8 +554,12 @@ class CreateForm extends React.PureComponent {
               <Select defaultValue="create_collection" onChange={this.onMainMenuChange}>
                 <Option value="create_collection">Create new collection</Option>
                 <Option value="create_item">Add item to an existing collection</Option>
-                <Option value="add_authorized">Authorize address to add item</Option>
-                <Option value="revoke_authorized">Revoke authorized address</Option>
+                {isOwner && (
+                  <>
+                    <Option value="add_authorized">Authorize address to add item</Option>
+                    <Option value="revoke_authorized">Revoke authorized address</Option>
+                  </>
+                )}
               </Select>
             </Form.Item>
 

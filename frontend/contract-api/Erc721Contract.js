@@ -34,7 +34,6 @@ export default class Erc721Contract {
 
   async name(contractAddress) {
     try {
-      console.log('contractAddress:', contractAddress)
       const contractInstance = await this.contract.at(contractAddress)
       return contractInstance.name()
     } catch (err) {
@@ -45,7 +44,6 @@ export default class Erc721Contract {
 
   async symbol(contractAddress) {
     try {
-      console.log('contractAddress:', contractAddress)
       const contractInstance = await this.contract.at(contractAddress)
       return contractInstance.symbol()
     } catch (err) {
@@ -54,9 +52,18 @@ export default class Erc721Contract {
     }
   }
 
+  async owner(contractAddress) {
+    try {
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.owner()
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
   async checkAuthorized(contractAddress, checkAddress) {
     try {
-      console.log('contractAddress:', contractAddress)
       const contractInstance = await this.contract.at(contractAddress)
       return contractInstance.checkAuthorized(checkAddress)
       return true
@@ -68,7 +75,6 @@ export default class Erc721Contract {
 
   async getSenderNonce(contractAddress, senderAddress) {
     try {
-      console.log('contractAddress:', contractAddress)
       const contractInstance = await this.contract.at(contractAddress)
       return contractInstance.getNonce(senderAddress)
     } catch (err) {
@@ -78,16 +84,18 @@ export default class Erc721Contract {
   }
 
   async createCollectibleFuncSig(contractAddress, tokenURI) {
-    console.log('contractAddress:', contractAddress)
     const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
-    // const contractInstance = await this.contract.at(contractAddress)
     return contractInstance.methods.createCollectible(tokenURI).encodeABI()
+  }
+
+  async addAuthorizedFuncSig(contractAddress, userWalletAddress) {
+    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
+    return contractInstance.methods.addAuthorized(userWalletAddress).encodeABI()
   }
 
   async createCollectible(data) {
     const { contractAddress, tokenURI, gasPrice } = data
     try {
-      console.log('contractAddress:', contractAddress)
       const contractInstance = await this.contract.at(contractAddress)
       return contractInstance.createCollectible(tokenURI, {
         gasPrice,
@@ -101,7 +109,6 @@ export default class Erc721Contract {
   async addAuthorized(data) {
     const { contractAddress, userAddress, gasPrice } = data
     try {
-      console.log('contractAddress:', contractAddress)
       const contractInstance = await this.contract.at(contractAddress)
       return contractInstance.addAuthorized(userAddress, {
         gasPrice,
@@ -115,7 +122,6 @@ export default class Erc721Contract {
   async revokeAuthorized(data) {
     const { contractAddress, userAddress, gasPrice } = data
     try {
-      console.log('contractAddress:', contractAddress)
       const contractInstance = await this.contract.at(contractAddress)
       return contractInstance.clearAuthorized(userAddress, {
         gasPrice,

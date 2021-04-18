@@ -109,44 +109,6 @@ const getTypedData = (data) => {
   }
 }
 
-export const createCollectibleMetaTx = async (
-  erc721Contract,
-  customERC721ContractAddress,
-  senderAddress,
-  tokenURI,
-  chainId,
-) => {
-  const nonce = await erc721Contract.getSenderNonce(customERC721ContractAddress, senderAddress)
-
-  const functionSignature = await erc721Contract.createCollectibleFuncSig(
-    customERC721ContractAddress,
-    tokenURI,
-  )
-  const dataToSign = getTypedData({
-    name: domainName,
-    version: domainVersion,
-    chainId,
-    verifyingContract: customERC721ContractAddress,
-    nonce: nonce,
-    from: senderAddress,
-    functionSignature: functionSignature,
-  })
-
-  const signature = await signTxData(senderAddress, dataToSign)
-
-  const { r, s, v } = getSignatureParameters(signature)
-
-  const metaTxData = {
-    to: customERC721ContractAddress,
-    userAddress: senderAddress,
-    apiId: biconomy_morpheusNftManagerDappApiId,
-    params: [senderAddress, functionSignature, r, s, v],
-  }
-
-  const txHash = await forwardMetaTx(metaTxData)
-  return txHash
-}
-
 export const setBiconomyEnv = (
   biconomyApiURL_,
   biconomyApiKey_,
@@ -159,4 +121,82 @@ export const setBiconomyEnv = (
   biconomy_morpheusNftManagerDappApiId = biconomy_morpheusNftManagerDappApiId_
   domainName = domainName_
   domainVersion = domainVersion_
+}
+
+// erc721Contract
+export const createCollectibleMetaTx = async (
+  erc721Contract,
+  erc721ContractAddress,
+  senderAddress,
+  chainId,
+  tokenURI,
+) => {
+  const nonce = await erc721Contract.getSenderNonce(erc721ContractAddress, senderAddress)
+
+  const functionSignature = await erc721Contract.createCollectibleFuncSig(
+    erc721ContractAddress,
+    tokenURI,
+  )
+  const dataToSign = getTypedData({
+    name: domainName,
+    version: domainVersion,
+    chainId,
+    verifyingContract: erc721ContractAddress,
+    nonce,
+    from: senderAddress,
+    functionSignature,
+  })
+
+  const signature = await signTxData(senderAddress, dataToSign)
+
+  const { r, s, v } = getSignatureParameters(signature)
+
+  const metaTxData = {
+    to: erc721ContractAddress,
+    userAddress: senderAddress,
+    apiId: biconomy_morpheusNftManagerDappApiId,
+    params: [senderAddress, functionSignature, r, s, v],
+  }
+
+  const txHash = await forwardMetaTx(metaTxData)
+  return txHash
+}
+
+// erc721Contract
+export const addAuthorizedMetaTx = async (
+  erc721Contract,
+  erc721ContractAddress,
+  senderAddress,
+  chainId,
+  userWalletAddress,
+) => {
+  const nonce = await erc721Contract.getSenderNonce(erc721ContractAddress, senderAddress)
+
+  const functionSignature = await erc721Contract.addAuthorizedFuncSig(
+    erc721ContractAddress,
+    userWalletAddress,
+  )
+  const dataToSign = getTypedData({
+    name: domainName,
+    version: domainVersion,
+    chainId,
+    verifyingContract: erc721ContractAddress,
+    nonce,
+    from: senderAddress,
+    functionSignature,
+  })
+
+  const signature = await signTxData(senderAddress, dataToSign)
+
+  const { r, s, v } = getSignatureParameters(signature)
+
+  const metaTxData = {
+    to: erc721ContractAddress,
+    userAddress: senderAddress,
+    apiId: biconomy_morpheusNftManagerDappApiId,
+    params: [senderAddress, functionSignature, r, s, v],
+  }
+
+  const txHash = await forwardMetaTx(metaTxData)
+  return txHash
 }
