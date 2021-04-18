@@ -111,4 +111,18 @@ export default class Erc721Contract {
       return null
     }
   }
+
+  async revokeAuthorized(data) {
+    const { contractAddress, userAddress, gasPrice } = data
+    try {
+      console.log('contractAddress:', contractAddress)
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.clearAuthorized(userAddress, {
+        gasPrice,
+      })
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
 }

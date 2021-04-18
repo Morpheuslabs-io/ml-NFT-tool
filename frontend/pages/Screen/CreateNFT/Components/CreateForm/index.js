@@ -56,6 +56,7 @@ class CreateForm extends React.PureComponent {
       selectedNftStandard: 'ERC721',
       isCreateCollection: true,
       isAddItem: false,
+      isAddAuthorized: false,
       nftColelctionName: '',
       nftColelctionSymbol: '',
       collectionAddressList: [],
@@ -138,6 +139,7 @@ class CreateForm extends React.PureComponent {
       {
         isCreateCollection: value === 'create_collection',
         isAddItem: value === 'create_item',
+        isAddAuthorized: value === 'add_authorized',
         imgLoading: false,
         imgBase64: null,
         nftOpResult: null,
@@ -217,6 +219,7 @@ class CreateForm extends React.PureComponent {
         address,
         isCreateCollection,
         isAddItem,
+        isAddAuthorized,
         networkID,
         selectedNftStandard,
         selectedCollection,
@@ -329,11 +332,20 @@ class CreateForm extends React.PureComponent {
             : null,
         })
       } else {
-        let result = await this.erc721Contract.addAuthorized({
-          contractAddress: selectedCollection,
-          userAddress: nftUserAddress,
-          gasPrice,
-        })
+        let result
+        if (isAddAuthorized) {
+          result = await this.erc721Contract.addAuthorized({
+            contractAddress: selectedCollection,
+            userAddress: nftUserAddress,
+            gasPrice,
+          })
+        } else {
+          result = await this.erc721Contract.revokeAuthorized({
+            contractAddress: selectedCollection,
+            userAddress: nftUserAddress,
+            gasPrice,
+          })
+        }
         console.log('result:', result)
         this.setState({
           loading: false,
