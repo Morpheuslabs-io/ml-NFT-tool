@@ -235,7 +235,7 @@ class CreateForm extends React.PureComponent {
   }
 
   addItem = async (nftCollectionAddress, nftItemDescription, nftItemName, nftItemExternalLink) => {
-    const { imgBase64, address, selectedNftStandard, selectedCollection } = this.state
+    const { imgBase64, address, selectedNftStandard, selectedCollection, networkID } = this.state
 
     // Upload image to IPFS
     let ipfsResult = await ipfs.add(Buffer(imgBase64))
@@ -280,6 +280,7 @@ class CreateForm extends React.PureComponent {
           selectedCollection,
           address,
           tokenURI,
+          networkID,
         )
       } else {
         result = await this.erc721Contract.createCollectible({

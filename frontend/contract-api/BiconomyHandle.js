@@ -1,6 +1,5 @@
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
-import web3Utils from 'web3-utils'
 
 axiosRetry(axios, { retries: 3 })
 
@@ -12,7 +11,6 @@ const BICONOMY_REGISTER = {
 
 const DOMAIN_NAME = 'morpheuslabs.io'
 const DOMAIN_VERSION = '1'
-const CHAIN_ID = 80001 // Matic testnet
 
 const forwardMetaTx = async (body) => {
   const { API_URL, API_KEY } = BICONOMY_REGISTER
@@ -121,6 +119,7 @@ export const createCollectibleMetaTx = async (
   customERC721ContractAddress,
   senderAddress,
   tokenURI,
+  chainId,
 ) => {
   const nonce = await erc721Contract.getSenderNonce(customERC721ContractAddress, senderAddress)
 
@@ -131,7 +130,7 @@ export const createCollectibleMetaTx = async (
   const dataToSign = getTypedData({
     name: DOMAIN_NAME,
     version: DOMAIN_VERSION,
-    chainId: CHAIN_ID,
+    chainId,
     verifyingContract: customERC721ContractAddress,
     nonce: nonce,
     from: senderAddress,
