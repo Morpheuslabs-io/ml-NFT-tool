@@ -9,18 +9,24 @@ contract MorpheusNftManagerInfo is Ownable {
     // One user address can create multiple NFT contract addresses
     mapping(address => address[]) public collectionList;
 
+    // One user address can add multiple NFT token items
+    mapping(address => string[]) public itemTxList;
+
     // Extend for itemList
     
-    function add(address userAddr_, address contractAddr_) public {
+    function addCollection(address userAddr_, address contractAddr_) public {
         collectionList[userAddr_].push(contractAddr_);
     }
 
-    function get(address userAddr_) public view returns (address[] memory) {
+    function getCollection(address userAddr_) public view returns (address[] memory) {
         return collectionList[userAddr_];
     }
 
-    function clear(address userAddr_) public onlyOwner {
-        address[] memory empty;
-        collectionList[userAddr_] = empty;
+    function addItemTx(address userAddr_, string memory txHash_) public {
+        itemTxList[userAddr_].push(txHash_);
+    }
+
+    function getItemTx(address userAddr_) public view returns (string[] memory) {
+        return itemTxList[userAddr_];
     }
 }

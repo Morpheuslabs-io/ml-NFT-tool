@@ -19,14 +19,14 @@ export default class Erc721InfoContract {
     return instance
   }
 
-  async add(data) {
+  async addCollection(data) {
     const { userAddr, contractAddr, gasPrice } = data
 
     try {
-      const result = await this.contractInstance.add(userAddr, contractAddr, {
+      const result = await this.contractInstance.addCollection(userAddr, contractAddr, {
         gasPrice,
       })
-      console.log('Erc721InfoContract.add - result:', result)
+      console.log('Erc721InfoContract.addCollection - result:', result)
       return result
     } catch (err) {
       console.log(err)
@@ -34,14 +34,14 @@ export default class Erc721InfoContract {
     }
   }
 
-  async get(data) {
+  async getCollection(data) {
     const { userAddr, gasPrice } = data
-    console.log('Erc721InfoContract.get - userAddr:', userAddr)
+    console.log('Erc721InfoContract.getCollection - userAddr:', userAddr)
     try {
-      const result = await this.contractInstance.get(userAddr, {
+      const result = await this.contractInstance.getCollection(userAddr, {
         gasPrice,
       })
-      console.log('Erc721InfoContract.get - result:', result)
+      console.log('Erc721InfoContract.getCollection - result:', result)
       return result
     } catch (err) {
       console.log(err)
