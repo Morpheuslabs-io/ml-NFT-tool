@@ -6,7 +6,8 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./EIP712MetaTransaction.sol";
 
-contract CustomERC721 is Ownable, ERC721URIStorage, EIP712MetaTransaction {
+// MorpheusNftManager
+contract MorpheusNftManager is Ownable, ERC721URIStorage, EIP712MetaTransaction {
     
     string private constant DOMAIN_NAME = "morpheuslabs.io";
     string private constant DOMAIN_VERSION = "1";
@@ -24,7 +25,7 @@ contract CustomERC721 is Ownable, ERC721URIStorage, EIP712MetaTransaction {
     modifier isAuthorized() {
         require(
             msgSender() == owner() || authorized[msgSender()] == true, 
-            "CustomERC721: unauthorized"
+            "MorpheusNftManager: unauthorized"
         );
         _;
     }

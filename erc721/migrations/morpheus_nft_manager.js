@@ -1,4 +1,4 @@
-const CustomERC721 = artifacts.require("CustomERC721");
+const MorpheusNftManager = artifacts.require("MorpheusNftManager");
 
 module.exports = function (deployer, network, accounts) {
   deployer.then(async () => {
@@ -34,11 +34,11 @@ module.exports = function (deployer, network, accounts) {
       from: deployerAccount,
     };
 
-    // Deploy CustomERC721
+    // Deploy MorpheusNftManager
     const name = "SOME_NAME";
     const symbol = "SOME_SYM";
-    const CustomERC721Contract = await deployer.deploy(
-      CustomERC721,
+    const MorpheusNftManagerContract = await deployer.deploy(
+      MorpheusNftManager,
       name,
       symbol,
       chainId,

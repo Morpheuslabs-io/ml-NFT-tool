@@ -1,4 +1,4 @@
-const CustomERC721Repo = artifacts.require("CustomERC721Repo");
+const MorpheusNftManagerInfo = artifacts.require("MorpheusNftManagerInfo");
 
 module.exports = function (deployer, network, accounts) {
   deployer.then(async () => {
@@ -34,9 +34,9 @@ module.exports = function (deployer, network, accounts) {
       from: deployerAccount,
     };
 
-    // Deploy CustomERC721Repo
-    const CustomERC721RepoContract = await deployer.deploy(
-      CustomERC721Repo,
+    // Deploy MorpheusNftManagerInfo
+    const MorpheusNftManagerInfoContract = await deployer.deploy(
+      MorpheusNftManagerInfo,
       opts
     );
   });
