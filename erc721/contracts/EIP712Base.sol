@@ -6,13 +6,13 @@ contract EIP712Base {
   struct EIP712Domain {
     string name;
     string version;
-    address verifyingContract;
     bytes32 salt;
+    address verifyingContract;
   }
 
   bytes32 internal constant EIP712_DOMAIN_TYPEHASH = keccak256(
     bytes(
-      "EIP712Domain(string name,string version,address verifyingContract,bytes32 salt)"
+      "EIP712Domain(string name,string version,bytes32 salt,address verifyingContract)"
     )
   );
 
@@ -24,8 +24,8 @@ contract EIP712Base {
         EIP712_DOMAIN_TYPEHASH,
         keccak256(bytes(name)),
         keccak256(bytes(version)),
-        address(this),
-        bytes32(chainId)
+        bytes32(chainId),
+        address(this)
       )
     );
   }

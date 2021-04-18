@@ -4,7 +4,6 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-// MorpheusNftManagerInfo
 contract MorpheusNftManagerInfo is Ownable {
     
     // One user address can create multiple NFT contract addresses

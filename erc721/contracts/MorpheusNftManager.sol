@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./EIP712MetaTransaction.sol";
 
-// MorpheusNftManager
 contract MorpheusNftManager is Ownable, ERC721URIStorage, EIP712MetaTransaction {
     
     string private constant DOMAIN_NAME = "morpheuslabs.io";

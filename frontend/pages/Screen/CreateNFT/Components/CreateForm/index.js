@@ -37,7 +37,7 @@ const networkName = {
   137: 'Matic Mainnet',
 }
 
-const erc721RepoContractAddress = process.env.REACT_APP_ERC721_REPO_CONTRACT_ADDRESS
+const erc721InfoContractAddress = process.env.REACT_APP_ERC721_INFO_CONTRACT_ADDRESS
 const erc721ContractGasless = process.env.REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS
 
 let gasPrice
@@ -89,7 +89,7 @@ class CreateForm extends React.PureComponent {
               this.erc1155Contract = new Erc1155Contract(defaultAddress)
               this.erc721InfoContract = new Erc721InfoContract(
                 defaultAddress,
-                erc721RepoContractAddress,
+                erc721InfoContractAddress,
               )
 
               let networkID = await ethereum.request({ method: 'eth_chainId' })

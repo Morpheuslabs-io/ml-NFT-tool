@@ -1,12 +1,13 @@
 import axios from 'axios'
 import axiosRetry from 'axios-retry'
+import web3Utils from 'web3-utils'
 
 axiosRetry(axios, { retries: 3 })
 
 const BICONOMY_REGISTER = {
   API_URL: 'https://api.biconomy.io/api/v2/meta-tx/native',
   API_KEY: '5JPFVRvIC.296e1370-db70-433d-8a12-080508ace510',
-  customERC721DappApiId: 'a03fbcb7-9e18-46ca-b78c-2d5627db18fb',
+  morpheusNftManagerDappApiId: '3607e293-db5f-4e5a-ad8c-553056d07aa2',
 }
 
 const DOMAIN_NAME = 'morpheuslabs.io'
@@ -77,12 +78,12 @@ const getTypedData = (data) => {
           type: 'string',
         },
         {
-          name: 'verifyingContract',
-          type: 'address',
-        },
-        {
           name: 'salt',
           type: 'bytes32',
+        },
+        {
+          name: 'verifyingContract',
+          type: 'address',
         },
       ],
       MetaTransaction: [
@@ -103,8 +104,8 @@ const getTypedData = (data) => {
     domain: {
       name,
       version,
+      salt: web3Utils.toHex(chainId), //'0x' + chainId.toString(16).padStart(64, '0'),
       verifyingContract,
-      salt: '0x' + chainId.toString(16).padStart(64, '0'),
     },
     primaryType: 'MetaTransaction',
     message: {
@@ -130,7 +131,7 @@ export const createCollectibleMetaTx = async (
   const dataToSign = getTypedData({
     name: DOMAIN_NAME,
     version: DOMAIN_VERSION,
-    chainId: CHAIN_ID, //'0x' + CHAIN_ID.toString(16).padStart(64, '0'),
+    chainId: CHAIN_ID,
     verifyingContract: customERC721ContractAddress,
     nonce: nonce,
     from: senderAddress,
@@ -144,7 +145,7 @@ export const createCollectibleMetaTx = async (
   const metaTxData = {
     to: customERC721ContractAddress,
     userAddress: senderAddress,
-    apiId: BICONOMY_REGISTER.customERC721DappApiId,
+    apiId: BICONOMY_REGISTER.morpheusNftManagerDappApiId,
     params: [senderAddress, functionSignature, r, s, v],
   }
 
