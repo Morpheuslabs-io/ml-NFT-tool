@@ -8,13 +8,11 @@ import Erc721Contract from 'contract-api/Erc721Contract'
 import Erc721RepoContract from 'contract-api/Erc721RepoContract'
 import { createCollectibleMetaTx } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
-import Web3Service from 'controller/Web3'
 import IPFS from 'ipfs-http-client'
 import axios from 'axios'
 import detectEthereumProvider from '@metamask/detect-provider'
 import web3Utils from 'web3-utils'
 import './style.scss'
-import { chain } from 'lodash'
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
 const IPFS_BASE_URL = 'https://ipfs.io/ipfs'
@@ -65,6 +63,10 @@ class CreateForm extends React.PureComponent {
     this.formRef = React.createRef()
   }
   componentDidMount() {
+    this.metamaskWeb3Handle()
+  }
+
+  metamaskWeb3Handle = () => {
     detectEthereumProvider()
       .then(async (provider) => {
         if (provider) {
@@ -132,9 +134,8 @@ class CreateForm extends React.PureComponent {
       .catch((err) => console.error(err))
   }
 
-  onCreateCollectionOrItemChange = (value) => {
+  onMainMenuChange = (value) => {
     const { address } = this.state
-    // value: create_collection or create_item
     this.setState(
       {
         isCreateCollection: value === 'create_collection',
@@ -149,11 +150,7 @@ class CreateForm extends React.PureComponent {
         selectedCollection: null,
       },
       async () => {
-        if (
-          value === 'create_item' ||
-          value === 'add_authorized' ||
-          value === 'revoke_authorized'
-        ) {
+        if (value !== 'create_collection') {
           if (!this.erc721RepoContract) {
             window.location.reload()
           }
@@ -198,6 +195,146 @@ class CreateForm extends React.PureComponent {
         })
     })
   }
+  createNewCollection = async (nftCollectionName, nftCollectionSymbol) => {
+    const { address, networkID, selectedNftStandard } = this.state
+
+    let result
+    if (selectedNftStandard === 'ERC721') {
+      result = await this.erc721Contract.create({
+        name: nftCollectionName,
+        symbol: nftCollectionSymbol,
+        chainId: networkID,
+        gasPrice,
+      })
+    } else {
+      result = await this.erc1155Contract.create({
+        name: nftCollectionName,
+        symbol: nftCollectionSymbol,
+        to: address,
+        tokenURI: nftItemImage,
+      })
+    }
+
+    // Add the newly-deployed NFT address
+    if (result && result.address) {
+      const tx = await this.erc721RepoContract.add({
+        userAddr: address,
+        contractAddr: result.address,
+        gasPrice,
+      })
+    }
+    this.setState({
+      loading: false,
+      nftOpResult: result
+        ? {
+            address: result.address,
+            tx: result.transactionHash,
+          }
+        : null,
+    })
+  }
+
+  addItem = async (nftCollectionAddress, nftItemDescription, nftItemName, nftItemExternalLink) => {
+    const { imgBase64, address, selectedNftStandard, selectedCollection } = this.state
+
+    // Upload image to IPFS
+    let ipfsResult = await ipfs.add(Buffer(imgBase64))
+    let ipfsHash = ipfsResult[0].hash
+    let external_url = nftItemExternalLink !== '' ? nftItemExternalLink : null
+    const image = `${IPFS_BASE_URL}/${ipfsHash}`
+    console.log('nftItemExternalLink:', nftItemExternalLink)
+
+    // This is only the content that the tokenURI returns
+    const tokenURIContent = JSON.stringify({
+      name: nftItemName,
+      description: nftItemDescription,
+      external_url,
+      image,
+    })
+
+    // Upload the entire JSON to get the tokenURI
+    ipfsResult = await ipfs.add(Buffer(tokenURIContent))
+    ipfsHash = ipfsResult[0].hash
+    const tokenURI = `${IPFS_BASE_URL}/${ipfsHash}`
+    console.log('tokenURI:', tokenURI)
+    ///////////
+
+    let result
+    if (selectedNftStandard === 'ERC721') {
+      const authorized = await this.erc721Contract.checkAuthorized(nftCollectionAddress, address)
+      if (!authorized) {
+        notification.open({
+          message: 'Unauthorized',
+          description: 'You are neither the owner nor authorized',
+        })
+        this.setState({
+          loading: false,
+          nftOpResult: null,
+        })
+        return
+      }
+
+      if (selectedCollection === erc721ContractGasless) {
+        result = await createCollectibleMetaTx(
+          this.erc721Contract,
+          selectedCollection,
+          address,
+          tokenURI,
+        )
+      } else {
+        result = await this.erc721Contract.createCollectible({
+          contractAddress: selectedCollection,
+          tokenURI,
+          gasPrice,
+        })
+      }
+    } else {
+      // result = await this.erc1155Contract.create({
+      //   name: nftCollectionName,
+      //   symbol: nftCollectionSymbol,
+      //   to: address,
+      //   tokenURI: nftItemImage,
+      // })
+    }
+    console.log('result:', result)
+    this.setState({
+      loading: false,
+      nftOpResult: result
+        ? {
+            tx: result,
+          }
+        : null,
+    })
+  }
+
+  addRevokeAuthorized = async (userWalletAddress) => {
+    const { isAddAuthorized, selectedCollection } = this.state
+
+    let result
+    if (isAddAuthorized) {
+      result = await this.erc721Contract.addAuthorized({
+        contractAddress: selectedCollection,
+        userAddress: userWalletAddress,
+        gasPrice,
+      })
+    } else {
+      result = await this.erc721Contract.revokeAuthorized({
+        contractAddress: selectedCollection,
+        userAddress: userWalletAddress,
+        gasPrice,
+      })
+    }
+    console.log('result:', result)
+    this.setState({
+      loading: false,
+      nftOpResult: result
+        ? {
+            tx: result,
+          }
+        : null,
+    })
+  }
+
   onFinish = async (values) => {
     const callbackOnFinish = async () => {
       this.setState({
@@ -205,157 +342,29 @@ class CreateForm extends React.PureComponent {
         nftOpResult: null,
       })
       const {
-        nftName,
-        nftSymbol,
+        nftCollectionName,
+        nftCollectionSymbol,
         nftCollectionAddress,
-        nftDescription,
+        nftItemDescription,
         nftItemName,
-        nftExternalLink,
-        nftImage,
-        nftUserAddress,
+        nftItemExternalLink,
+        nftItemImage,
+        userWalletAddress,
       } = values
-      const {
-        imgBase64,
-        address,
-        isCreateCollection,
-        isAddItem,
-        isAddAuthorized,
-        networkID,
-        selectedNftStandard,
-        selectedCollection,
-      } = this.state
+      const { isCreateCollection, isAddItem, isAddAuthorized } = this.state
 
       if (isCreateCollection) {
-        let result
-        if (selectedNftStandard === 'ERC721') {
-          result = await this.erc721Contract.create({
-            name: nftName,
-            symbol: nftSymbol,
-            chainId: networkID,
-            gasPrice,
-          })
-        } else {
-          result = await this.erc1155Contract.create({
-            name: nftName,
-            symbol: nftSymbol,
-            to: address,
-            tokenURI: nftImage,
-          })
-        }
-        if (result && result.address) {
-          const tx = await this.erc721RepoContract.add({
-            userAddr: address,
-            contractAddr: result.address,
-            gasPrice,
-          })
-        }
-        this.setState({
-          loading: false,
-          nftOpResult: result
-            ? {
-                address: result.address,
-                tx: result.transactionHash,
-              }
-            : null,
-        })
+        await this.createNewCollection(nftCollectionName, nftCollectionSymbol)
       } else if (isAddItem) {
-        // Upload to IPFS
-        let ipfsResult = await ipfs.add(Buffer(imgBase64))
-        let ipfsHash = ipfsResult[0].hash
-        let external_url = nftExternalLink !== '' ? nftExternalLink : null
-        const image = `${IPFS_BASE_URL}/${ipfsHash}`
-        console.log('nftExternalLink:', nftExternalLink)
-
-        // This is only the content that the tokenURI returns
-        const tokenURIContent = JSON.stringify({
-          name: nftItemName,
-          description: nftDescription,
-          external_url,
-          image,
-        })
-
-        // Upload the entire JSON to get the tokenURI
-        ipfsResult = await ipfs.add(Buffer(tokenURIContent))
-        ipfsHash = ipfsResult[0].hash
-        const tokenURI = `${IPFS_BASE_URL}/${ipfsHash}`
-        console.log('tokenURI:', tokenURI)
-        ///////////
-
-        let result
-        if (selectedNftStandard === 'ERC721') {
-          const authorized = await this.erc721Contract.checkAuthorized(
-            nftCollectionAddress,
-            address,
-          )
-          if (!authorized) {
-            notification.open({
-              message: 'Unauthorized',
-              description: 'You are neither the owner nor authorized',
-            })
-            this.setState({
-              loading: false,
-              nftOpResult: null,
-            })
-            return
-          }
-
-          if (selectedCollection === erc721ContractGasless) {
-            result = await createCollectibleMetaTx(
-              this.erc721Contract,
-              selectedCollection,
-              address,
-              tokenURI,
-            )
-          } else {
-            result = await this.erc721Contract.createCollectible({
-              contractAddress: selectedCollection,
-              tokenURI,
-              gasPrice,
-            })
-          }
-        } else {
-          // result = await this.erc1155Contract.create({
-          //   name: nftName,
-          //   symbol: nftSymbol,
-          //   to: address,
-          //   tokenURI: nftImage,
-          // })
-        }
-        console.log('result:', result)
-        this.setState({
-          loading: false,
-          nftOpResult: result
-            ? {
-                // address: result.address,
-                tx: result.tx || result,
-              }
-            : null,
-        })
+        await this.addItem(
+          nftCollectionAddress,
+          nftItemDescription,
+          nftItemName,
+          nftItemExternalLink,
+          nftItemImage,
+        )
       } else {
-        let result
-        if (isAddAuthorized) {
-          result = await this.erc721Contract.addAuthorized({
-            contractAddress: selectedCollection,
-            userAddress: nftUserAddress,
-            gasPrice,
-          })
-        } else {
-          result = await this.erc721Contract.revokeAuthorized({
-            contractAddress: selectedCollection,
-            userAddress: nftUserAddress,
-            gasPrice,
-          })
-        }
-        console.log('result:', result)
-        this.setState({
-          loading: false,
-          nftOpResult: result
-            ? {
-                // address: result.address,
-                tx: result.tx || result,
-              }
-            : null,
-        })
+        await this.addRevokeAuthorized(userWalletAddress)
       }
     }
     const isSigned = this.state.address !== null
@@ -501,10 +510,10 @@ class CreateForm extends React.PureComponent {
             initialValues={{
               numberOfIssuing: 1,
               remember: true,
-              nftDescription: '',
+              nftItemDescription: '',
               nftItemName: '',
-              nftUserAddress: '',
-              nftExternalLink: 'https://',
+              userWalletAddress: '',
+              nftItemExternalLink: 'https://',
               enableSend: true,
               ownerMessage: '',
               nftID: this.generateNumber(),
@@ -515,10 +524,7 @@ class CreateForm extends React.PureComponent {
             onFinish={this.onFinish}
           >
             <Form.Item>
-              <Select
-                defaultValue="create_collection"
-                onChange={this.onCreateCollectionOrItemChange}
-              >
+              <Select defaultValue="create_collection" onChange={this.onMainMenuChange}>
                 <Option value="create_collection">Create new collection</Option>
                 <Option value="create_item">Add item to an existing collection</Option>
                 <Option value="add_authorized">Authorize address to add item</Option>
@@ -555,7 +561,7 @@ class CreateForm extends React.PureComponent {
                 <Tooltip placement="bottomRight" title="NFT token name">
                   <Form.Item
                     label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
-                    name="nftName"
+                    name="nftCollectionName"
                     rules={[
                       {
                         required: true,
@@ -570,7 +576,7 @@ class CreateForm extends React.PureComponent {
                 <Tooltip placement="bottomRight" title="NFT token symbol">
                   <Form.Item
                     label={<div className="text text-bold text-color-4 text-size-3x">Symbol</div>}
-                    name="nftSymbol"
+                    name="nftCollectionSymbol"
                     rules={[
                       {
                         required: true,
@@ -677,7 +683,7 @@ class CreateForm extends React.PureComponent {
                             Item Description
                           </div>
                         }
-                        name="nftDescription"
+                        name="nftItemDescription"
                         rules={[
                           {
                             required: true,
@@ -696,7 +702,7 @@ class CreateForm extends React.PureComponent {
                             Item External Link
                           </div>
                         }
-                        name="nftExternalLink"
+                        name="nftItemExternalLink"
                         rules={[
                           {
                             required: false,
@@ -715,7 +721,7 @@ class CreateForm extends React.PureComponent {
                             {selectedNftStandard === 'ERC721' ? 'Item Image' : 'Base Metadata URI'}
                           </div>
                         }
-                        name="nftImage"
+                        name="nftItemImage"
                         rules={[
                           {
                             // required: true,
@@ -749,7 +755,7 @@ class CreateForm extends React.PureComponent {
                             User Wallet Address
                           </div>
                         }
-                        name="nftUserAddress"
+                        name="userWalletAddress"
                         rules={[
                           {
                             required: true,
