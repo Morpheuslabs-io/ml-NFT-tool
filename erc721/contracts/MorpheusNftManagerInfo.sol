@@ -3,16 +3,22 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "./EIP712MetaTransaction.sol";
 
-contract MorpheusNftManagerInfo is Ownable {
+contract MorpheusNftManagerInfo is Ownable, EIP712MetaTransaction {
     
+    string private constant DOMAIN_NAME = "morpheuslabs.io";
+    string private constant DOMAIN_VERSION = "1";
+
     // One user address can create multiple NFT contract addresses
     mapping(address => address[]) public collectionList;
 
     // One user address can add multiple NFT token items
     mapping(address => string[]) public itemTxList;
 
-    // Extend for itemList
+    constructor(uint256 chainId_) 
+        EIP712Base(DOMAIN_NAME, DOMAIN_VERSION, chainId_) {
+    }
     
     function addCollection(address userAddr_, address contractAddr_) public {
         collectionList[userAddr_].push(contractAddr_);

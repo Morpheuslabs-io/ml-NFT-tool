@@ -37,6 +37,7 @@ module.exports = function (deployer, network, accounts) {
     // Deploy MorpheusNftManagerInfo
     const MorpheusNftManagerInfoContract = await deployer.deploy(
       MorpheusNftManagerInfo,
+      Number(chainId),
       opts
     );
   });
