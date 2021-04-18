@@ -3,24 +3,19 @@ import axiosRetry from 'axios-retry'
 
 axiosRetry(axios, { retries: 3 })
 
-const BICONOMY_REGISTER = {
-  API_URL: 'https://api.biconomy.io/api/v2/meta-tx/native',
-  API_KEY: '5JPFVRvIC.296e1370-db70-433d-8a12-080508ace510',
-  morpheusNftManagerDappApiId: '0960ae9b-3ba2-434d-828e-916f7ebd9d56',
-}
-
-const DOMAIN_NAME = 'morpheuslabs.io'
-const DOMAIN_VERSION = '1'
+let biconomyApiURL
+let biconomyApiKey
+let biconomy_morpheusNftManagerDappApiId
+let domainName
+let domainVersion
 
 const forwardMetaTx = async (body) => {
-  const { API_URL, API_KEY } = BICONOMY_REGISTER
-
   return new Promise((resolve, reject) => {
     axios
-      .post(API_URL, JSON.stringify(body), {
+      .post(biconomyApiURL, JSON.stringify(body), {
         headers: {
           'Content-Type': 'application/json',
-          'x-api-key': API_KEY,
+          'x-api-key': biconomyApiKey,
         },
       })
       .then((res) => resolve(res.data.txHash))
@@ -128,8 +123,8 @@ export const createCollectibleMetaTx = async (
     tokenURI,
   )
   const dataToSign = getTypedData({
-    name: DOMAIN_NAME,
-    version: DOMAIN_VERSION,
+    name: domainName,
+    version: domainVersion,
     chainId,
     verifyingContract: customERC721ContractAddress,
     nonce: nonce,
@@ -144,10 +139,24 @@ export const createCollectibleMetaTx = async (
   const metaTxData = {
     to: customERC721ContractAddress,
     userAddress: senderAddress,
-    apiId: BICONOMY_REGISTER.morpheusNftManagerDappApiId,
+    apiId: biconomy_morpheusNftManagerDappApiId,
     params: [senderAddress, functionSignature, r, s, v],
   }
 
   const txHash = await forwardMetaTx(metaTxData)
   return txHash
+}
+
+export const setBiconomyEnv = (
+  biconomyApiURL_,
+  biconomyApiKey_,
+  biconomy_morpheusNftManagerDappApiId_,
+  domainName_,
+  domainVersion_,
+) => {
+  biconomyApiURL = biconomyApiURL_
+  biconomyApiKey = biconomyApiKey_
+  biconomy_morpheusNftManagerDappApiId = biconomy_morpheusNftManagerDappApiId_
+  domainName = domainName_
+  domainVersion = domainVersion_
 }

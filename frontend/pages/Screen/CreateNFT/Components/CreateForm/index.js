@@ -6,7 +6,7 @@ import ImgCrop from 'antd-img-crop'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
 import Erc721InfoContract from 'contract-api/Erc721InfoContract'
-import { createCollectibleMetaTx } from 'contract-api/BiconomyHandle'
+import { createCollectibleMetaTx, setBiconomyEnv } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import IPFS from 'ipfs-http-client'
 import axios from 'axios'
@@ -40,6 +40,14 @@ const networkName = {
 const erc721InfoContractAddress = process.env.REACT_APP_ERC721_INFO_CONTRACT_ADDRESS
 const erc721ContractGasless = process.env.REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS
 
+const biconomyApiURL = process.env.REACT_APP_BICONOMY_API_URL
+const biconomyApiKey = process.env.REACT_APP_BICONOMY_API_KEY
+const biconomy_morpheusNftManagerDappApiId =
+  process.env.REACT_APP_BICONOMY_morpheusNftManagerDappApiId
+
+const domainName = process.env.REACT_APP_DOMAIN_NAME
+const domainVersion = process.env.REACT_APP_DOMAIN_VERSION
+
 let gasPrice
 class CreateForm extends React.PureComponent {
   constructor(props) {
@@ -64,6 +72,14 @@ class CreateForm extends React.PureComponent {
   }
   componentDidMount() {
     this.metamaskWeb3Handle()
+
+    setBiconomyEnv(
+      biconomyApiURL,
+      biconomyApiKey,
+      biconomy_morpheusNftManagerDappApiId,
+      domainName,
+      domainVersion,
+    )
   }
 
   metamaskWeb3Handle = () => {
