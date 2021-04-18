@@ -5,7 +5,7 @@ import { Button, Form, Input, Tooltip, Spin, Alert, notification, Select, Upload
 import ImgCrop from 'antd-img-crop'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
-import Erc721RepoContract from 'contract-api/Erc721RepoContract'
+import Erc721InfoContract from 'contract-api/Erc721InfoContract'
 import { createCollectibleMetaTx } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import IPFS from 'ipfs-http-client'
@@ -87,7 +87,7 @@ class CreateForm extends React.PureComponent {
               console.log(`defaultAddress:${defaultAddress}`)
               this.erc721Contract = new Erc721Contract(defaultAddress)
               this.erc1155Contract = new Erc1155Contract(defaultAddress)
-              this.erc721RepoContract = new Erc721RepoContract(
+              this.erc721InfoContract = new Erc721InfoContract(
                 defaultAddress,
                 erc721RepoContractAddress,
               )
@@ -151,10 +151,10 @@ class CreateForm extends React.PureComponent {
       },
       async () => {
         if (value !== 'create_collection') {
-          if (!this.erc721RepoContract) {
+          if (!this.erc721InfoContract) {
             window.location.reload()
           }
-          let userCreatedContractList = await this.erc721RepoContract.get({
+          let userCreatedContractList = await this.erc721InfoContract.get({
             userAddr: address,
             gasPrice,
           })
@@ -217,7 +217,7 @@ class CreateForm extends React.PureComponent {
 
     // Add the newly-deployed NFT address
     if (result && result.address) {
-      const tx = await this.erc721RepoContract.add({
+      const tx = await this.erc721InfoContract.add({
         userAddr: address,
         contractAddr: result.address,
         gasPrice,
@@ -449,7 +449,7 @@ class CreateForm extends React.PureComponent {
   }
 
   getContractInfo = async (contractAddr) => {
-    if (!this.erc721Contract || !this.erc721RepoContract) {
+    if (!this.erc721Contract || !this.erc721InfoContract) {
       notification.open({
         message: 'Metamask is locked',
         description: 'Please click the Metamask to unlock it',

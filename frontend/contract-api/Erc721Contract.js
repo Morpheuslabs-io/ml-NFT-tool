@@ -1,4 +1,4 @@
-import Erc721ContractAbi from '../erc721/contracts/CustomERC721.json'
+import Erc721ContractAbi from '../erc721/contracts/MorpheusNftManager.json'
 import contract from '@truffle/contract'
 import Web3Service from '../controller/Web3'
 
