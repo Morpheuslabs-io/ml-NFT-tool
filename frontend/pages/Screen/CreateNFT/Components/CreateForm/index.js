@@ -127,12 +127,20 @@ class CreateForm extends React.PureComponent {
               console.log(`defaultAddress:${defaultAddress}`)
               this.erc721Contract = new Erc721Contract(defaultAddress)
               this.erc1155Contract = new Erc1155Contract(defaultAddress)
-              this.erc721InfoContract = new Erc721InfoContract(
-                defaultAddress,
-                erc721InfoContractAddress,
-              )
 
-              const contractGaslessOwner = await this.erc721Contract.owner(erc721ContractGasless)
+              if (erc721InfoContractAddress) {
+                this.erc721InfoContract = new Erc721InfoContract(
+                  defaultAddress,
+                  erc721InfoContractAddress,
+                )
+              } else {
+                this.erc721InfoContract = null
+              }
+
+              let contractGaslessOwner = null
+              if (erc721ContractGasless) {
+                contractGaslessOwner = await this.erc721Contract.owner(erc721ContractGasless)
+              }
 
               let networkID = await ethereum.request({ method: 'eth_chainId' })
               networkID = web3Utils.hexToNumber(networkID)
@@ -141,8 +149,9 @@ class CreateForm extends React.PureComponent {
                 networkID,
                 address: defaultAddress,
                 isOwner:
+                  contractGaslessOwner &&
                   web3Utils.toChecksumAddress(contractGaslessOwner) ===
-                  web3Utils.toChecksumAddress(defaultAddress),
+                    web3Utils.toChecksumAddress(defaultAddress),
               })
               const gasPriceGwei = await this.queryGasPrice(networkID)
               gasPrice = gasPriceGwei * Math.pow(10, 9)
