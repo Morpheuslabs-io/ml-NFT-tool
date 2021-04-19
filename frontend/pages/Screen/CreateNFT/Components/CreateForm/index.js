@@ -68,8 +68,10 @@ class CreateForm extends React.PureComponent {
       collectionAddressList: [],
       selectedCollection: null,
       isOwner: false,
+      isAuthorizedForAddItem: false,
     }
     this.formRef = React.createRef()
+    this.clr = null
   }
   componentDidMount() {
     this.metamaskWeb3Handle()
@@ -81,6 +83,10 @@ class CreateForm extends React.PureComponent {
       domainName,
       domainVersion,
     )
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.clr)
   }
 
   metamaskWeb3Handle = () => {
@@ -95,6 +101,13 @@ class CreateForm extends React.PureComponent {
           } else {
             const accounts = await ethereum.request({ method: 'eth_accounts' })
             if (accounts.length === 0) {
+              this.clr = setInterval(async () => {
+                const accounts = await ethereum.request({ method: 'eth_accounts' })
+                if (accounts.length !== 0) {
+                  clearInterval(this.clr)
+                  window.location.reload()
+                }
+              }, 1000)
               return notification.open({
                 message: 'Metamask is locked',
                 description: 'Please click the Metamask to unlock it',
@@ -173,6 +186,7 @@ class CreateForm extends React.PureComponent {
         nftColelctionSymbol: '',
         collectionAddressList: [],
         selectedCollection: null,
+        isAuthorizedForAddItem: false,
       },
       async () => {
         if (value !== 'create_collection') {
@@ -437,6 +451,7 @@ class CreateForm extends React.PureComponent {
           nftColelctionName: '',
           nftColelctionSymbol: '',
           nftOpResult: null,
+          isAuthorizedForAddItem: false,
         },
         () => {
           this.getContractInfo(e)
@@ -484,6 +499,11 @@ class CreateForm extends React.PureComponent {
     }
     const retrievedNftName = await this.erc721Contract.name(contractAddr)
     const retrievedNftSymbol = await this.erc721Contract.symbol(contractAddr)
+    const isAuthorizedForAddItem = await this.erc721Contract.checkAuthorized(
+      contractAddr,
+      this.state.address,
+    )
+    console.log('isAuthorizedForAddItem:', isAuthorizedForAddItem)
     if (!retrievedNftName || !retrievedNftSymbol) {
       notification.open({
         message: 'Collection address not found',
@@ -497,6 +517,7 @@ class CreateForm extends React.PureComponent {
     this.setState({
       nftColelctionName: retrievedNftName,
       nftColelctionSymbol: retrievedNftSymbol,
+      isAuthorizedForAddItem,
     })
   }
 
@@ -514,11 +535,14 @@ class CreateForm extends React.PureComponent {
       selectedCollection,
       isAddItem,
       isOwner,
+      isAuthorizedForAddItem,
     } = this.state
     const layout = {
       labelCol: { span: 13 },
       wrapperCol: { span: 11 },
     }
+
+    console.log('isAuthorizedForAddItem:', isAuthorizedForAddItem)
 
     return (
       <div className="create-form-container">
@@ -622,7 +646,7 @@ class CreateForm extends React.PureComponent {
             ) : (
               <>
                 <Tooltip
-                  placement="bottomRight"
+                  // placement="bottomLeft"
                   title="This is the NFT token address after creating new collection"
                 >
                   <Form.Item
@@ -690,93 +714,106 @@ class CreateForm extends React.PureComponent {
                   </Form.Item>
                 </Tooltip>
                 {isAddItem ? (
-                  <>
-                    <Tooltip placement="bottomRight" title="NFT token item name">
-                      <Form.Item
-                        label={
-                          <div className="text text-bold text-color-4 text-size-3x">Item Name</div>
-                        }
-                        name="nftItemName"
-                        rules={[
-                          {
-                            required: true,
-                            message: 'NFT token item name is required',
-                          },
-                        ]}
-                      >
-                        <Input />
-                      </Form.Item>
-                    </Tooltip>
-                    <Tooltip placement="bottomRight" title="NFT token item description">
-                      <Form.Item
-                        label={
-                          <div className="text text-bold text-color-4 text-size-3x">
-                            Item Description
-                          </div>
-                        }
-                        name="nftItemDescription"
-                        rules={[
-                          {
-                            required: true,
-                            message: 'NFT token item description is required',
-                          },
-                        ]}
-                      >
-                        <Input />
-                      </Form.Item>
-                    </Tooltip>
+                  isAuthorizedForAddItem === true ? (
+                    <>
+                      <Tooltip placement="bottomRight" title="NFT token item name">
+                        <Form.Item
+                          label={
+                            <div className="text text-bold text-color-4 text-size-3x">
+                              Item Name
+                            </div>
+                          }
+                          name="nftItemName"
+                          rules={[
+                            {
+                              required: true,
+                              message: 'NFT token item name is required',
+                            },
+                          ]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Tooltip>
+                      <Tooltip placement="bottomRight" title="NFT token item description">
+                        <Form.Item
+                          label={
+                            <div className="text text-bold text-color-4 text-size-3x">
+                              Item Description
+                            </div>
+                          }
+                          name="nftItemDescription"
+                          rules={[
+                            {
+                              required: true,
+                              message: 'NFT token item description is required',
+                            },
+                          ]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Tooltip>
 
-                    <Tooltip placement="bottomRight" title="External link to the NFT token item">
-                      <Form.Item
-                        label={
-                          <div className="text text-bold text-color-4 text-size-3x">
-                            Item External Link
-                          </div>
-                        }
-                        name="nftItemExternalLink"
-                        rules={[
-                          {
-                            required: false,
-                            message: 'NFT token item external link is required',
-                          },
-                        ]}
-                      >
-                        <Input />
-                      </Form.Item>
-                    </Tooltip>
+                      <Tooltip placement="bottomRight" title="External link to the NFT token item">
+                        <Form.Item
+                          label={
+                            <div className="text text-bold text-color-4 text-size-3x">
+                              Item External Link
+                            </div>
+                          }
+                          name="nftItemExternalLink"
+                          rules={[
+                            {
+                              required: false,
+                              message: 'NFT token item external link is required',
+                            },
+                          ]}
+                        >
+                          <Input />
+                        </Form.Item>
+                      </Tooltip>
 
-                    <Tooltip placement="bottomRight" title="NFT token item image">
-                      <Form.Item
-                        label={
-                          <div className="text text-bold text-color-4 text-size-3x">
-                            {selectedNftStandard === 'ERC721' ? 'Item Image' : 'Base Metadata URI'}
-                          </div>
-                        }
-                        name="nftItemImage"
-                        rules={[
-                          {
-                            // required: true,
-                            // message: 'NFT link is required',
-                          },
-                        ]}
-                      >
-                        <ImgCrop rotate>
-                          <Upload
-                            name="avatar"
-                            listType="picture-card"
-                            className="avatar-uploader"
-                            onChange={this.handleChange}
-                            onPreview={this.onPreview}
-                            onRemove={() => {
-                              this.setState({ imgBase64: null })
-                            }}
-                          >
-                            {!imgBase64 && '+ Upload'}
-                          </Upload>
-                        </ImgCrop>
-                      </Form.Item>
-                    </Tooltip>
-                  </>
+                      <Tooltip placement="bottomRight" title="NFT token item image">
+                        <Form.Item
+                          label={
+                            <div className="text text-bold text-color-4 text-size-3x">
+                              {selectedNftStandard === 'ERC721'
+                                ? 'Item Image'
+                                : 'Base Metadata URI'}
+                            </div>
+                          }
+                          name="nftItemImage"
+                          rules={[
+                            {
+                              // required: true,
+                              // message: 'NFT link is required',
+                            },
+                          ]}
+                        >
+                          <ImgCrop rotate>
+                            <Upload
+                              name="avatar"
+                              listType="picture-card"
+                              className="avatar-uploader"
+                              onChange={this.handleChange}
+                              onPreview={this.onPreview}
+                              onRemove={() => {
+                                this.setState({ imgBase64: null })
+                              }}
+                            >
+                              {!imgBase64 && '+ Upload'}
+                            </Upload>
+                          </ImgCrop>
+                        </Form.Item>
+                      </Tooltip>
+                    </>
+                  ) : (
+                    <div
+                      className="text text-bold text-color-4 text-size-3x"
+                      style={{ color: 'red' }}
+                    >
+                      Please request for authorization to add item
+                    </div>
+                  )
                 ) : (
                   <>
                     <Tooltip placement="bottomRight" title="User wallet address to be authorized">

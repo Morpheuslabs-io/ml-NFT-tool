@@ -65,8 +65,9 @@ export default class Erc721Contract {
   async checkAuthorized(contractAddress, checkAddress) {
     try {
       const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.checkAuthorized(checkAddress)
-      return true
+      const result = await contractInstance.checkAuthorized(checkAddress)
+      console.log('checkAuthorized - checkAddress:', checkAddress, ', result:', result)
+      return result
     } catch (err) {
       console.log(err)
       return false
