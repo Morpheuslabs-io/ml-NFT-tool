@@ -11,6 +11,7 @@ import {
   setBiconomyEnv,
   addCollectionMetaTx,
   reqAuthMetaTx,
+  addAuthorizedBatchMetaTx,
 } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import IPFS from 'ipfs-http-client'
@@ -73,6 +74,7 @@ class CreateForm extends React.PureComponent {
       nftCollectionName: '',
       nftCollectionSymbol: '',
       collectionAddressList: [],
+      userAuthReqList: [],
       selectedCollection: null,
       isOwner: false,
       isAuthorizedForAddItem: false,
@@ -197,7 +199,21 @@ class CreateForm extends React.PureComponent {
         isAuthorizedForAddItem: false,
       },
       async () => {
-        if (value !== 'create_collection') {
+        if (value === 'add_authorized' || value === 'revoke_authorized') {
+          if (!this.erc721InfoContract) {
+            window.location.reload()
+          }
+          let userAuthReqList = await this.erc721InfoContract.getAuthReqList({
+            gasPrice,
+          })
+          if (!userAuthReqList) {
+            window.location.reload()
+          }
+
+          this.setState({
+            userAuthReqList,
+          })
+        } else if (value !== 'create_collection') {
           if (!this.erc721InfoContract) {
             window.location.reload()
           }
@@ -405,9 +421,11 @@ class CreateForm extends React.PureComponent {
       const {
         isMenuCreateCollection,
         isMenuAddItem,
+        isMenuAddAuthorized,
         isAuthorizedForAddItem,
         address,
         networkID,
+        userAuthReqList,
       } = this.state
 
       if (isMenuCreateCollection) {
@@ -441,7 +459,26 @@ class CreateForm extends React.PureComponent {
           })
         }
       } else {
-        await this.addRevokeAuthorized(userWalletAddress)
+        if (isMenuAddAuthorized) {
+          const result = await addAuthorizedBatchMetaTx(
+            this.erc721Contract,
+            erc721ContractGasless,
+            address,
+            networkID,
+            userAuthReqList,
+          )
+
+          console.log('result:', result)
+          this.setState({
+            loading: false,
+            nftOpResult: result
+              ? {
+                  tx: result,
+                }
+              : null,
+          })
+        } else {
+        }
       }
     }
     const isSigned = this.state.address !== null
@@ -614,10 +651,12 @@ class CreateForm extends React.PureComponent {
       loading,
       imgBase64,
       isMenuCreateCollection,
+      isMenuAddAuthorized,
       selectedCollection,
       isMenuAddItem,
       isOwner,
       isAuthorizedForAddItem,
+      userAuthReqList,
     } = this.state
     const layout = {
       labelCol: { span: 13 },
@@ -725,74 +764,78 @@ class CreateForm extends React.PureComponent {
               </>
             ) : (
               <>
-                <Tooltip
-                  // placement="bottomLeft"
-                  title="This is the NFT token address after creating new collection"
-                >
-                  <Form.Item
-                    label={
-                      <div className="text text-bold text-color-4 text-size-3x">
-                        Collection Address
-                      </div>
-                    }
-                    name="nftCollectionAddress"
-                    rules={[
-                      {
-                        required: true,
-                        message: 'NFT token address is required',
-                      },
-                    ]}
-                  >
-                    {/* <Input onBlur={(e) => this.onBlur(e)} /> */}
-                    <Select
-                      defaultValue={erc721ContractGasless}
-                      onChange={this.onCollectionAddressListChange}
+                {!isMenuAddAuthorized && (
+                  <>
+                    <Tooltip
+                      // placement="bottomLeft"
+                      title="This is the NFT token address after creating new collection"
                     >
-                      {collectionAddressList.map((entry, idx) => {
-                        return (
-                          <Option key={idx} value={entry}>
-                            {entry === erc721ContractGasless ? `${entry} (gasless)` : entry}
-                          </Option>
-                        )
-                      })}
-                    </Select>
-                  </Form.Item>
-                </Tooltip>
-                <Tooltip placement="bottomRight" title="This is the NFT token name">
-                  <Form.Item
-                    label={
-                      <div className="text text-bold text-color-4 text-size-3x">
-                        Collection Name
-                      </div>
-                    }
-                    name=""
-                    rules={[
-                      {
-                        required: false,
-                      },
-                    ]}
-                  >
-                    <Input placeholder={nftCollectionName} disabled={true} />
-                  </Form.Item>
-                </Tooltip>
+                      <Form.Item
+                        label={
+                          <div className="text text-bold text-color-4 text-size-3x">
+                            Collection Address
+                          </div>
+                        }
+                        name="nftCollectionAddress"
+                        rules={[
+                          {
+                            required: true,
+                            message: 'NFT token address is required',
+                          },
+                        ]}
+                      >
+                        {/* <Input onBlur={(e) => this.onBlur(e)} /> */}
+                        <Select
+                          defaultValue={erc721ContractGasless}
+                          onChange={this.onCollectionAddressListChange}
+                        >
+                          {collectionAddressList.map((entry, idx) => {
+                            return (
+                              <Option key={idx} value={entry}>
+                                {entry === erc721ContractGasless ? `${entry} (gasless)` : entry}
+                              </Option>
+                            )
+                          })}
+                        </Select>
+                      </Form.Item>
+                    </Tooltip>
+                    <Tooltip placement="bottomRight" title="This is the NFT token name">
+                      <Form.Item
+                        label={
+                          <div className="text text-bold text-color-4 text-size-3x">
+                            Collection Name
+                          </div>
+                        }
+                        name=""
+                        rules={[
+                          {
+                            required: false,
+                          },
+                        ]}
+                      >
+                        <Input placeholder={nftCollectionName} disabled={true} />
+                      </Form.Item>
+                    </Tooltip>
 
-                <Tooltip placement="bottomRight" title="This is the NFT token symbol">
-                  <Form.Item
-                    label={
-                      <div className="text text-bold text-color-4 text-size-3x">
-                        Collection Symbol
-                      </div>
-                    }
-                    name=""
-                    rules={[
-                      {
-                        required: false,
-                      },
-                    ]}
-                  >
-                    <Input placeholder={nftCollectionSymbol} disabled={true} />
-                  </Form.Item>
-                </Tooltip>
+                    <Tooltip placement="bottomRight" title="This is the NFT token symbol">
+                      <Form.Item
+                        label={
+                          <div className="text text-bold text-color-4 text-size-3x">
+                            Collection Symbol
+                          </div>
+                        }
+                        name=""
+                        rules={[
+                          {
+                            required: false,
+                          },
+                        ]}
+                      >
+                        <Input placeholder={nftCollectionSymbol} disabled={true} />
+                      </Form.Item>
+                    </Tooltip>
+                  </>
+                )}
                 {isMenuAddItem ? (
                   isAuthorizedForAddItem === true ? (
                     <>
@@ -897,23 +940,35 @@ class CreateForm extends React.PureComponent {
                     )
                   )
                 ) : (
+                  // authorize address to add item
                   <>
-                    <Tooltip placement="bottomRight" title="User wallet address to be authorized">
+                    <Tooltip
+                      // placement="bottomLeft"
+                      title="User address list waiting for authorization"
+                    >
                       <Form.Item
                         label={
                           <div className="text text-bold text-color-4 text-size-3x">
-                            User Wallet Address
+                            User Address List
                           </div>
                         }
-                        name="userWalletAddress"
+                        name="userAuthReqList"
                         rules={[
                           {
                             required: true,
-                            message: 'User wallet address is required',
+                            message: 'User address list is required',
                           },
                         ]}
                       >
-                        <Input />
+                        <Select>
+                          {userAuthReqList.map((entry, idx) => {
+                            return (
+                              <Option key={idx} value={entry}>
+                                {entry}
+                              </Option>
+                            )
+                          })}
+                        </Select>
                       </Form.Item>
                     </Tooltip>
                   </>
