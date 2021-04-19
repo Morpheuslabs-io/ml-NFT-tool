@@ -48,6 +48,12 @@ contract MorpheusNftManager is Ownable, ERC721URIStorage, EIP712MetaTransaction 
         authorized[auth] = true;
     }
 
+    function addAuthorizedBatch(address[] memory authList) public isOwner {
+        for (uint256 i = 0; i < authList.length; i++) {
+            addAuthorized(authList[i]);
+        }
+    }
+
     function clearAuthorized(address auth) public isOwner {
         authorized[auth] = false;
     }
