@@ -10,6 +10,7 @@ import {
   createCollectibleMetaTx,
   setBiconomyEnv,
   addCollectionMetaTx,
+  reqAuthMetaTx,
 } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import IPFS from 'ipfs-http-client'
@@ -401,18 +402,44 @@ class CreateForm extends React.PureComponent {
         nftItemImage,
         userWalletAddress,
       } = values
-      const { isMenuCreateCollection, isMenuAddItem, isAuthorizedForAddItem } = this.state
+      const {
+        isMenuCreateCollection,
+        isMenuAddItem,
+        isAuthorizedForAddItem,
+        address,
+        networkID,
+      } = this.state
 
       if (isMenuCreateCollection) {
         await this.createNewCollection(nftCollectionName, nftCollectionSymbol)
       } else if (isMenuAddItem) {
-        await this.addItem(
-          nftCollectionAddress,
-          nftItemDescription,
-          nftItemName,
-          nftItemExternalLink,
-          nftItemImage,
-        )
+        if (isAuthorizedForAddItem) {
+          await this.addItem(
+            nftCollectionAddress,
+            nftItemDescription,
+            nftItemName,
+            nftItemExternalLink,
+            nftItemImage,
+          )
+        } else {
+          const result = await reqAuthMetaTx(
+            this.erc721InfoContract,
+            erc721InfoContractAddress,
+            address,
+            networkID,
+            address,
+          )
+
+          console.log('result:', result)
+          this.setState({
+            loading: false,
+            nftOpResult: result
+              ? {
+                  tx: result,
+                }
+              : null,
+          })
+        }
       } else {
         await this.addRevokeAuthorized(userWalletAddress)
       }
@@ -551,6 +578,27 @@ class CreateForm extends React.PureComponent {
       } else {
         // add/revoke authorized
         return 'Submit'
+      }
+    }
+  }
+
+  getButtonStatusLabel = () => {
+    const { isMenuCreateCollection, isMenuAddItem, isAuthorizedForAddItem } = this.state
+
+    isMenuCreateCollection ? 'NFT Token is being launched' : 'Collection item is being created'
+
+    if (isMenuCreateCollection) {
+      return 'NFT Token is being launched'
+    } else {
+      if (isMenuAddItem) {
+        if (isAuthorizedForAddItem) {
+          return 'Collection item is being added'
+        } else {
+          return 'In progress'
+        }
+      } else {
+        // add/revoke authorized
+        return 'In progress'
       }
     }
   }
@@ -903,11 +951,7 @@ class CreateForm extends React.PureComponent {
               <br />
               {loading && (
                 <Alert
-                  message={
-                    isMenuCreateCollection
-                      ? 'NFT Token is being launched'
-                      : 'Collection item is being created'
-                  }
+                  message={this.getButtonStatusLabel()}
                   description="Please wait!"
                   type="info"
                 />
