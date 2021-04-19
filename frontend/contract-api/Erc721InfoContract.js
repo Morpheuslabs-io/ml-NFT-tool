@@ -19,11 +19,12 @@ export default class Erc721InfoContract {
     return instance
   }
 
+  // Collection
   async addCollection(data) {
-    const { userAddr, contractAddr, gasPrice } = data
+    const { userAddr, collectionContractAddr, gasPrice } = data
 
     try {
-      const result = await this.contractInstance.addCollection(userAddr, contractAddr, {
+      const result = await this.contractInstance.addCollection(userAddr, collectionContractAddr, {
         gasPrice,
       })
       console.log('Erc721InfoContract.addCollection - result:', result)
@@ -47,7 +48,9 @@ export default class Erc721InfoContract {
       return null
     }
   }
+  ///////////////////////
 
+  // Item
   async addItemTx(data) {
     const { userAddr, txHash, gasPrice } = data
 
@@ -76,4 +79,83 @@ export default class Erc721InfoContract {
       return null
     }
   }
+  ///////////////////////
+
+  // Auth
+  async reqAuth(data) {
+    const { userAddr, gasPrice } = data
+
+    try {
+      const result = await this.contractInstance.reqAuth(userAddr, {
+        gasPrice,
+      })
+      console.log('Erc721InfoContract.reqAuth - result:', result)
+      return result
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async getAuthReqList(data) {
+    const { gasPrice } = data
+    try {
+      const result = await this.contractInstance.getAuthReqList({
+        gasPrice,
+      })
+      console.log('Erc721InfoContract.getAuthReqList - result:', result)
+      return result
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async clearAuthReqList(data) {
+    const { gasPrice } = data
+
+    try {
+      const result = await this.contractInstance.clearAuthReqList({
+        gasPrice,
+      })
+      console.log('Erc721InfoContract.clearAuthReqList - result:', result)
+      return result
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  ////////// Meta-Tx ////////////////////////////////////
+  async getSenderNonce(contractAddress, senderAddress) {
+    try {
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.getNonce(senderAddress)
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async addCollectionFuncSig(contractAddress, userAddr, collectionContractAddr) {
+    const contractInstance = new this.web3.eth.Contract(Erc721InfoContractAbi.abi, contractAddress)
+    return contractInstance.methods.addCollection(userAddr, collectionContractAddr).encodeABI()
+  }
+
+  async addItemTxFuncSig(contractAddress, userAddr, txHash) {
+    const contractInstance = new this.web3.eth.Contract(Erc721InfoContractAbi.abi, contractAddress)
+    return contractInstance.methods.addItemTx(userAddr, txHash).encodeABI()
+  }
+
+  async reqAuthFuncSig(contractAddress, userAddr) {
+    const contractInstance = new this.web3.eth.Contract(Erc721InfoContractAbi.abi, contractAddress)
+    return contractInstance.methods.reqAuth(userAddr).encodeABI()
+  }
+
+  async clearAuthReqListFuncSig(contractAddress) {
+    const contractInstance = new this.web3.eth.Contract(Erc721InfoContractAbi.abi, contractAddress)
+    return contractInstance.methods.clearAuthReqList().encodeABI()
+  }
+
+  //////////////////////////////////////////////
 }

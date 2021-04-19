@@ -74,26 +74,6 @@ export default class Erc721Contract {
     }
   }
 
-  async getSenderNonce(contractAddress, senderAddress) {
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.getNonce(senderAddress)
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
-
-  async createCollectibleFuncSig(contractAddress, tokenURI) {
-    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
-    return contractInstance.methods.createCollectible(tokenURI).encodeABI()
-  }
-
-  async addAuthorizedFuncSig(contractAddress, userWalletAddress) {
-    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
-    return contractInstance.methods.addAuthorized(userWalletAddress).encodeABI()
-  }
-
   async createCollectible(data) {
     const { contractAddress, tokenURI, gasPrice } = data
     try {
@@ -132,4 +112,32 @@ export default class Erc721Contract {
       return null
     }
   }
+
+  ////////// Meta-Tx ////////////////////////////////////
+  async getSenderNonce(contractAddress, senderAddress) {
+    try {
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.getNonce(senderAddress)
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async createCollectibleFuncSig(contractAddress, tokenURI) {
+    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
+    return contractInstance.methods.createCollectible(tokenURI).encodeABI()
+  }
+
+  async addAuthorizedFuncSig(contractAddress, userWalletAddress) {
+    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
+    return contractInstance.methods.addAuthorized(userWalletAddress).encodeABI()
+  }
+
+  async addAuthorizedBatchFuncSig(contractAddress, userWalletAddressList) {
+    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
+    return contractInstance.methods.addAuthorizedBatch(userWalletAddressList).encodeABI()
+  }
+
+  //////////////////////////////////////////////
 }

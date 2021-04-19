@@ -6,7 +6,11 @@ import ImgCrop from 'antd-img-crop'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
 import Erc721InfoContract from 'contract-api/Erc721InfoContract'
-import { createCollectibleMetaTx, setBiconomyEnv } from 'contract-api/BiconomyHandle'
+import {
+  createCollectibleMetaTx,
+  setBiconomyEnv,
+  addCollectionMetaTx,
+} from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import IPFS from 'ipfs-http-client'
 import axios from 'axios'
@@ -44,6 +48,8 @@ const biconomyApiURL = process.env.REACT_APP_BICONOMY_API_URL
 const biconomyApiKey = process.env.REACT_APP_BICONOMY_API_KEY
 const biconomy_morpheusNftManagerDappApiId =
   process.env.REACT_APP_BICONOMY_morpheusNftManagerDappApiId
+const biconomy_morpheusNftManagerInfoDappApiId =
+  process.env.REACT_APP_BICONOMY_morpheusNftManagerInfoDappApiId
 
 const domainName = process.env.REACT_APP_DOMAIN_NAME
 const domainVersion = process.env.REACT_APP_DOMAIN_VERSION
@@ -60,11 +66,11 @@ class CreateForm extends React.PureComponent {
       networkID: null,
       address: null,
       selectedNftStandard: 'ERC721',
-      isCreateCollection: true,
-      isAddItem: false,
-      isAddAuthorized: false,
-      nftColelctionName: '',
-      nftColelctionSymbol: '',
+      isMenuCreateCollection: true,
+      isMenuAddItem: false,
+      isMenuAddAuthorized: false,
+      nftCollectionName: '',
+      nftCollectionSymbol: '',
       collectionAddressList: [],
       selectedCollection: null,
       isOwner: false,
@@ -80,6 +86,7 @@ class CreateForm extends React.PureComponent {
       biconomyApiURL,
       biconomyApiKey,
       biconomy_morpheusNftManagerDappApiId,
+      biconomy_morpheusNftManagerInfoDappApiId,
       domainName,
       domainVersion,
     )
@@ -176,14 +183,14 @@ class CreateForm extends React.PureComponent {
     const { address } = this.state
     this.setState(
       {
-        isCreateCollection: value === 'create_collection',
-        isAddItem: value === 'create_item',
-        isAddAuthorized: value === 'add_authorized',
+        isMenuCreateCollection: value === 'create_collection',
+        isMenuAddItem: value === 'create_item',
+        isMenuAddAuthorized: value === 'add_authorized',
         imgLoading: false,
         imgBase64: null,
         nftOpResult: null,
-        nftColelctionName: '',
-        nftColelctionSymbol: '',
+        nftCollectionName: '',
+        nftCollectionSymbol: '',
         collectionAddressList: [],
         selectedCollection: null,
         isAuthorizedForAddItem: false,
@@ -256,11 +263,14 @@ class CreateForm extends React.PureComponent {
 
     // Add the newly-deployed NFT address
     if (result && result.address) {
-      const tx = await this.erc721InfoContract.addCollection({
-        userAddr: address,
-        contractAddr: result.address,
-        gasPrice,
-      })
+      const tx = await addCollectionMetaTx(
+        this.erc721InfoContract,
+        erc721InfoContractAddress,
+        address,
+        networkID,
+        address,
+        result.address,
+      )
     }
     this.setState({
       loading: false,
@@ -348,10 +358,10 @@ class CreateForm extends React.PureComponent {
   }
 
   addRevokeAuthorized = async (userWalletAddress) => {
-    const { isAddAuthorized, selectedCollection } = this.state
+    const { isMenuAddAuthorized, selectedCollection } = this.state
 
     let result
-    if (isAddAuthorized) {
+    if (isMenuAddAuthorized) {
       result = await this.erc721Contract.addAuthorized({
         contractAddress: selectedCollection,
         userAddress: userWalletAddress,
@@ -391,11 +401,11 @@ class CreateForm extends React.PureComponent {
         nftItemImage,
         userWalletAddress,
       } = values
-      const { isCreateCollection, isAddItem, isAddAuthorized } = this.state
+      const { isMenuCreateCollection, isMenuAddItem, isAuthorizedForAddItem } = this.state
 
-      if (isCreateCollection) {
+      if (isMenuCreateCollection) {
         await this.createNewCollection(nftCollectionName, nftCollectionSymbol)
-      } else if (isAddItem) {
+      } else if (isMenuAddItem) {
         await this.addItem(
           nftCollectionAddress,
           nftItemDescription,
@@ -448,8 +458,8 @@ class CreateForm extends React.PureComponent {
       this.setState(
         {
           selectedCollection: e,
-          nftColelctionName: '',
-          nftColelctionSymbol: '',
+          nftCollectionName: '',
+          nftCollectionSymbol: '',
           nftOpResult: null,
           isAuthorizedForAddItem: false,
         },
@@ -503,7 +513,7 @@ class CreateForm extends React.PureComponent {
       contractAddr,
       this.state.address,
     )
-    console.log('isAuthorizedForAddItem:', isAuthorizedForAddItem)
+
     if (!retrievedNftName || !retrievedNftSymbol) {
       notification.open({
         message: 'Collection address not found',
@@ -511,14 +521,38 @@ class CreateForm extends React.PureComponent {
           networkName[this.state.networkID] || '...'
         }`,
       })
-      this.setState({ nftColelctionName: null, nftColelctionName: null })
+      this.setState({ nftCollectionName: null, nftCollectionName: null })
       return
     }
     this.setState({
-      nftColelctionName: retrievedNftName,
-      nftColelctionSymbol: retrievedNftSymbol,
+      nftCollectionName: retrievedNftName,
+      nftCollectionSymbol: retrievedNftSymbol,
       isAuthorizedForAddItem,
     })
+  }
+
+  getButtonLabel = () => {
+    const {
+      isMenuCreateCollection,
+      isMenuAddItem,
+      selectedCollection,
+      isAuthorizedForAddItem,
+    } = this.state
+
+    if (isMenuCreateCollection) {
+      return 'Create Collection'
+    } else {
+      if (isMenuAddItem) {
+        if (isAuthorizedForAddItem) {
+          return selectedCollection === erc721ContractGasless ? 'Add Item (gasless)' : 'Add Item'
+        } else {
+          return 'Submit'
+        }
+      } else {
+        // add/revoke authorized
+        return 'Submit'
+      }
+    }
   }
 
   render() {
@@ -526,14 +560,14 @@ class CreateForm extends React.PureComponent {
       nftOpResult,
       networkID,
       selectedNftStandard,
-      nftColelctionName,
-      nftColelctionSymbol,
+      nftCollectionName,
+      nftCollectionSymbol,
       collectionAddressList,
       loading,
       imgBase64,
-      isCreateCollection,
+      isMenuCreateCollection,
       selectedCollection,
-      isAddItem,
+      isMenuAddItem,
       isOwner,
       isAuthorizedForAddItem,
     } = this.state
@@ -541,8 +575,6 @@ class CreateForm extends React.PureComponent {
       labelCol: { span: 13 },
       wrapperCol: { span: 11 },
     }
-
-    console.log('isAuthorizedForAddItem:', isAuthorizedForAddItem)
 
     return (
       <div className="create-form-container">
@@ -611,7 +643,7 @@ class CreateForm extends React.PureComponent {
               Your {selectedNftStandard} Token
             </Tag> */}
 
-            {isCreateCollection ? (
+            {isMenuCreateCollection ? (
               <>
                 <Tooltip placement="bottomRight" title="NFT token name">
                   <Form.Item
@@ -692,7 +724,7 @@ class CreateForm extends React.PureComponent {
                       },
                     ]}
                   >
-                    <Input placeholder={nftColelctionName} disabled={true} />
+                    <Input placeholder={nftCollectionName} disabled={true} />
                   </Form.Item>
                 </Tooltip>
 
@@ -710,10 +742,10 @@ class CreateForm extends React.PureComponent {
                       },
                     ]}
                   >
-                    <Input placeholder={nftColelctionSymbol} disabled={true} />
+                    <Input placeholder={nftCollectionSymbol} disabled={true} />
                   </Form.Item>
                 </Tooltip>
-                {isAddItem ? (
+                {isMenuAddItem ? (
                   isAuthorizedForAddItem === true ? (
                     <>
                       <Tooltip placement="bottomRight" title="NFT token item name">
@@ -807,12 +839,14 @@ class CreateForm extends React.PureComponent {
                       </Tooltip>
                     </>
                   ) : (
-                    <div
-                      className="text text-bold text-color-4 text-size-3x"
-                      style={{ color: 'red' }}
-                    >
-                      Please request for authorization to add item
-                    </div>
+                    nftCollectionName !== '' && (
+                      <div
+                        className="text text-bold text-color-4 text-size-3x"
+                        style={{ color: 'red' }}
+                      >
+                        Please click button Submit below to request for authorization to add item
+                      </div>
+                    )
                   )
                 ) : (
                   <>
@@ -864,25 +898,13 @@ class CreateForm extends React.PureComponent {
 
             <Form.Item xs={24} md={24}>
               <Button type="primary" htmlType="submit" className="ant-big-btn" disabled={loading}>
-                {loading ? (
-                  <Spin />
-                ) : (
-                  `${
-                    isCreateCollection
-                      ? 'Create Collection'
-                      : isAddItem
-                      ? selectedCollection === erc721ContractGasless
-                        ? 'Add Item (gasless)'
-                        : 'Add Item'
-                      : 'Submit'
-                  }`
-                )}
+                {loading ? <Spin /> : this.getButtonLabel()}
               </Button>
               <br />
               {loading && (
                 <Alert
                   message={
-                    isCreateCollection
+                    isMenuCreateCollection
                       ? 'NFT Token is being launched'
                       : 'Collection item is being created'
                   }
@@ -893,7 +915,7 @@ class CreateForm extends React.PureComponent {
             </Form.Item>
             {!loading && nftOpResult !== null && (
               <div style={{ justifyContent: 'center' }}>
-                {isCreateCollection ? (
+                {isMenuCreateCollection ? (
                   <a
                     href={`${explorerLink[networkID]}/address/${nftOpResult.address}`}
                     target="_blank"
