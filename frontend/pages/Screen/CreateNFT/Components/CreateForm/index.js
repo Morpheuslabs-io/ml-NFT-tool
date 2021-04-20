@@ -1,7 +1,22 @@
 import React from 'react'
 import { withRouter } from 'next/router'
 import { connect } from 'react-redux'
-import { Button, Form, Input, Tooltip, Spin, Alert, notification, Select, Upload, Tag } from 'antd'
+import {
+  Button,
+  Form,
+  Input,
+  Tooltip,
+  Spin,
+  Alert,
+  notification,
+  Select,
+  Upload,
+  Tag,
+  Menu,
+  Dropdown,
+  Icon,
+} from 'antd'
+import { DownOutlined } from '@ant-design/icons'
 import ImgCrop from 'antd-img-crop'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
@@ -10,6 +25,7 @@ import {
   createCollectibleMetaTx,
   setBiconomyEnv,
   addCollectionMetaTx,
+  addItemTxMetaTx,
   reqAuthMetaTx,
   addAuthorizedBatchMetaTx,
   clearAuthReqListMetaTx,
@@ -79,6 +95,7 @@ class CreateForm extends React.PureComponent {
       selectedCollection: null,
       isOwner: false,
       isAuthorizedForAddItem: false,
+      itemTxList: [],
     }
     this.formRef = React.createRef()
     this.clr = null
@@ -239,6 +256,7 @@ class CreateForm extends React.PureComponent {
             if (!userCreatedContractList.includes(erc721ContractGasless)) {
               userCreatedContractList = [erc721ContractGasless, ...userCreatedContractList]
             }
+            await this.getItemTxList()
           }
 
           this.setState({
@@ -358,12 +376,14 @@ class CreateForm extends React.PureComponent {
           networkID,
           tokenURI,
         )
+        console.log('createCollectibleMetaTx:', result)
       } else {
         result = await this.erc721Contract.createCollectible({
           contractAddress: selectedCollection,
           tokenURI,
           gasPrice,
         })
+        console.log('createCollectible:', result)
       }
     } else {
       // result = await this.erc1155Contract.create({
@@ -373,14 +393,38 @@ class CreateForm extends React.PureComponent {
       //   tokenURI: nftItemImage,
       // })
     }
-    console.log('result:', result)
+
+    const tx = await addItemTxMetaTx(
+      this.erc721InfoContract,
+      erc721InfoContractAddress,
+      address,
+      networkID,
+      address,
+      result,
+    )
+
+    this.setState(
+      {
+        loading: false,
+        nftOpResult: result
+          ? {
+              tx: result,
+            }
+          : null,
+      },
+      this.getItemTxList(),
+    )
+  }
+
+  getItemTxList = async () => {
+    const { address, networkID } = this.state
+    const itemTxList = await this.erc721InfoContract.getItemTx({
+      userAddr: address,
+      gasPrice,
+    })
+
     this.setState({
-      loading: false,
-      nftOpResult: result
-        ? {
-            tx: result,
-          }
-        : null,
+      itemTxList,
     })
   }
 
@@ -664,6 +708,25 @@ class CreateForm extends React.PureComponent {
     }
   }
 
+  menu = () => {
+    const { itemTxList, networkID } = this.state
+    return (
+      <Menu>
+        {itemTxList.map((txHash, idx) => (
+          <Menu.Item>
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              href={`${explorerLink[networkID]}/tx/${txHash}`}
+            >
+              {txHash}
+            </a>
+          </Menu.Item>
+        ))}
+      </Menu>
+    )
+  }
+
   render() {
     const {
       nftOpResult,
@@ -681,6 +744,7 @@ class CreateForm extends React.PureComponent {
       isOwner,
       isAuthorizedForAddItem,
       userAuthReqList,
+      itemTxList,
     } = this.state
     const layout = {
       labelCol: { span: 13 },
@@ -792,6 +856,32 @@ class CreateForm extends React.PureComponent {
                   <>
                     <Tooltip
                       // placement="bottomLeft"
+                      title="Transaction history of adding items"
+                    >
+                      {/* <Form.Item
+                        label={
+                          <div className="text text-bold text-color-4 text-size-3x">
+                            Transaction History
+                          </div>
+                        }
+                        name="itemTxList"
+                        rules={[
+                          {
+                            required: false,
+                            message: '',
+                          },
+                        ]}
+                      > */}
+                      <Dropdown overlay={this.menu}>
+                        <a className="ant-dropdown-link" href="#">
+                          Transaction History <DownOutlined />
+                        </a>
+                      </Dropdown>
+                      {/* </Form.Item> */}
+                    </Tooltip>
+                    <div style={{ marginBottom: '40px' }} />
+                    <Tooltip
+                      // placement="bottomLeft"
                       title="This is the NFT token address after creating new collection"
                     >
                       <Form.Item
@@ -808,7 +898,6 @@ class CreateForm extends React.PureComponent {
                           },
                         ]}
                       >
-                        {/* <Input onBlur={(e) => this.onBlur(e)} /> */}
                         <Select
                           defaultValue={erc721ContractGasless}
                           onChange={this.onCollectionAddressListChange}

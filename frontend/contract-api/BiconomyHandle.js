@@ -312,3 +312,31 @@ export const clearAuthReqListMetaTx = async (
   )
   return txHash
 }
+
+// erc721ContractInfo
+export const addItemTxMetaTx = async (
+  erc721ContractInfo,
+  erc721ContractInfoAddress,
+  senderAddress,
+  chainId,
+  userAddr,
+  addItemTxHash,
+) => {
+  const nonce = await erc721ContractInfo.getSenderNonce(erc721ContractInfoAddress, senderAddress)
+
+  const functionSignature = await erc721ContractInfo.addItemTxFuncSig(
+    erc721ContractInfoAddress,
+    userAddr,
+    addItemTxHash,
+  )
+
+  const txHash = await biconomyWrapper(
+    erc721ContractInfoAddress,
+    senderAddress,
+    chainId,
+    nonce,
+    functionSignature,
+    true,
+  )
+  return txHash
+}
