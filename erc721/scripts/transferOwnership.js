@@ -6,7 +6,7 @@ const MorpheusNftManagerInfo_Address =
 
 const MorpheusNftManager_Address = "0x8c7a476D48CFd339480dd323e6Afa1F7C7cE4c49";
 
-const newOwnerAddress = "0xA7fc2009cc8B36997Ef533deC396d6B4B00760E4";
+const newOwnerAddress = "0x32Ddbb3164E988C6661B09aAdc75992ce3f36fFD";
 
 module.exports = async function () {
   // MorpheusNftManagerInfo

@@ -12,6 +12,7 @@ import {
   addCollectionMetaTx,
   reqAuthMetaTx,
   addAuthorizedBatchMetaTx,
+  clearAuthReqListMetaTx,
 } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import IPFS from 'ipfs-http-client'
@@ -469,7 +470,7 @@ class CreateForm extends React.PureComponent {
         }
       } else {
         if (isMenuAddAuthorized) {
-          const result = await addAuthorizedBatchMetaTx(
+          let result = await addAuthorizedBatchMetaTx(
             this.erc721Contract,
             erc721ContractGasless,
             address,
@@ -477,7 +478,16 @@ class CreateForm extends React.PureComponent {
             userAuthReqList,
           )
 
-          console.log('result:', result)
+          console.log('addAuthorizedBatchMetaTx - result:', result)
+
+          result = await clearAuthReqListMetaTx(
+            this.erc721InfoContract,
+            erc721InfoContractAddress,
+            address,
+            networkID,
+          )
+          console.log('clearAuthReqListMetaTx - result:', result)
+
           this.setState({
             loading: false,
             nftOpResult: result
@@ -964,7 +974,7 @@ class CreateForm extends React.PureComponent {
                         name="userAuthReqList"
                         rules={[
                           {
-                            required: true,
+                            required: false,
                             message: 'User address list is required',
                           },
                         ]}
