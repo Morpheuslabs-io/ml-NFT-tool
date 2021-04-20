@@ -412,7 +412,7 @@ class CreateForm extends React.PureComponent {
             }
           : null,
       },
-      this.getItemTxList(),
+      () => this.getItemTxList(),
     )
   }
 
@@ -689,8 +689,6 @@ class CreateForm extends React.PureComponent {
 
   getButtonStatusLabel = () => {
     const { isMenuCreateCollection, isMenuAddItem, isAuthorizedForAddItem } = this.state
-
-    isMenuCreateCollection ? 'NFT Token is being launched' : 'Collection item is being created'
 
     if (isMenuCreateCollection) {
       return 'NFT Token is being launched'
@@ -1116,7 +1114,7 @@ class CreateForm extends React.PureComponent {
               <Button type="primary" htmlType="submit" className="ant-big-btn" disabled={loading}>
                 {loading ? <Spin /> : this.getButtonLabel()}
               </Button>
-              <br />
+              <div style={{ marginBottom: '5px' }} />
               {loading && (
                 <Alert
                   message={this.getButtonStatusLabel()}
