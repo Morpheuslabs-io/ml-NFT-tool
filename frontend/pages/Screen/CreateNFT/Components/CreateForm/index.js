@@ -507,7 +507,12 @@ class CreateForm extends React.PureComponent {
         description: 'Please click the Metamask to unlock it',
       })
     } else {
-      callbackOnFinish()
+      callbackOnFinish().catch(() => {
+        this.setState({
+          loading: false,
+          nftOpResult: null,
+        })
+      })
     }
   }
   generateNumber = (min = 1, max = 10000) => {
