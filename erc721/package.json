@@ -29,7 +29,9 @@
     "deploy-mainnet": "npx truffle migrate --reset --network mainnet",
     "deploy-ganache": "npx truffle migrate --reset --network development",
     "deploy-matictestnet": "npx truffle migrate --reset --network matictestnet",
-    "deploy-maticmainnet": "npx truffle migrate --reset --network maticmainnet"
+    "deploy-maticmainnet": "npx truffle migrate --reset --network maticmainnet",
+    "transfer-ownership-matictestnet": "npx truffle exec ./scripts/transferOwnership.js --network matictestnet",
+    "transfer-ownership-maticmainnet": "npx truffle exec ./scripts/transferOwnership.js --network maticmainnet"
   },
   "author": "",
   "license": "ISC"
