@@ -139,5 +139,10 @@ export default class Erc721Contract {
     return contractInstance.methods.addAuthorizedBatch(userWalletAddressList).encodeABI()
   }
 
+  async revokeAuthorizedFuncSig(contractAddress, userWalletAddress) {
+    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
+    return contractInstance.methods.clearAuthorized(userWalletAddress).encodeABI()
+  }
+
   //////////////////////////////////////////////
 }

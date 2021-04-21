@@ -29,6 +29,7 @@ import {
   reqAuthMetaTx,
   addAuthorizedBatchMetaTx,
   clearAuthReqListMetaTx,
+  revokeAuthorizedMetaTx,
 } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import IPFS from 'ipfs-http-client'
@@ -458,11 +459,13 @@ class CreateForm extends React.PureComponent {
         nftItemName,
         nftItemExternalLink,
         nftItemImage,
+        revokeUserAddress,
       } = values
       const {
         isMenuCreateCollection,
         isMenuAddItem,
         isMenuAddAuthorized,
+        isMenuRevokeAuthorized,
         isAuthorizedForAddItem,
         address,
         networkID,
@@ -500,8 +503,9 @@ class CreateForm extends React.PureComponent {
           })
         }
       } else {
-        if (isMenuAddAuthorized) {
-          let result = await addAuthorizedBatchMetaTx(
+        let result
+        if (!isMenuRevokeAuthorized) {
+          result = await addAuthorizedBatchMetaTx(
             this.erc721Contract,
             erc721ContractGasless,
             address,
@@ -518,17 +522,26 @@ class CreateForm extends React.PureComponent {
             networkID,
           )
           console.log('clearAuthReqListMetaTx - result:', result)
-
-          this.setState({
-            loading: false,
-            nftOpResult: result
-              ? {
-                  tx: result,
-                }
-              : null,
-          })
         } else {
+          result = await revokeAuthorizedMetaTx(
+            this.erc721Contract,
+            erc721ContractGasless,
+            address,
+            networkID,
+            revokeUserAddress,
+          )
+
+          console.log('revokeAuthorizedMetaTx - result:', result)
         }
+
+        this.setState({
+          loading: false,
+          nftOpResult: result
+            ? {
+                tx: result,
+              }
+            : null,
+        })
       }
     }
     const isSigned = this.state.address !== null

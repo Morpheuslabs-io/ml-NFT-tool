@@ -233,6 +233,30 @@ export const addAuthorizedBatchMetaTx = async (
   return txHash
 }
 
+// erc721Contract
+export const revokeAuthorizedMetaTx = async (
+  erc721Contract,
+  erc721ContractAddress,
+  senderAddress,
+  chainId,
+  userWalletAddress,
+) => {
+  const nonce = await erc721Contract.getSenderNonce(erc721ContractAddress, senderAddress)
+
+  const functionSignature = await erc721Contract.revokeAuthorizedFuncSig(
+    erc721ContractAddress,
+    userWalletAddress,
+  )
+  const txHash = await biconomyWrapper(
+    erc721ContractAddress,
+    senderAddress,
+    chainId,
+    nonce,
+    functionSignature,
+  )
+  return txHash
+}
+
 /////////////////////////////////
 
 // erc721ContractInfo
