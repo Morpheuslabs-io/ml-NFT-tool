@@ -88,6 +88,7 @@ class CreateForm extends React.PureComponent {
       isMenuCreateCollection: true,
       isMenuAddItem: false,
       isMenuAddAuthorized: false,
+      isMenuTransferItem: false,
       nftCollectionName: '',
       nftCollectionSymbol: '',
       collectionAddressList: [],
@@ -215,7 +216,9 @@ class CreateForm extends React.PureComponent {
       {
         isMenuCreateCollection: value === 'create_collection',
         isMenuAddItem: value === 'create_item',
-        isMenuAddAuthorized: value === 'add_authorized',
+        isMenuAddAuthorized: value === 'add_authorized' || value === 'revoke_authorized',
+        isMenuRevokeAuthorized: value === 'revoke_authorized',
+        isMenuTransferItem: value === 'transfer_item',
         imgLoading: false,
         imgBase64: null,
         nftOpResult: null,
@@ -226,7 +229,9 @@ class CreateForm extends React.PureComponent {
         isAuthorizedForAddItem: false,
       },
       async () => {
-        if (value === 'add_authorized' || value === 'revoke_authorized') {
+        if (value === 'transfer_item') {
+          await this.getItemTxList()
+        } else if (value === 'add_authorized' || value === 'revoke_authorized') {
           if (!this.erc721InfoContract) {
             window.location.reload()
           }
@@ -272,7 +277,7 @@ class CreateForm extends React.PureComponent {
     const gasStationURL = isMatic
       ? 'https://gasstation-mainnet.matic.network'
       : 'https://ethgasstation.info/json/ethgasAPI.json'
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       axios
         .get(gasStationURL)
         .then((res) => {
@@ -281,7 +286,7 @@ class CreateForm extends React.PureComponent {
           console.log(`queryGasPrice: ${gasPrice} GWei (isMatic: ${isMatic})`)
           resolve(gasPrice)
         })
-        .catch((err) => {
+        .catch(() => {
           resolve(DEFAULT_GAS_PRICE)
         })
     })
@@ -308,14 +313,6 @@ class CreateForm extends React.PureComponent {
 
     // Add the newly-deployed NFT address
     if (result && result.address) {
-      const tx = await addCollectionMetaTx(
-        this.erc721InfoContract,
-        erc721InfoContractAddress,
-        address,
-        networkID,
-        address,
-        result.address,
-      )
     }
     this.setState({
       loading: false,
@@ -394,15 +391,6 @@ class CreateForm extends React.PureComponent {
       // })
     }
 
-    const tx = await addItemTxMetaTx(
-      this.erc721InfoContract,
-      erc721InfoContractAddress,
-      address,
-      networkID,
-      address,
-      result,
-    )
-
     this.setState(
       {
         loading: false,
@@ -417,7 +405,7 @@ class CreateForm extends React.PureComponent {
   }
 
   getItemTxList = async () => {
-    const { address, networkID } = this.state
+    const { address } = this.state
     const itemTxList = await this.erc721InfoContract.getItemTx({
       userAddr: address,
       gasPrice,
@@ -470,7 +458,6 @@ class CreateForm extends React.PureComponent {
         nftItemName,
         nftItemExternalLink,
         nftItemImage,
-        userWalletAddress,
       } = values
       const {
         isMenuCreateCollection,
@@ -710,7 +697,7 @@ class CreateForm extends React.PureComponent {
     const { itemTxList, networkID } = this.state
     return (
       <Menu>
-        {itemTxList.map((txHash, idx) => (
+        {itemTxList.map((txHash) => (
           <Menu.Item>
             <a
               target="_blank"
@@ -725,24 +712,274 @@ class CreateForm extends React.PureComponent {
     )
   }
 
+  renderMenuCreateCollection = () => {
+    return (
+      <>
+        <Tooltip placement="bottomRight" title="NFT token name">
+          <Form.Item
+            label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
+            name="nftCollectionName"
+            rules={[
+              {
+                required: true,
+                message: 'NFT token name is required',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Tooltip>
+
+        <Tooltip placement="bottomRight" title="NFT token symbol">
+          <Form.Item
+            label={<div className="text text-bold text-color-4 text-size-3x">Symbol</div>}
+            name="nftCollectionSymbol"
+            rules={[
+              {
+                required: true,
+                message: 'NFT token symbol is required',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Tooltip>
+      </>
+    )
+  }
+
+  renderNotMenuAddAuthorized = () => {
+    const { nftCollectionName, nftCollectionSymbol, collectionAddressList } = this.state
+
+    return (
+      <>
+        <Tooltip
+          // placement="bottomLeft"
+          title="Transaction history of adding items"
+        >
+          <Dropdown overlay={this.menu}>
+            <a className="ant-dropdown-link" href="#">
+              Transaction History <DownOutlined />
+            </a>
+          </Dropdown>
+          {/* </Form.Item> */}
+        </Tooltip>
+        <div style={{ marginBottom: '40px' }} />
+        <Tooltip
+          // placement="bottomLeft"
+          title="This is the NFT token address after creating new collection"
+        >
+          <Form.Item
+            label={
+              <div className="text text-bold text-color-4 text-size-3x">Collection Address</div>
+            }
+            name="nftCollectionAddress"
+            rules={[
+              {
+                required: true,
+                message: 'NFT token address is required',
+              },
+            ]}
+          >
+            <Select
+              defaultValue={erc721ContractGasless}
+              onChange={this.onCollectionAddressListChange}
+            >
+              {collectionAddressList.map((entry, idx) => {
+                return (
+                  <Option key={idx} value={entry}>
+                    {entry === erc721ContractGasless ? `${entry} (gasless)` : entry}
+                  </Option>
+                )
+              })}
+            </Select>
+          </Form.Item>
+        </Tooltip>
+        <Tooltip placement="bottomRight" title="This is the NFT token name">
+          <Form.Item
+            label={<div className="text text-bold text-color-4 text-size-3x">Collection Name</div>}
+            name=""
+            rules={[
+              {
+                required: false,
+              },
+            ]}
+          >
+            <Input placeholder={nftCollectionName} disabled={true} />
+          </Form.Item>
+        </Tooltip>
+
+        <Tooltip placement="bottomRight" title="This is the NFT token symbol">
+          <Form.Item
+            label={
+              <div className="text text-bold text-color-4 text-size-3x">Collection Symbol</div>
+            }
+            name=""
+            rules={[
+              {
+                required: false,
+              },
+            ]}
+          >
+            <Input placeholder={nftCollectionSymbol} disabled={true} />
+          </Form.Item>
+        </Tooltip>
+      </>
+    )
+  }
+
+  renderMenuAddItemAndIsAuthorized = () => {
+    const { selectedNftStandard, imgBase64 } = this.state
+
+    return (
+      <>
+        <Tooltip placement="bottomRight" title="NFT token item name">
+          <Form.Item
+            label={<div className="text text-bold text-color-4 text-size-3x">Item Name</div>}
+            name="nftItemName"
+            rules={[
+              {
+                required: true,
+                message: 'NFT token item name is required',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Tooltip>
+        <Tooltip placement="bottomRight" title="NFT token item description">
+          <Form.Item
+            label={<div className="text text-bold text-color-4 text-size-3x">Item Description</div>}
+            name="nftItemDescription"
+            rules={[
+              {
+                required: true,
+                message: 'NFT token item description is required',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Tooltip>
+
+        <Tooltip placement="bottomRight" title="External link to the NFT token item">
+          <Form.Item
+            label={
+              <div className="text text-bold text-color-4 text-size-3x">Item External Link</div>
+            }
+            name="nftItemExternalLink"
+            rules={[
+              {
+                required: false,
+                message: 'NFT token item external link is required',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Tooltip>
+
+        <Tooltip placement="bottomRight" title="NFT token item image">
+          <Form.Item
+            label={
+              <div className="text text-bold text-color-4 text-size-3x">
+                {selectedNftStandard === 'ERC721' ? 'Item Image' : 'Base Metadata URI'}
+              </div>
+            }
+            name="nftItemImage"
+            rules={[
+              {
+                // required: true,
+                // message: 'NFT link is required',
+              },
+            ]}
+          >
+            <ImgCrop rotate>
+              <Upload
+                name="avatar"
+                listType="picture-card"
+                className="avatar-uploader"
+                onChange={this.handleChange}
+                onPreview={this.onPreview}
+                onRemove={() => {
+                  this.setState({ imgBase64: null })
+                }}
+              >
+                {!imgBase64 && '+ Upload'}
+              </Upload>
+            </ImgCrop>
+          </Form.Item>
+        </Tooltip>
+      </>
+    )
+  }
+
+  renderMenuAddRevokeAuthorized = () => {
+    const { userAuthReqList, isMenuAddAuthorized, isMenuRevokeAuthorized } = this.state
+
+    if (!isMenuRevokeAuthorized) {
+      return (
+        <>
+          <Tooltip
+            // placement="bottomLeft"
+            title="User address list waiting for authorization"
+          >
+            <Form.Item
+              label={
+                <div className="text text-bold text-color-4 text-size-3x">User Address List</div>
+              }
+              name="userAuthReqList"
+              rules={[
+                {
+                  required: false,
+                  message: 'User address list is required',
+                },
+              ]}
+            >
+              <Select>
+                {userAuthReqList.map((entry, idx) => {
+                  return (
+                    <Option key={idx} value={entry}>
+                      {entry}
+                    </Option>
+                  )
+                })}
+              </Select>
+            </Form.Item>
+          </Tooltip>
+        </>
+      )
+    } else {
+      return (
+        <Tooltip placement="bottomRight" title="User address to be revoked">
+          <Form.Item
+            label={<div className="text text-bold text-color-4 text-size-3x">User Address</div>}
+            name="revokeUserAddress"
+            rules={[
+              {
+                required: true,
+                message: 'User address is required',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Tooltip>
+      )
+    }
+  }
+
   render() {
     const {
       nftOpResult,
       networkID,
-      selectedNftStandard,
       nftCollectionName,
-      nftCollectionSymbol,
-      collectionAddressList,
       loading,
-      imgBase64,
       isMenuCreateCollection,
       isMenuAddAuthorized,
-      selectedCollection,
       isMenuAddItem,
       isOwner,
       isAuthorizedForAddItem,
-      userAuthReqList,
-      itemTxList,
     } = this.state
     const layout = {
       labelCol: { span: 13 },
@@ -812,303 +1049,26 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            {/* <Tag color="blue" style={{ fontSize: '16px' }}>
-              Your {selectedNftStandard} Token
-            </Tag> */}
-
             {isMenuCreateCollection ? (
-              <>
-                <Tooltip placement="bottomRight" title="NFT token name">
-                  <Form.Item
-                    label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
-                    name="nftCollectionName"
-                    rules={[
-                      {
-                        required: true,
-                        message: 'NFT token name is required',
-                      },
-                    ]}
-                  >
-                    <Input />
-                  </Form.Item>
-                </Tooltip>
-
-                <Tooltip placement="bottomRight" title="NFT token symbol">
-                  <Form.Item
-                    label={<div className="text text-bold text-color-4 text-size-3x">Symbol</div>}
-                    name="nftCollectionSymbol"
-                    rules={[
-                      {
-                        required: true,
-                        message: 'NFT token symbol is required',
-                      },
-                    ]}
-                  >
-                    <Input />
-                  </Form.Item>
-                </Tooltip>
-              </>
+              this.renderMenuCreateCollection()
             ) : (
               <>
-                {!isMenuAddAuthorized && (
-                  <>
-                    <Tooltip
-                      // placement="bottomLeft"
-                      title="Transaction history of adding items"
-                    >
-                      {/* <Form.Item
-                        label={
-                          <div className="text text-bold text-color-4 text-size-3x">
-                            Transaction History
-                          </div>
-                        }
-                        name="itemTxList"
-                        rules={[
-                          {
-                            required: false,
-                            message: '',
-                          },
-                        ]}
-                      > */}
-                      <Dropdown overlay={this.menu}>
-                        <a className="ant-dropdown-link" href="#">
-                          Transaction History <DownOutlined />
-                        </a>
-                      </Dropdown>
-                      {/* </Form.Item> */}
-                    </Tooltip>
-                    <div style={{ marginBottom: '40px' }} />
-                    <Tooltip
-                      // placement="bottomLeft"
-                      title="This is the NFT token address after creating new collection"
-                    >
-                      <Form.Item
-                        label={
-                          <div className="text text-bold text-color-4 text-size-3x">
-                            Collection Address
-                          </div>
-                        }
-                        name="nftCollectionAddress"
-                        rules={[
-                          {
-                            required: true,
-                            message: 'NFT token address is required',
-                          },
-                        ]}
-                      >
-                        <Select
-                          defaultValue={erc721ContractGasless}
-                          onChange={this.onCollectionAddressListChange}
+                {!isMenuAddAuthorized && this.renderNotMenuAddAuthorized()}
+                {isMenuAddItem
+                  ? isAuthorizedForAddItem === true
+                    ? this.renderMenuAddItemAndIsAuthorized()
+                    : nftCollectionName !== '' && (
+                        <div
+                          className="text text-bold text-color-4 text-size-3x"
+                          style={{ color: 'red' }}
                         >
-                          {collectionAddressList.map((entry, idx) => {
-                            return (
-                              <Option key={idx} value={entry}>
-                                {entry === erc721ContractGasless ? `${entry} (gasless)` : entry}
-                              </Option>
-                            )
-                          })}
-                        </Select>
-                      </Form.Item>
-                    </Tooltip>
-                    <Tooltip placement="bottomRight" title="This is the NFT token name">
-                      <Form.Item
-                        label={
-                          <div className="text text-bold text-color-4 text-size-3x">
-                            Collection Name
-                          </div>
-                        }
-                        name=""
-                        rules={[
-                          {
-                            required: false,
-                          },
-                        ]}
-                      >
-                        <Input placeholder={nftCollectionName} disabled={true} />
-                      </Form.Item>
-                    </Tooltip>
-
-                    <Tooltip placement="bottomRight" title="This is the NFT token symbol">
-                      <Form.Item
-                        label={
-                          <div className="text text-bold text-color-4 text-size-3x">
-                            Collection Symbol
-                          </div>
-                        }
-                        name=""
-                        rules={[
-                          {
-                            required: false,
-                          },
-                        ]}
-                      >
-                        <Input placeholder={nftCollectionSymbol} disabled={true} />
-                      </Form.Item>
-                    </Tooltip>
-                  </>
-                )}
-                {isMenuAddItem ? (
-                  isAuthorizedForAddItem === true ? (
-                    <>
-                      <Tooltip placement="bottomRight" title="NFT token item name">
-                        <Form.Item
-                          label={
-                            <div className="text text-bold text-color-4 text-size-3x">
-                              Item Name
-                            </div>
-                          }
-                          name="nftItemName"
-                          rules={[
-                            {
-                              required: true,
-                              message: 'NFT token item name is required',
-                            },
-                          ]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Tooltip>
-                      <Tooltip placement="bottomRight" title="NFT token item description">
-                        <Form.Item
-                          label={
-                            <div className="text text-bold text-color-4 text-size-3x">
-                              Item Description
-                            </div>
-                          }
-                          name="nftItemDescription"
-                          rules={[
-                            {
-                              required: true,
-                              message: 'NFT token item description is required',
-                            },
-                          ]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Tooltip>
-
-                      <Tooltip placement="bottomRight" title="External link to the NFT token item">
-                        <Form.Item
-                          label={
-                            <div className="text text-bold text-color-4 text-size-3x">
-                              Item External Link
-                            </div>
-                          }
-                          name="nftItemExternalLink"
-                          rules={[
-                            {
-                              required: false,
-                              message: 'NFT token item external link is required',
-                            },
-                          ]}
-                        >
-                          <Input />
-                        </Form.Item>
-                      </Tooltip>
-
-                      <Tooltip placement="bottomRight" title="NFT token item image">
-                        <Form.Item
-                          label={
-                            <div className="text text-bold text-color-4 text-size-3x">
-                              {selectedNftStandard === 'ERC721'
-                                ? 'Item Image'
-                                : 'Base Metadata URI'}
-                            </div>
-                          }
-                          name="nftItemImage"
-                          rules={[
-                            {
-                              // required: true,
-                              // message: 'NFT link is required',
-                            },
-                          ]}
-                        >
-                          <ImgCrop rotate>
-                            <Upload
-                              name="avatar"
-                              listType="picture-card"
-                              className="avatar-uploader"
-                              onChange={this.handleChange}
-                              onPreview={this.onPreview}
-                              onRemove={() => {
-                                this.setState({ imgBase64: null })
-                              }}
-                            >
-                              {!imgBase64 && '+ Upload'}
-                            </Upload>
-                          </ImgCrop>
-                        </Form.Item>
-                      </Tooltip>
-                    </>
-                  ) : (
-                    nftCollectionName !== '' && (
-                      <div
-                        className="text text-bold text-color-4 text-size-3x"
-                        style={{ color: 'red' }}
-                      >
-                        Please click button Submit below to request for authorization to add item
-                      </div>
-                    )
-                  )
-                ) : (
-                  // authorize address to add item
-                  <>
-                    <Tooltip
-                      // placement="bottomLeft"
-                      title="User address list waiting for authorization"
-                    >
-                      <Form.Item
-                        label={
-                          <div className="text text-bold text-color-4 text-size-3x">
-                            User Address List
-                          </div>
-                        }
-                        name="userAuthReqList"
-                        rules={[
-                          {
-                            required: false,
-                            message: 'User address list is required',
-                          },
-                        ]}
-                      >
-                        <Select>
-                          {userAuthReqList.map((entry, idx) => {
-                            return (
-                              <Option key={idx} value={entry}>
-                                {entry}
-                              </Option>
-                            )
-                          })}
-                        </Select>
-                      </Form.Item>
-                    </Tooltip>
-                  </>
-                )}
+                          Please click button Submit below to request for authorization to add item
+                        </div>
+                      )
+                  : // authorize address to add item
+                    this.renderMenuAddRevokeAuthorized()}
               </>
             )}
-
-            {/* <hr style={{ color: '#f0f0f0' }} /> */}
-
-            {/* <Tag color="blue" style={{ fontSize: '16px' }}>
-              Your First {selectedNftStandard} Token
-            </Tag> */}
-
-            {/* <Tooltip placement="bottomRight"  title="NFT token owner address">
-              <Form.Item
-                label={
-                  <div className="text text-bold text-color-4 text-size-3x">Owner Address</div>
-                }
-                name="nftOwner"
-                rules={[
-                  {
-                    required: true,
-                    message: 'NFT token owner address is required',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Tooltip> */}
 
             <Form.Item xs={24} md={24}>
               <Button type="primary" htmlType="submit" className="ant-big-btn" disabled={loading}>
@@ -1146,6 +1106,6 @@ class CreateForm extends React.PureComponent {
   }
 }
 
-const mapStateToProps = (state) => ({})
+const mapStateToProps = () => ({})
 
 export default withRouter(connect(mapStateToProps, null)(CreateForm))
