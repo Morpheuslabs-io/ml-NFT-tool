@@ -752,11 +752,11 @@ class CreateForm extends React.PureComponent {
     return (
       <div className="create-form-container">
         <div className="wrapper">
-          <div
-            className="page-title"
-            style={{ textAlign: 'center', color: '#ffffff', padding: '40px' }}
-          >
-            {`NFT Launch Pad for ${networkName[networkID] || '...'}`}
+          <div className="page-title" style={{ color: '#ffffff', padding: '40px' }}>
+            <span style={{ textAlign: 'center' }}>{`NFT Launch Pad for ${
+              networkName[networkID] || '...'
+            }`}</span>
+            <span style={{ float: 'right' }}>V1.0 beta</span>
           </div>
           <Form
             ref={this.formRef}
