@@ -31,6 +31,7 @@ import {
   addAuthorizedBatchMetaTx,
   clearAuthReqListMetaTx,
   revokeAuthorizedMetaTx,
+  safeTransferFromMetaTx,
 } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import IPFS from 'ipfs-http-client'
@@ -482,16 +483,19 @@ class CreateForm extends React.PureComponent {
         nftItemExternalLink,
         nftItemImage,
         revokeUserAddress,
+        receivingUserAddress,
       } = values
       const {
         isMenuCreateCollection,
         isMenuAddItem,
         isMenuAddAuthorized,
         isMenuRevokeAuthorized,
+        isMenuTransferItem,
         isAuthorizedForAddItem,
         address,
         networkID,
         userAuthReqList,
+        selectedItemToTransfer,
       } = this.state
 
       if (isMenuCreateCollection) {
@@ -524,6 +528,46 @@ class CreateForm extends React.PureComponent {
               : null,
           })
         }
+      } else if (isMenuTransferItem) {
+        console.log('selectedItemToTransfer:', selectedItemToTransfer)
+
+        // Meta tx -> not work
+        // let result = await safeTransferFromMetaTx(
+        //   this.erc721Contract,
+        //   erc721ContractGasless,
+        //   address,
+        //   networkID,
+        //   address,
+        //   receivingUserAddress,
+        //   selectedItemToTransfer,
+        // )
+        // console.log('safeTransferFromMetaTx - result:', result)
+        // this.setState({
+        //   loading: false,
+        //   nftOpResult: result
+        //     ? {
+        //         tx: result,
+        //       }
+        //     : null,
+        // })
+
+        // Normal tx -> work
+        let result = await this.erc721Contract.safeTransferFrom({
+          contractAddress: erc721ContractGasless,
+          from: address,
+          to: receivingUserAddress,
+          tokenId: selectedItemToTransfer,
+          gasPrice,
+        })
+        console.log('safeTransferFromMetaTx - result:', result)
+        this.setState({
+          loading: false,
+          nftOpResult: result
+            ? {
+                tx: result,
+              }
+            : null,
+        })
       } else {
         let result
         if (!isMenuRevokeAuthorized) {
@@ -824,31 +868,47 @@ class CreateForm extends React.PureComponent {
     }
 
     return (
-      <Tooltip
-        // placement="bottomLeft"
-        title="List of the created NFT tokens"
-      >
-        <Form.Item
-          label={
-            <div className="text text-bold text-color-4 text-size-3x">NFT Token Item List</div>
-          }
-          name="nftCreatedItem"
-          rules={[
-            {
-              required: true,
-              message: 'NFT token is required',
-            },
-          ]}
+      <>
+        <Tooltip
+          // placement="bottomLeft"
+          title="List of the created NFT tokens"
         >
-          <Select onChange={this.onItemTxTokenIdListChange}>
-            {itemTxTokenIdList.map((item, idx) => (
-              <Option key={idx} value={item.tokenId}>
-                {`Token ID: ${item.tokenId}, Transaction: ${item.itemTx}`}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-      </Tooltip>
+          <Form.Item
+            label={
+              <div className="text text-bold text-color-4 text-size-3x">NFT Token Item List</div>
+            }
+            name="nftCreatedItem"
+            rules={[
+              {
+                required: true,
+                message: 'NFT token is required',
+              },
+            ]}
+          >
+            <Select onChange={this.onItemTxTokenIdListChange}>
+              {itemTxTokenIdList.map((item, idx) => (
+                <Option key={idx} value={item.tokenId}>
+                  {`Token ID: ${item.tokenId}, Transaction: ${item.itemTx}`}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+        </Tooltip>
+        <Tooltip placement="bottomRight" title="User address to receive the NFT token item">
+          <Form.Item
+            label={<div className="text text-bold text-color-4 text-size-3x">User Address</div>}
+            name="receivingUserAddress"
+            rules={[
+              {
+                required: true,
+                message: 'User address is required',
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>
+        </Tooltip>
+      </>
     )
   }
 

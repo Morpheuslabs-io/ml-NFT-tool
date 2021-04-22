@@ -113,6 +113,19 @@ export default class Erc721Contract {
     }
   }
 
+  async safeTransferFrom(data) {
+    const { contractAddress, from, to, tokenId, gasPrice } = data
+    try {
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.safeTransferFrom(from, to, tokenId, {
+        gasPrice,
+      })
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
   ////////// Meta-Tx ////////////////////////////////////
   async getSenderNonce(contractAddress, senderAddress) {
     try {
@@ -142,6 +155,11 @@ export default class Erc721Contract {
   async revokeAuthorizedFuncSig(contractAddress, userWalletAddress) {
     const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
     return contractInstance.methods.clearAuthorized(userWalletAddress).encodeABI()
+  }
+
+  async safeTransferFromFuncSig(contractAddress, from, to, tokenId) {
+    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
+    return contractInstance.methods.safeTransferFrom(from, to, tokenId).encodeABI()
   }
 
   //////////////////////////////////////////////

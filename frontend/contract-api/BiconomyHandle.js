@@ -257,6 +257,34 @@ export const revokeAuthorizedMetaTx = async (
   return txHash
 }
 
+// erc721Contract
+export const safeTransferFromMetaTx = async (
+  erc721Contract,
+  erc721ContractAddress,
+  senderAddress,
+  chainId,
+  from,
+  to,
+  tokenId,
+) => {
+  const nonce = await erc721Contract.getSenderNonce(erc721ContractAddress, senderAddress)
+
+  const functionSignature = await erc721Contract.safeTransferFromFuncSig(
+    erc721ContractAddress,
+    from,
+    to,
+    tokenId,
+  )
+  const txHash = await biconomyWrapper(
+    erc721ContractAddress,
+    senderAddress,
+    chainId,
+    nonce,
+    functionSignature,
+  )
+  return txHash
+}
+
 /////////////////////////////////
 
 // erc721ContractInfo
