@@ -272,8 +272,17 @@ class CreateForm extends React.PureComponent {
             await this.getItemTxList()
           }
 
+          const collectionAddressNameList = []
+          for (const contractAddr of userCreatedContractList) {
+            const retrievedNftName = await this.erc721Contract.name(contractAddr)
+            collectionAddressNameList.push({
+              collectionAddress: contractAddr,
+              collectionName: retrievedNftName,
+            })
+          }
+
           this.setState({
-            collectionAddressList: userCreatedContractList,
+            collectionAddressList: collectionAddressNameList,
           })
         }
       },
@@ -984,8 +993,12 @@ class CreateForm extends React.PureComponent {
             >
               {collectionAddressList.map((entry, idx) => {
                 return (
-                  <Option key={idx} value={entry}>
-                    {entry === erc721ContractGasless ? `${entry} (gasless)` : entry}
+                  <Option key={idx} value={entry.collectionAddress}>
+                    {`${entry.collectionName}, ${
+                      entry.collectionAddress === erc721ContractGasless
+                        ? `${entry.collectionAddress} (gasless)`
+                        : entry.collectionAddress
+                    }`}
                   </Option>
                 )
               })}
