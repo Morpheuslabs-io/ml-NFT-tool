@@ -330,6 +330,16 @@ class CreateForm extends React.PureComponent {
 
     // Add the newly-deployed NFT address
     if (result && result.address) {
+      const tx = await addCollectionMetaTx(
+        this.erc721InfoContract,
+        erc721InfoContractAddress,
+        address,
+        networkID,
+        address,
+        result.address,
+      )
+
+      console.log('addCollectionMetaTx:', tx)
     }
     this.setState({
       loading: false,
@@ -413,7 +423,7 @@ class CreateForm extends React.PureComponent {
         loading: false,
         nftOpResult: result
           ? {
-              tx: result,
+              tx: result.tx || result,
             }
           : null,
       },
