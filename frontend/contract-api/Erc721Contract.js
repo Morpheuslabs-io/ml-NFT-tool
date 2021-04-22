@@ -82,6 +82,16 @@ export default class Erc721Contract {
     }
   }
 
+  async tokenURI(contractAddress, tokenId) {
+    try {
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.tokenURI(tokenId)
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
   async checkAuthorized(contractAddress, checkAddress) {
     try {
       const contractInstance = await this.contract.at(contractAddress)

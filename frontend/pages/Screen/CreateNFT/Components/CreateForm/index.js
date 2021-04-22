@@ -64,6 +64,8 @@ const networkName = {
   137: 'Matic Mainnet',
 }
 
+const VERSION = 'V1.0 beta'
+
 const erc721InfoContractAddress = process.env.REACT_APP_ERC721_INFO_CONTRACT_ADDRESS
 const erc721ContractGasless = process.env.REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS
 
@@ -104,6 +106,9 @@ class CreateForm extends React.PureComponent {
       itemTxList: [],
       itemTxTokenIdList: [],
       ownerTokenIdList: [],
+      selectedTokenItemDesc: '',
+      selectedTokenItemName: '',
+      selectedTokenItemImg: '',
     }
     this.formRef = React.createRef()
     this.clr = null
@@ -237,6 +242,7 @@ class CreateForm extends React.PureComponent {
         userAuthReqList: [],
         itemTxList: [],
         selectedCollection: null,
+        selectedTokenIdToTransfer: null,
         isAuthorizedForAddItem: false,
       },
       async () => {
@@ -490,7 +496,11 @@ class CreateForm extends React.PureComponent {
     for (let tokenId = 1; tokenId <= tokenIdCnt; tokenId++) {
       // Check the token owner again because the token could be transferred to others
       const tokenOwner = await this.erc721Contract.ownerOf(erc721ContractGasless, tokenId)
-      if (web3Utils.toChecksumAddress(tokenOwner) === web3Utils.toChecksumAddress(address)) {
+      if (
+        tokenOwner &&
+        address &&
+        web3Utils.toChecksumAddress(tokenOwner) === web3Utils.toChecksumAddress(address)
+      ) {
         ownerTokenIdList.push(tokenId)
       }
     }
@@ -622,7 +632,7 @@ class CreateForm extends React.PureComponent {
           tokenId: selectedTokenIdToTransfer,
           gasPrice,
         })
-        console.log('safeTransferFromMetaTx - result:', result)
+        console.log('safeTransferFrom - result:', result)
         this.setState({
           loading: false,
           nftOpResult: result
@@ -713,12 +723,35 @@ class CreateForm extends React.PureComponent {
     }
   }
 
-  onItemTxTokenIdListChange = (e) => {
+  getTokenMetadata = async (tokenId) => {
+    if (!this.erc721Contract) {
+      notification.open({
+        message: 'Metamask is locked',
+        description: 'Please click the Metamask to unlock it',
+      })
+      return
+    }
+
+    const tokenURI = await this.erc721Contract.tokenURI(erc721ContractGasless, tokenId)
+    let metadata = await axios.get(tokenURI)
+    if (!metadata) {
+      return null
+    } else {
+      return metadata.data
+    }
+  }
+
+  onItemTxTokenIdListChange = async (e) => {
     const { selectedTokenIdToTransfer } = this.state
     if (!selectedTokenIdToTransfer || selectedTokenIdToTransfer !== e) {
+      const tokenMetadata = await this.getTokenMetadata(e)
+      console.log('tokenMetadata:', tokenMetadata)
       this.setState(
         {
           selectedTokenIdToTransfer: e,
+          selectedTokenItemName: tokenMetadata.name,
+          selectedTokenItemDesc: tokenMetadata.description,
+          selectedTokenItemImg: tokenMetadata.image,
         },
         () => {
           // this.getContractInfo(e)
@@ -927,7 +960,12 @@ class CreateForm extends React.PureComponent {
   }
 
   renderMenuTransferItem = () => {
-    const { ownerTokenIdList } = this.state
+    const {
+      ownerTokenIdList,
+      selectedTokenItemDesc,
+      selectedTokenItemName,
+      selectedTokenItemImg,
+    } = this.state
     if (!ownerTokenIdList) {
       return
     }
@@ -959,6 +997,29 @@ class CreateForm extends React.PureComponent {
             </Select>
           </Form.Item>
         </Tooltip>
+        <Form.Item
+          label={
+            <div className="text text-bold text-color-4 text-size-3x">NFT Token Item Name</div>
+          }
+        >
+          <Input placeholder={selectedTokenItemName} disabled={true} />
+        </Form.Item>
+        <Form.Item
+          label={
+            <div className="text text-bold text-color-4 text-size-3x">
+              NFT Token Item Description
+            </div>
+          }
+        >
+          <Input placeholder={selectedTokenItemDesc} disabled={true} />
+        </Form.Item>
+        <Form.Item
+          label={
+            <div className="text text-bold text-color-4 text-size-3x">NFT Token Item Image</div>
+          }
+        >
+          <img width={isMobile ? 200 : 400} src={selectedTokenItemImg} />
+        </Form.Item>
         <Tooltip placement="bottomRight" title="User address to receive the NFT token item">
           <Form.Item
             label={<div className="text text-bold text-color-4 text-size-3x">User Address</div>}
@@ -1230,10 +1291,10 @@ class CreateForm extends React.PureComponent {
             {isMobile ? (
               <>
                 <br />
-                <div style={{ fontSize: '20px' }}>V1.0 beta</div>
+                <div style={{ fontSize: '20px' }}>{VERSION}</div>
               </>
             ) : (
-              <span style={{ float: 'right', fontSize: '20px' }}>V1.0 beta</span>
+              <span style={{ float: 'right', fontSize: '20px' }}>{VERSION}</span>
             )}
           </div>
           <Form
