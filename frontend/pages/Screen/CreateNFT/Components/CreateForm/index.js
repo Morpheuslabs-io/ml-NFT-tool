@@ -38,6 +38,7 @@ import IPFS from 'ipfs-http-client'
 import axios from 'axios'
 import detectEthereumProvider from '@metamask/detect-provider'
 import web3Utils from 'web3-utils'
+import { isMobile } from 'react-device-detect'
 import './style.scss'
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
@@ -872,7 +873,7 @@ class CreateForm extends React.PureComponent {
       <>
         <Tooltip placement="bottomRight" title="NFT token name">
           <Form.Item
-            label={<div className="text text-bold text-color-4 text-size-3x">Name</div>}
+            label={<div className="text text-bold text-color-4 text-size-3x">Collection Name</div>}
             name="nftCollectionName"
             rules={[
               {
@@ -887,7 +888,9 @@ class CreateForm extends React.PureComponent {
 
         <Tooltip placement="bottomRight" title="NFT token symbol">
           <Form.Item
-            label={<div className="text text-bold text-color-4 text-size-3x">Symbol</div>}
+            label={
+              <div className="text text-bold text-color-4 text-size-3x">Collection Symbol</div>
+            }
             name="nftCollectionSymbol"
             rules={[
               {
@@ -1224,7 +1227,14 @@ class CreateForm extends React.PureComponent {
             <span style={{ textAlign: 'center' }}>{`NFT Launch Pad for ${
               networkName[networkID] || '...'
             }`}</span>
-            <span style={{ float: 'right' }}>V1.0 beta</span>
+            {isMobile ? (
+              <>
+                <br />
+                <div style={{ fontSize: '20px' }}>V1.0 beta</div>
+              </>
+            ) : (
+              <span style={{ float: 'right', fontSize: '20px' }}>V1.0 beta</span>
+            )}
           </div>
           <Form
             ref={this.formRef}
