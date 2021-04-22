@@ -21,6 +21,7 @@ import ImgCrop from 'antd-img-crop'
 const { Option } = Select
 import Erc721Contract from 'contract-api/Erc721Contract'
 import Erc721InfoContract from 'contract-api/Erc721InfoContract'
+import Web3Service from 'controller/Web3'
 import {
   createCollectibleMetaTx,
   setBiconomyEnv,
@@ -95,12 +96,15 @@ class CreateForm extends React.PureComponent {
       collectionAddressList: [],
       userAuthReqList: [],
       selectedCollection: null,
+      selectedItemToTransfer: null,
       isOwner: false,
       isAuthorizedForAddItem: false,
       itemTxList: [],
+      itemTxTokenIdList: [],
     }
     this.formRef = React.createRef()
     this.clr = null
+    this.getItemTxList = this.getItemTxList.bind(this)
   }
   componentDidMount() {
     this.metamaskWeb3Handle()
@@ -412,9 +416,27 @@ class CreateForm extends React.PureComponent {
       gasPrice,
     })
 
-    this.setState({
-      itemTxList,
-    })
+    if (!itemTxList) {
+      return
+    }
+
+    const web3 = Web3Service.getWeb3()
+    const itemTxTokenIdList = []
+    for (const itemTx of itemTxList) {
+      const tokenId = await this.getTokenIdFromTxHash(web3, itemTx)
+      itemTxTokenIdList.push({
+        itemTx,
+        tokenId,
+      })
+    }
+    console.log(itemTxTokenIdList)
+    this.setState(
+      {
+        itemTxList,
+        itemTxTokenIdList,
+      },
+      () => this.forceUpdate(),
+    )
   }
 
   addRevokeAuthorized = async (userWalletAddress) => {
@@ -584,6 +606,20 @@ class CreateForm extends React.PureComponent {
     }
   }
 
+  onItemTxTokenIdListChange = (e) => {
+    const { selectedItemToTransfer } = this.state
+    if (!selectedItemToTransfer || selectedItemToTransfer !== e) {
+      this.setState(
+        {
+          selectedItemToTransfer: e,
+        },
+        () => {
+          // this.getContractInfo(e)
+        },
+      )
+    }
+  }
+
   onCollectionAddressListChange = (e) => {
     const { selectedCollection } = this.state
     if (!selectedCollection || selectedCollection !== e) {
@@ -707,17 +743,17 @@ class CreateForm extends React.PureComponent {
   }
 
   menu = () => {
-    const { itemTxList, networkID } = this.state
+    const { itemTxTokenIdList, networkID } = this.state
     return (
       <Menu>
-        {itemTxList.map((txHash) => (
-          <Menu.Item>
+        {itemTxTokenIdList.map((item, idx) => (
+          <Menu.Item key={idx}>
             <a
               target="_blank"
               rel="noopener noreferrer"
-              href={`${explorerLink[networkID]}/tx/${txHash}`}
+              href={`${explorerLink[networkID]}/tx/${item.itemTx}`}
             >
-              {txHash}
+              {`Token ID: ${item.tokenId}, Transaction: ${item.itemTx}`}
             </a>
           </Menu.Item>
         ))}
@@ -758,6 +794,61 @@ class CreateForm extends React.PureComponent {
           </Form.Item>
         </Tooltip>
       </>
+    )
+  }
+
+  getTokenIdFromTxHash = async (web3, txHash) => {
+    const { address } = this.state
+    const txReceipt = await web3.eth.getTransactionReceipt(txHash)
+    let tokenId = null
+    const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
+    for (const txLog of txReceipt.logs) {
+      if (txLog.topics.length < 4) {
+        continue
+      }
+      if (
+        txLog.topics[1].indexOf(ADDRESS_ZERO) !== -1 &&
+        txLog.topics[2].indexOf(address.substr(2).toLowerCase()) !== -1
+      ) {
+        tokenId = web3Utils.hexToNumber(txLog.topics[3])
+        console.log('tokenId:', tokenId)
+      }
+    }
+    return tokenId
+  }
+
+  renderMenuTransferItem = () => {
+    const { itemTxTokenIdList } = this.state
+    if (!itemTxTokenIdList) {
+      return
+    }
+
+    return (
+      <Tooltip
+        // placement="bottomLeft"
+        title="List of the created NFT tokens"
+      >
+        <Form.Item
+          label={
+            <div className="text text-bold text-color-4 text-size-3x">NFT Token Item List</div>
+          }
+          name="nftCreatedItem"
+          rules={[
+            {
+              required: true,
+              message: 'NFT token is required',
+            },
+          ]}
+        >
+          <Select onChange={this.onItemTxTokenIdListChange}>
+            {itemTxTokenIdList.map((item, idx) => (
+              <Option key={idx} value={item.tokenId}>
+                {`Token ID: ${item.tokenId}, Transaction: ${item.itemTx}`}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+      </Tooltip>
     )
   }
 
@@ -993,6 +1084,7 @@ class CreateForm extends React.PureComponent {
       isMenuAddItem,
       isOwner,
       isAuthorizedForAddItem,
+      isMenuTransferItem,
     } = this.state
     const layout = {
       labelCol: { span: 13 },
@@ -1033,6 +1125,7 @@ class CreateForm extends React.PureComponent {
               <Select defaultValue="create_collection" onChange={this.onMainMenuChange}>
                 <Option value="create_collection">Create new collection</Option>
                 <Option value="create_item">Add item to an existing collection</Option>
+                <Option value="transfer_item">Transfer item to another user address</Option>
                 {isOwner && (
                   <>
                     <Option value="add_authorized">Authorize address to add item</Option>
@@ -1062,7 +1155,9 @@ class CreateForm extends React.PureComponent {
               </Form.Item>
             </Tooltip>
 
-            {isMenuCreateCollection ? (
+            {isMenuTransferItem ? (
+              this.renderMenuTransferItem()
+            ) : isMenuCreateCollection ? (
               this.renderMenuCreateCollection()
             ) : (
               <>
