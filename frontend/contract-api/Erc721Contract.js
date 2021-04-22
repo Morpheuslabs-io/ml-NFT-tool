@@ -62,6 +62,26 @@ export default class Erc721Contract {
     }
   }
 
+  async tokenId(contractAddress) {
+    try {
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.tokenId()
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
+  async ownerOf(contractAddress, tokenId) {
+    try {
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.ownerOf(tokenId)
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+
   async checkAuthorized(contractAddress, checkAddress) {
     try {
       const contractInstance = await this.contract.at(contractAddress)

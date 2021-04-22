@@ -97,11 +97,12 @@ class CreateForm extends React.PureComponent {
       collectionAddressList: [],
       userAuthReqList: [],
       selectedCollection: null,
-      selectedItemToTransfer: null,
+      selectedTokenIdToTransfer: null,
       isOwner: false,
       isAuthorizedForAddItem: false,
       itemTxList: [],
       itemTxTokenIdList: [],
+      ownerTokenIdList: [],
     }
     this.formRef = React.createRef()
     this.clr = null
@@ -231,12 +232,13 @@ class CreateForm extends React.PureComponent {
         nftCollectionName: '',
         nftCollectionSymbol: '',
         collectionAddressList: [],
+        ownerTokenIdList: [],
         selectedCollection: null,
         isAuthorizedForAddItem: false,
       },
       async () => {
         if (value === 'transfer_item') {
-          await this.getItemTxList()
+          await this.getOwnerTokenIdList()
         } else if (value === 'add_authorized' || value === 'revoke_authorized') {
           if (!this.erc721InfoContract) {
             window.location.reload()
@@ -425,16 +427,47 @@ class CreateForm extends React.PureComponent {
     const itemTxTokenIdList = []
     for (const itemTx of itemTxList) {
       const tokenId = await this.getTokenIdFromTxHash(web3, itemTx)
-      itemTxTokenIdList.push({
-        itemTx,
-        tokenId,
-      })
+
+      // Check the token owner again because the token could be transferred to others
+      const tokenOwner = await this.erc721Contract.ownerOf(erc721ContractGasless, tokenId)
+      if (web3Utils.toChecksumAddress(tokenOwner) === web3Utils.toChecksumAddress(address)) {
+        itemTxTokenIdList.push({
+          itemTx,
+          tokenId,
+        })
+      }
     }
     console.log(itemTxTokenIdList)
     this.setState(
       {
         itemTxList,
         itemTxTokenIdList,
+      },
+      () => this.forceUpdate(),
+    )
+  }
+
+  getOwnerTokenIdList = async () => {
+    const { address } = this.state
+    const tokenIdCnt = await this.erc721Contract.tokenId(erc721ContractGasless)
+    console.log(`tokenIdCnt: ${tokenIdCnt}`)
+
+    if (!tokenIdCnt || tokenIdCnt === 0) {
+      return
+    }
+
+    const ownerTokenIdList = []
+    for (let tokenId = 1; tokenId <= tokenIdCnt; tokenId++) {
+      // Check the token owner again because the token could be transferred to others
+      const tokenOwner = await this.erc721Contract.ownerOf(erc721ContractGasless, tokenId)
+      if (web3Utils.toChecksumAddress(tokenOwner) === web3Utils.toChecksumAddress(address)) {
+        ownerTokenIdList.push(tokenId)
+      }
+    }
+    console.log('ownerTokenIdList:', ownerTokenIdList)
+    this.setState(
+      {
+        ownerTokenIdList,
       },
       () => this.forceUpdate(),
     )
@@ -495,7 +528,7 @@ class CreateForm extends React.PureComponent {
         address,
         networkID,
         userAuthReqList,
-        selectedItemToTransfer,
+        selectedTokenIdToTransfer,
       } = this.state
 
       if (isMenuCreateCollection) {
@@ -529,7 +562,7 @@ class CreateForm extends React.PureComponent {
           })
         }
       } else if (isMenuTransferItem) {
-        console.log('selectedItemToTransfer:', selectedItemToTransfer)
+        console.log('selectedTokenIdToTransfer:', selectedTokenIdToTransfer)
 
         // Meta tx -> not work
         // let result = await safeTransferFromMetaTx(
@@ -539,7 +572,7 @@ class CreateForm extends React.PureComponent {
         //   networkID,
         //   address,
         //   receivingUserAddress,
-        //   selectedItemToTransfer,
+        //   selectedTokenIdToTransfer,
         // )
         // console.log('safeTransferFromMetaTx - result:', result)
         // this.setState({
@@ -556,7 +589,7 @@ class CreateForm extends React.PureComponent {
           contractAddress: erc721ContractGasless,
           from: address,
           to: receivingUserAddress,
-          tokenId: selectedItemToTransfer,
+          tokenId: selectedTokenIdToTransfer,
           gasPrice,
         })
         console.log('safeTransferFromMetaTx - result:', result)
@@ -564,7 +597,7 @@ class CreateForm extends React.PureComponent {
           loading: false,
           nftOpResult: result
             ? {
-                tx: result,
+                tx: result.tx,
               }
             : null,
         })
@@ -651,11 +684,11 @@ class CreateForm extends React.PureComponent {
   }
 
   onItemTxTokenIdListChange = (e) => {
-    const { selectedItemToTransfer } = this.state
-    if (!selectedItemToTransfer || selectedItemToTransfer !== e) {
+    const { selectedTokenIdToTransfer } = this.state
+    if (!selectedTokenIdToTransfer || selectedTokenIdToTransfer !== e) {
       this.setState(
         {
-          selectedItemToTransfer: e,
+          selectedTokenIdToTransfer: e,
         },
         () => {
           // this.getContractInfo(e)
@@ -862,8 +895,8 @@ class CreateForm extends React.PureComponent {
   }
 
   renderMenuTransferItem = () => {
-    const { itemTxTokenIdList } = this.state
-    if (!itemTxTokenIdList) {
+    const { ownerTokenIdList } = this.state
+    if (!ownerTokenIdList) {
       return
     }
 
@@ -886,9 +919,9 @@ class CreateForm extends React.PureComponent {
             ]}
           >
             <Select onChange={this.onItemTxTokenIdListChange}>
-              {itemTxTokenIdList.map((item, idx) => (
-                <Option key={idx} value={item.tokenId}>
-                  {`Token ID: ${item.tokenId}, Transaction: ${item.itemTx}`}
+              {ownerTokenIdList.map((item, idx) => (
+                <Option key={idx} value={item}>
+                  {`Token ID: ${item}`}
                 </Option>
               ))}
             </Select>
