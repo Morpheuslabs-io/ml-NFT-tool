@@ -469,6 +469,14 @@ class CreateForm extends React.PureComponent {
   }
 
   getOwnerTokenIdList = async () => {
+    if (!this.erc721Contract) {
+      notification.open({
+        message: 'Metamask is locked',
+        description: 'Please click the Metamask to unlock it',
+      })
+      window.location.reload()
+    }
+
     const { address } = this.state
     const tokenIdCnt = await this.erc721Contract.tokenId(erc721ContractGasless)
     console.log(`tokenIdCnt: ${tokenIdCnt}`)
