@@ -233,6 +233,8 @@ class CreateForm extends React.PureComponent {
         nftCollectionSymbol: '',
         collectionAddressList: [],
         ownerTokenIdList: [],
+        userAuthReqList: [],
+        itemTxList: [],
         selectedCollection: null,
         isAuthorizedForAddItem: false,
       },
@@ -448,13 +450,13 @@ class CreateForm extends React.PureComponent {
       const tokenId = await this.getTokenIdFromTxHash(web3, itemTx)
 
       // Check the token owner again because the token could be transferred to others
-      const tokenOwner = await this.erc721Contract.ownerOf(erc721ContractGasless, tokenId)
-      if (web3Utils.toChecksumAddress(tokenOwner) === web3Utils.toChecksumAddress(address)) {
-        itemTxTokenIdList.push({
-          itemTx,
-          tokenId,
-        })
-      }
+      // const tokenOwner = await this.erc721Contract.ownerOf(erc721ContractGasless, tokenId)
+      // if (web3Utils.toChecksumAddress(tokenOwner) === web3Utils.toChecksumAddress(address)) {
+      itemTxTokenIdList.push({
+        itemTx,
+        tokenId,
+      })
+      // }
     }
     console.log(itemTxTokenIdList)
     this.setState(
