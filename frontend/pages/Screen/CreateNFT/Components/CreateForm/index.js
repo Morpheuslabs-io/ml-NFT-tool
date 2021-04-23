@@ -1018,7 +1018,7 @@ class CreateForm extends React.PureComponent {
             <div className="text text-bold text-color-4 text-size-3x">NFT Token Item Image</div>
           }
         >
-          <img width={isMobile ? 200 : 400} src={selectedTokenItemImg} />
+          <img width={isMobile ? 200 : 300} src={selectedTokenItemImg} />
         </Form.Item>
         <Tooltip placement="bottomRight" title="User address to receive the NFT token item">
           <Form.Item
