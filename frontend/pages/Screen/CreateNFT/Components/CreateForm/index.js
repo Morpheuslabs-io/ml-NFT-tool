@@ -97,10 +97,11 @@ class CreateForm extends React.PureComponent {
       isMenuTransferItem: false,
       nftCollectionName: '',
       nftCollectionSymbol: '',
-      collectionAddressList: [],
+      collectionList: [],
       userAuthReqList: [],
       selectedCollection: null,
       selectedTokenIdToTransfer: null,
+      selectedTokenIdCollectionAddressToTransfer: null,
       isOwner: false,
       isAuthorizedForAddItem: false,
       itemTxList: [],
@@ -237,7 +238,7 @@ class CreateForm extends React.PureComponent {
         nftOpResult: null,
         nftCollectionName: '',
         nftCollectionSymbol: '',
-        collectionAddressList: [],
+        collectionList: [],
         ownerTokenIdList: [],
         userAuthReqList: [],
         itemTxList: [],
@@ -246,9 +247,7 @@ class CreateForm extends React.PureComponent {
         isAuthorizedForAddItem: false,
       },
       async () => {
-        if (value === 'transfer_item') {
-          await this.getOwnerTokenIdList()
-        } else if (value === 'add_authorized' || value === 'revoke_authorized') {
+        if (value === 'add_authorized' || value === 'revoke_authorized') {
           if (!this.erc721InfoContract) {
             window.location.reload()
           }
@@ -274,24 +273,30 @@ class CreateForm extends React.PureComponent {
             window.location.reload()
           }
 
-          if (value === 'create_item') {
+          if (value === 'create_item' || value === 'transfer_item') {
             if (!userCreatedContractList.includes(erc721ContractGasless)) {
               userCreatedContractList = [erc721ContractGasless, ...userCreatedContractList]
             }
             await this.getItemTxList()
           }
 
-          const collectionAddressNameList = []
+          const collectionList = []
           for (const contractAddr of userCreatedContractList) {
             const retrievedNftName = await this.erc721Contract.name(contractAddr)
-            collectionAddressNameList.push({
+            const retrievedNftSymbol = await this.erc721Contract.symbol(contractAddr)
+            collectionList.push({
               collectionAddress: contractAddr,
               collectionName: retrievedNftName,
+              collectionSymbol: retrievedNftSymbol,
             })
           }
 
+          if (value === 'transfer_item') {
+            await this.getOwnerTokenIdList(collectionList)
+          }
+
           this.setState({
-            collectionAddressList: collectionAddressNameList,
+            collectionList,
           })
         }
       },
@@ -418,6 +423,17 @@ class CreateForm extends React.PureComponent {
         })
         console.log('createCollectible:', result)
       }
+
+      const txHash = await addItemTxMetaTx(
+        this.erc721InfoContract,
+        erc721InfoContractAddress,
+        address,
+        networkID,
+        address,
+        result.tx || result,
+      )
+
+      console.log('addItemTxMetaTx:', txHash)
     } else {
       // result = await this.erc1155Contract.create({
       //   name: nftCollectionName,
@@ -465,7 +481,7 @@ class CreateForm extends React.PureComponent {
       })
       // }
     }
-    console.log(itemTxTokenIdList)
+    console.log('itemTxTokenIdList:', itemTxTokenIdList)
     this.setState(
       {
         itemTxList,
@@ -475,7 +491,8 @@ class CreateForm extends React.PureComponent {
     )
   }
 
-  getOwnerTokenIdList = async () => {
+  // Get owner tokenIds from all relevant NFT collection list
+  getOwnerTokenIdList = async (collectionList) => {
     if (!this.erc721Contract) {
       notification.open({
         message: 'Metamask is locked',
@@ -485,25 +502,36 @@ class CreateForm extends React.PureComponent {
     }
 
     const { address } = this.state
-    const tokenIdCnt = await this.erc721Contract.tokenId(erc721ContractGasless)
-    console.log(`tokenIdCnt: ${tokenIdCnt}`)
-
-    if (!tokenIdCnt || tokenIdCnt === 0) {
-      return
-    }
 
     const ownerTokenIdList = []
-    for (let tokenId = 1; tokenId <= tokenIdCnt; tokenId++) {
-      // Check the token owner again because the token could be transferred to others
-      const tokenOwner = await this.erc721Contract.ownerOf(erc721ContractGasless, tokenId)
-      if (
-        tokenOwner &&
-        address &&
-        web3Utils.toChecksumAddress(tokenOwner) === web3Utils.toChecksumAddress(address)
-      ) {
-        ownerTokenIdList.push(tokenId)
+    for (const nftCollection of collectionList) {
+      const collectionAddr = nftCollection.collectionAddress
+
+      const tokenIdCnt = await this.erc721Contract.tokenId(collectionAddr)
+      console.log(`tokenIdCnt: ${tokenIdCnt} - collectionAddr: ${collectionAddr}`)
+
+      if (!tokenIdCnt || tokenIdCnt === 0) {
+        continue
+      }
+
+      for (let tokenId = 1; tokenId <= tokenIdCnt; tokenId++) {
+        // Check the token owner again because the token could be transferred to others
+        const tokenOwner = await this.erc721Contract.ownerOf(collectionAddr, tokenId)
+        if (
+          tokenOwner &&
+          address &&
+          web3Utils.toChecksumAddress(tokenOwner) === web3Utils.toChecksumAddress(address)
+        ) {
+          ownerTokenIdList.push({
+            tokenId,
+            collectionName: nftCollection.collectionName,
+            collectionSymbol: nftCollection.collectionSymbol,
+            collectionAddress: nftCollection.collectionAddress,
+          })
+        }
       }
     }
+
     console.log('ownerTokenIdList:', ownerTokenIdList)
     this.setState(
       {
@@ -569,6 +597,7 @@ class CreateForm extends React.PureComponent {
         networkID,
         userAuthReqList,
         selectedTokenIdToTransfer,
+        selectedTokenIdCollectionAddressToTransfer,
       } = this.state
 
       if (isMenuCreateCollection) {
@@ -626,7 +655,7 @@ class CreateForm extends React.PureComponent {
 
         // Normal tx -> work
         let result = await this.erc721Contract.safeTransferFrom({
-          contractAddress: erc721ContractGasless,
+          contractAddress: selectedTokenIdCollectionAddressToTransfer,
           from: address,
           to: receivingUserAddress,
           tokenId: selectedTokenIdToTransfer,
@@ -723,7 +752,7 @@ class CreateForm extends React.PureComponent {
     }
   }
 
-  getTokenMetadata = async (tokenId) => {
+  getTokenMetadata = async (tokenId, collectionAddr) => {
     if (!this.erc721Contract) {
       notification.open({
         message: 'Metamask is locked',
@@ -732,7 +761,7 @@ class CreateForm extends React.PureComponent {
       return
     }
 
-    const tokenURI = await this.erc721Contract.tokenURI(erc721ContractGasless, tokenId)
+    const tokenURI = await this.erc721Contract.tokenURI(collectionAddr, tokenId)
     let metadata = await axios.get(tokenURI)
     if (!metadata) {
       return null
@@ -741,23 +770,27 @@ class CreateForm extends React.PureComponent {
     }
   }
 
+  // "e" contains only the index of "ownerTokenIdList"
   onItemTxTokenIdListChange = async (e) => {
-    const { selectedTokenIdToTransfer } = this.state
-    if (!selectedTokenIdToTransfer || selectedTokenIdToTransfer !== e) {
-      const tokenMetadata = await this.getTokenMetadata(e)
-      console.log('tokenMetadata:', tokenMetadata)
-      this.setState(
-        {
-          selectedTokenIdToTransfer: e,
-          selectedTokenItemName: tokenMetadata.name,
-          selectedTokenItemDesc: tokenMetadata.description,
-          selectedTokenItemImg: tokenMetadata.image,
-        },
-        () => {
-          // this.getContractInfo(e)
-        },
-      )
-    }
+    const { selectedTokenIdToTransfer, ownerTokenIdList } = this.state
+    const selectedTokeIdData = ownerTokenIdList[e]
+    const tokenMetadata = await this.getTokenMetadata(
+      selectedTokeIdData.tokenId,
+      selectedTokeIdData.collectionAddress,
+    )
+    console.log('tokenMetadata:', tokenMetadata)
+    this.setState(
+      {
+        selectedTokenIdToTransfer: selectedTokeIdData.tokenId,
+        selectedTokenIdCollectionAddressToTransfer: selectedTokeIdData.collectionAddress,
+        selectedTokenItemName: tokenMetadata.name,
+        selectedTokenItemDesc: tokenMetadata.description,
+        selectedTokenItemImg: tokenMetadata.image,
+      },
+      () => {
+        // this.getContractInfo(e)
+      },
+    )
   }
 
   onCollectionAddressListChange = (e) => {
@@ -952,8 +985,10 @@ class CreateForm extends React.PureComponent {
         txLog.topics[1].indexOf(ADDRESS_ZERO) !== -1 &&
         txLog.topics[2].indexOf(address.substr(2).toLowerCase()) !== -1
       ) {
-        tokenId = web3Utils.hexToNumber(txLog.topics[3])
-        console.log('tokenId:', tokenId)
+        try {
+          tokenId = web3Utils.hexToNumber(txLog.topics[3])
+          console.log('tokenId:', tokenId)
+        } catch (err) {}
       }
     }
     return tokenId
@@ -965,11 +1000,12 @@ class CreateForm extends React.PureComponent {
       selectedTokenItemDesc,
       selectedTokenItemName,
       selectedTokenItemImg,
+      collectionList,
     } = this.state
     if (!ownerTokenIdList) {
       return
     }
-
+    console.log('collectionList:', collectionList)
     return (
       <>
         <Tooltip
@@ -990,13 +1026,14 @@ class CreateForm extends React.PureComponent {
           >
             <Select onChange={this.onItemTxTokenIdListChange}>
               {ownerTokenIdList.map((item, idx) => (
-                <Option key={idx} value={item}>
-                  {`Token ID: ${item}`}
+                <Option key={idx} value={idx}>
+                  {`Token ID: ${item.tokenId} (${item.collectionName} / ${item.collectionSymbol})`}
                 </Option>
               ))}
             </Select>
           </Form.Item>
         </Tooltip>
+
         <Form.Item
           label={
             <div className="text text-bold text-color-4 text-size-3x">NFT Token Item Name</div>
@@ -1039,7 +1076,7 @@ class CreateForm extends React.PureComponent {
   }
 
   renderNotMenuAddAuthorized = () => {
-    const { nftCollectionName, nftCollectionSymbol, collectionAddressList } = this.state
+    const { nftCollectionName, nftCollectionSymbol, collectionList } = this.state
 
     return (
       <>
@@ -1075,13 +1112,13 @@ class CreateForm extends React.PureComponent {
               defaultValue={erc721ContractGasless}
               onChange={this.onCollectionAddressListChange}
             >
-              {collectionAddressList.map((entry, idx) => {
+              {collectionList.map((entry, idx) => {
                 return (
                   <Option key={idx} value={entry.collectionAddress}>
-                    {`${entry.collectionName}, ${
+                    {`${entry.collectionName} ${
                       entry.collectionAddress === erc721ContractGasless
-                        ? `${entry.collectionAddress} (gasless)`
-                        : entry.collectionAddress
+                        ? `(gasless), ${entry.collectionAddress}`
+                        : `, ${entry.collectionAddress}`
                     }`}
                   </Option>
                 )
