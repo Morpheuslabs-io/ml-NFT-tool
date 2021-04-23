@@ -1285,9 +1285,9 @@ class CreateForm extends React.PureComponent {
       <div className="create-form-container">
         <div className="wrapper">
           <div className="page-title" style={{ color: '#ffffff', padding: '40px' }}>
-            <span style={{ textAlign: 'center' }}>{`NFT Launch Pad for ${
-              networkName[networkID] || '...'
-            }`}</span>
+            <span
+              style={{ textAlign: 'center', fontSize: `${isMobile ? '25px' : '35px'}` }}
+            >{`NFT Launch Pad for ${networkName[networkID] || '...'}`}</span>
             {isMobile ? (
               <>
                 <br />
