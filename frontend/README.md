@@ -20,6 +20,24 @@ To get Metamask connected to Matic, please set the `Custom RPC` with the followi
 
 `npm i`
 
+## Configuration
+
+The config file (`frontend/.env`) contains the following params that need to be set:
+
+- `REACT_APP_ERC721_INFO_CONTRACT_ADDRESS`: deployed address of the contract `erc721/contracts/MorpheusNftManagerInfo.sol`
+
+- `REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS`: deployed address of the contract `erc721/contracts/MorpheusNftManager.sol`
+
+- `REACT_APP_BICONOMY_morpheusNftManagerDappApiId`: API ID of the Biconomy tx-relayer for the contract `REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS`
+
+- `REACT_APP_BICONOMY_morpheusNftManagerInfoDappApiId`: API ID of the Biconomy tx-relayer for the contract `REACT_APP_ERC721_INFO_CONTRACT_ADDRESS`
+
+**Notice**
+
+- Whenever the contracts are changed and re-deployed, the API ID of the Biconomy tx-relayer must be re-registered at here: https://dashboard.biconomy.io/
+
+- For how to deployment of contracts, please refer to this file `erc721/README.md`
+
 ## Deployment
 
 `pm2 start script_deploy.sh`
