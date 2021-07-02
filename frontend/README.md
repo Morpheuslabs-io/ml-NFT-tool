@@ -20,7 +20,7 @@ To get Metamask connected to Matic, please set the `Custom RPC` with the followi
 
 `npm i`
 
-## Configuration
+## Configuration (only for interacting with Matic network)
 
 The config file (`frontend/.env`) contains the following params that need to be set:
 
