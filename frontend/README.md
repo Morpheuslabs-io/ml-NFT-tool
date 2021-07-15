@@ -14,7 +14,7 @@ To get Metamask connected to Matic, please set the `Custom RPC` with the followi
 - `New RPC URL`: `https://rpc-mumbai.maticvigil.com` or `https://rpc-mainnet.maticvigil.com`
 - `Chain ID`: `80001` or `137`
 - `Currency symbol`: `MATIC`
-- `Block explorer URL`: `https://mumbai-explorer.matic.today` or `https://explorer-mainnet.maticvigil.com`
+- `Block explorer URL`: `https://mumbai.polygonscan.com/` or `https://polygonscan.com/`
 
 ## Installation
 
