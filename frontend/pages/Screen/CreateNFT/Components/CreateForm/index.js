@@ -50,8 +50,8 @@ const explorerLink = {
   4: 'https://rinkeby.etherscan.io',
   5: 'https://goerli.etherscan.io',
   42: 'https://kovan.etherscan.io',
-  80001: 'https://mumbai-explorer.matic.today',
-  137: 'https://explorer.matic.network',
+  80001: 'https://mumbai.polygonscan.com',
+  137: 'https://polygonscan.com',
 }
 
 const networkName = {
@@ -873,12 +873,8 @@ class CreateForm extends React.PureComponent {
   }
 
   getButtonLabel = () => {
-    const {
-      isMenuCreateCollection,
-      isMenuAddItem,
-      selectedCollection,
-      isAuthorizedForAddItem,
-    } = this.state
+    const { isMenuCreateCollection, isMenuAddItem, selectedCollection, isAuthorizedForAddItem } =
+      this.state
 
     if (isMenuCreateCollection) {
       return 'Create Collection'
