@@ -114,6 +114,9 @@ class CreateForm extends React.PureComponent {
     this.formRef = React.createRef()
     this.clr = null
     this.getItemTxList = this.getItemTxList.bind(this)
+    this.connectToMetaMask = this.connectToMetaMask.bind(this)
+    this.buyLandInErc20 = this.buyLandInErc20.bind(this)
+    this.buyLandInWeth = this.buyLandInWeth.bind(this)
   }
   componentDidMount() {
     this.metamaskWeb3Handle()
@@ -136,92 +139,77 @@ class CreateForm extends React.PureComponent {
     detectEthereumProvider()
       .then(async (provider) => {
         if (provider) {
-          if (provider !== window.ethereum) {
-            return notification.open({
-              message: 'Metamask conflict',
-              description: 'Do you have multiple wallets installed?',
-            })
-          } else {
-            const accounts = await ethereum.request({ method: 'eth_accounts' })
-            if (accounts.length === 0) {
-              this.clr = setInterval(async () => {
-                const accounts = await ethereum.request({ method: 'eth_accounts' })
-                if (accounts.length !== 0) {
-                  clearInterval(this.clr)
-                  window.location.reload()
-                }
-              }, 1000)
-              return notification.open({
-                message: 'Metamask is locked',
-                description: 'Please click the Metamask to unlock it',
-              })
-            } else {
-              const defaultAddress = accounts[0]
-              console.log(`defaultAddress:${defaultAddress}`)
-              this.erc721Contract = new Erc721Contract(defaultAddress)
-              this.erc1155Contract = new Erc1155Contract(defaultAddress)
-
-              if (erc721InfoContractAddress) {
-                this.erc721InfoContract = new Erc721InfoContract(
-                  defaultAddress,
-                  erc721InfoContractAddress,
-                )
-              } else {
-                this.erc721InfoContract = null
-              }
-
-              let contractGaslessOwner = null
-              if (erc721ContractGasless) {
-                contractGaslessOwner = await this.erc721Contract.owner(erc721ContractGasless)
-              }
-
-              let networkID = await ethereum.request({ method: 'eth_chainId' })
-              networkID = web3Utils.hexToNumber(networkID)
-              console.log('networkID:', networkID)
-              this.setState({
-                networkID,
-                address: defaultAddress,
-                isOwner:
-                  contractGaslessOwner &&
-                  web3Utils.toChecksumAddress(contractGaslessOwner) ===
-                    web3Utils.toChecksumAddress(defaultAddress),
-              })
-              const gasPriceGwei = await this.queryGasPrice(networkID)
-              gasPrice = gasPriceGwei * Math.pow(10, 9)
-
-              window.ethereum.on('chainChanged', (chainId) => {
-                if (chainId !== this.state.networkID) {
-                  notification.open({
-                    message: 'Metamask network changed',
-                    description: 'Reload is to happen',
-                  })
-                  setTimeout(() => {
-                    window.location.reload()
-                  }, 1000)
-                }
-              })
-
-              ethereum.on('accountsChanged', (accounts) => {
-                if (accounts[0] !== this.state.address) {
-                  notification.open({
-                    message: 'Metamask account changed',
-                    description: 'Reload is to happen',
-                  })
-                  setTimeout(() => {
-                    window.location.reload()
-                  }, 1000)
-                }
-              })
-            }
+          const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+          if (accounts.length > 0) {
+            const defaultAddress = accounts[0]
+            this.setState({
+              address: defaultAddress
+            });
+            this.initNetwork(defaultAddress);
           }
-        } else {
-          notification.open({
-            message: 'Metamask is not available',
-            description: 'Please install Metamask on your web browser',
+
+          window.ethereum.on('chainChanged', (chainId) => {
+            if (chainId !== this.state.networkID) {
+              notification.open({
+                message: 'Metamask network changed',
+                description: 'Reload is to happen',
+              })
+              setTimeout(() => {
+                window.location.reload()
+              }, 1000)
+            }
+          })
+
+          ethereum.on('accountsChanged', (accounts) => {
+            if (accounts[0] !== this.state.address) {
+              notification.open({
+                message: 'Metamask account changed',
+                description: 'Reload is to happen',
+              })
+              setTimeout(() => {
+                window.location.reload()
+              }, 1000)
+            }
           })
         }
       })
       .catch((err) => console.error(err))
+  }
+
+  async initNetwork(defaultAddress) {
+    console.log(`defaultAddress: ${defaultAddress}`)
+    this.setState({ address: defaultAddress })
+
+    this.erc721Contract = new Erc721Contract(defaultAddress)
+    this.erc1155Contract = new Erc1155Contract(defaultAddress)
+
+    if (erc721InfoContractAddress) {
+      this.erc721InfoContract = new Erc721InfoContract(
+        defaultAddress,
+        erc721InfoContractAddress,
+      )
+    } else {
+      this.erc721InfoContract = null
+    }
+
+    let contractGaslessOwner = null
+    if (erc721ContractGasless) {
+      contractGaslessOwner = await this.erc721Contract.owner(erc721ContractGasless)
+    }
+
+    let networkID = await ethereum.request({ method: 'eth_chainId' })
+    networkID = web3Utils.hexToNumber(networkID)
+    console.log('networkID:', networkID)
+    this.setState({
+      networkID,
+      isOwner:
+        contractGaslessOwner &&
+        web3Utils.toChecksumAddress(contractGaslessOwner) ===
+          web3Utils.toChecksumAddress(defaultAddress),
+    })
+    const gasPriceGwei = await this.queryGasPrice(networkID)
+    gasPrice = gasPriceGwei * Math.pow(10, 9)
+
   }
 
   onMainMenuChange = (value) => {
@@ -1296,6 +1284,48 @@ class CreateForm extends React.PureComponent {
     }
   }
 
+  connectToMetaMask() {
+    console.log('connect');
+    // this.metamaskWeb3Handle();
+    detectEthereumProvider()
+      .then(async (provider) => {
+        if (provider) {
+          if (provider !== window.ethereum) {
+            return notification.open({
+              message: 'Metamask conflict',
+              description: 'Do you have multiple wallets installed?',
+            })
+          } else {
+            const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+            if (accounts.length === 0) {
+              this.clr = setInterval(async () => {
+                const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+                if (accounts.length !== 0) {
+                  clearInterval(this.clr)
+                  window.location.reload()
+                }
+              }, 1000)
+              return notification.open({
+                message: 'Metamask is locked',
+                description: 'Please click the Metamask to unlock it',
+              })
+            } else {
+              this.initNetwork(accounts[0])
+            }
+          }
+        }
+      })
+      .catch((err) => console.error(err))
+  }
+
+  buyLandInWeth() {
+    console.log('weth');
+  }
+
+  buyLandInErc20() {
+    console.log('erc20');
+  }
+
   render() {
     const {
       nftOpResult,
@@ -1438,6 +1468,18 @@ class CreateForm extends React.PureComponent {
               </div>
             )}
           </Form>
+        </div>
+
+        <div className='action-section'>
+          <Button type='primary' htmlType='submit' className='ant-big-btn' disabled={!!this.state.address} onClick={this.connectToMetaMask}>
+            Connect to MetaMask
+          </Button>
+          <Button type='primary' htmlType='submit' className='ant-big-btn' onClick={this.buyLandInWeth}>
+            Buy Land In WETH
+          </Button>
+          <Button type='primary' htmlType='submit' className='ant-big-btn' onClick={this.buyLandInErc20}>
+            Buy Land In ERC20
+          </Button>
         </div>
       </div>
     )

@@ -2,11 +2,20 @@
 @import 'pages/Style/variable.scss';
 
 .create-form-container {
-  #create-nft {
+  #create-nft, .action-section {
     padding: 50px;
     background: #f9faff;
     // border: 1px solid rgba(242, 201, 76, 0.3);
     box-sizing: border-box;
     // border-radius: 10px;
+  }
+
+  .action-section {
+    button {
+      margin: 0px 5px;
+    }
+    button:first-child {
+      margin-left: 0px;
+  }
   }
 }
