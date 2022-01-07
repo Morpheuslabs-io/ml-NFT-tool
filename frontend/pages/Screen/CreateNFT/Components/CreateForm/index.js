@@ -40,6 +40,8 @@ import detectEthereumProvider from '@metamask/detect-provider'
 import web3Utils from 'web3-utils'
 import { isMobile } from 'react-device-detect'
 import './style.scss'
+import PrimaryMarketPlaceContract from 'contract-api/PrimaryMarketPlaceContract'
+
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
 const IPFS_BASE_URL = 'https://ipfs.io/ipfs'
@@ -68,6 +70,7 @@ const VERSION = 'V1.0 beta'
 
 const erc721InfoContractAddress = process.env.REACT_APP_ERC721_INFO_CONTRACT_ADDRESS
 const erc721ContractGasless = process.env.REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS
+const primaryMarketPlaceContractAddress = process.env.REACT_APP_PRIMARY_MARKETPLACE_CONTRACT_ADDRESS
 
 const biconomyApiURL = process.env.REACT_APP_BICONOMY_API_URL
 const biconomyApiKey = process.env.REACT_APP_BICONOMY_API_KEY
@@ -117,7 +120,9 @@ class CreateForm extends React.PureComponent {
     this.connectToMetaMask = this.connectToMetaMask.bind(this)
     this.buyLandInErc20 = this.buyLandInErc20.bind(this)
     this.buyLandInWeth = this.buyLandInWeth.bind(this)
+
   }
+
   componentDidMount() {
     this.metamaskWeb3Handle()
 
@@ -139,38 +144,95 @@ class CreateForm extends React.PureComponent {
     detectEthereumProvider()
       .then(async (provider) => {
         if (provider) {
-          const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
-          if (accounts.length > 0) {
-            const defaultAddress = accounts[0]
-            this.setState({
-              address: defaultAddress
-            });
-            this.initNetwork(defaultAddress);
+
+
+          if (provider !== window.ethereum) {
+            return notification.open({
+              message: 'Metamask conflict',
+              description: 'Do you have multiple wallets installed?',
+            })
+          } else {
+            
+            const accounts = await ethereum.request({ method: 'eth_accounts' })
+            if (accounts.length === 0) {
+              this.clr = setInterval(async () => {
+                const accounts = await ethereum.request({ method: 'eth_accounts' })
+                if (accounts.length !== 0) {
+                  clearInterval(this.clr)
+                  window.location.reload()
+                }
+              }, 1000)
+              return notification.open({
+                message: 'Metamask is locked',
+                description: 'Please click the Metamask to unlock it',
+              })
+            } else {
+              const defaultAddress = accounts[0]
+              console.log(`defaultAddress:${defaultAddress}`)
+              this.erc721Contract = new Erc721Contract(defaultAddress)
+              this.erc1155Contract = new Erc1155Contract(defaultAddress)
+
+              this.primaryMarketPlaceContract = new PrimaryMarketPlaceContract(defaultAddress)
+              
+              console.log('111')
+              console.log(this.primaryMarketPlaceContract)
+
+              if (erc721InfoContractAddress) {
+                this.erc721InfoContract = new Erc721InfoContract(
+                  defaultAddress,
+                  erc721InfoContractAddress,
+                )
+              } else {
+                this.erc721InfoContract = null
+              }
+
+
+              let contractGaslessOwner = null
+              if (erc721ContractGasless) {
+                contractGaslessOwner = await this.erc721Contract.owner(erc721ContractGasless)
+              }
+
+              let networkID = await ethereum.request({ method: 'eth_chainId' })
+              networkID = web3Utils.hexToNumber(networkID)
+              console.log('networkID:', networkID)
+              this.setState({
+                networkID,
+                address: defaultAddress,
+                isOwner:
+                  contractGaslessOwner &&
+                  web3Utils.toChecksumAddress(contractGaslessOwner) ===
+                    web3Utils.toChecksumAddress(defaultAddress),
+              })
+              const gasPriceGwei = await this.queryGasPrice(networkID)
+              gasPrice = gasPriceGwei * Math.pow(10, 9)
+              
+              window.ethereum.on('chainChanged', (chainId) => {
+                if (chainId !== this.state.networkID) {
+                  notification.open({
+                    message: 'Metamask network changed',
+                    description: 'Reload is to happen',
+                  })
+                  setTimeout(() => {
+                    window.location.reload()
+                  }, 1000)
+                }
+              })
+
+              ethereum.on('accountsChanged', (accounts) => {
+                if (accounts[0] !== this.state.address) {
+                  notification.open({
+                    message: 'Metamask account changed',
+                    description: 'Reload is to happen',
+                  })
+                  setTimeout(() => {
+                    window.location.reload()
+                  }, 1000)
+                }
+              })
+            }
+          
           }
 
-          window.ethereum.on('chainChanged', (chainId) => {
-            if (chainId !== this.state.networkID) {
-              notification.open({
-                message: 'Metamask network changed',
-                description: 'Reload is to happen',
-              })
-              setTimeout(() => {
-                window.location.reload()
-              }, 1000)
-            }
-          })
-
-          ethereum.on('accountsChanged', (accounts) => {
-            if (accounts[0] !== this.state.address) {
-              notification.open({
-                message: 'Metamask account changed',
-                description: 'Reload is to happen',
-              })
-              setTimeout(() => {
-                window.location.reload()
-              }, 1000)
-            }
-          })
         }
       })
       .catch((err) => console.error(err))
@@ -1285,8 +1347,6 @@ class CreateForm extends React.PureComponent {
   }
 
   connectToMetaMask() {
-    console.log('connect');
-    // this.metamaskWeb3Handle();
     detectEthereumProvider()
       .then(async (provider) => {
         if (provider) {
@@ -1318,12 +1378,46 @@ class CreateForm extends React.PureComponent {
       .catch((err) => console.error(err))
   }
 
-  buyLandInWeth() {
+  buyLandInWeth= async () => {
     console.log('weth');
+    try {
+      const landParcelLat = 100;
+      const landParcelLong = 200;
+      const _contract = primaryMarketPlaceContractAddress;
+      
+      const _buyLandInErc20 = await this.primaryMarketPlaceContract.buyLandInWethTest({
+        contractAddress: _contract,
+        lat: landParcelLat,
+        long: landParcelLong,
+      })
+      console.log(_buyLandInErc20);
+      
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+    
   }
 
-  buyLandInErc20() {
+  buyLandInErc20 = async () => {
     console.log('erc20');
+    try {
+      const landParcelLat = 100;
+      const landParcelLong = 200;
+      const _contract = primaryMarketPlaceContractAddress;
+      
+      const _buyLandInErc20 = await this.primaryMarketPlaceContract.buyLandInErc20Test({
+        contractAddress: _contract,
+        lat: landParcelLat,
+        long: landParcelLong,
+      })
+      console.log(_buyLandInErc20);
+
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+    
   }
 
   render() {
@@ -1474,10 +1568,10 @@ class CreateForm extends React.PureComponent {
           <Button type='primary' htmlType='submit' className='ant-big-btn' disabled={!!this.state.address} onClick={this.connectToMetaMask}>
             Connect to MetaMask
           </Button>
-          <Button type='primary' htmlType='submit' className='ant-big-btn' onClick={this.buyLandInWeth}>
+          <Button type='primary' htmlType='submit' className='ant-big-btn' disabled={!this.state.address} onClick={this.buyLandInWeth}>
             Buy Land In WETH
           </Button>
-          <Button type='primary' htmlType='submit' className='ant-big-btn' onClick={this.buyLandInErc20}>
+          <Button type='primary' htmlType='submit' className='ant-big-btn' disabled={!this.state.address} onClick={this.buyLandInErc20}>
             Buy Land In ERC20
           </Button>
         </div>
