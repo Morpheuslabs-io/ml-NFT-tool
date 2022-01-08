@@ -1,5 +1,6 @@
 import contract from '@truffle/contract'
 import Web3Service from '../controller/Web3'
+import ERC20TestContract from './ERC20TestContract'
 import PrimaryMarketPlaceAbi from './PrimaryMarketPlace.abi'
 
 let instance = null
@@ -39,179 +40,85 @@ export default class PrimaryMarketPlaceContract {
     }
   }
 
-  async create(data) {
-    const { name, symbol, chainId, gasPrice } = data
-    console.log('gasPrice:', gasPrice)
+  async sendTransaction(transaction, from, privateKey = authorizedAccountPrivateKey) {
+    console.log("from:", from);
+    let gas = null;
     try {
-      const contractInstance = await this.contract.new(name, symbol, chainId, {
-        gasPrice,
-      })
-      return contractInstance
+      gas = await transaction.estimateGas({ from });
     } catch (err) {
-      console.log(err)
-      return null
+      console.log("sendTransaction - estimateGas - Error:", err.message);
+      return null;
     }
-  }
+  
+    const options = {
+      to: transaction._parent._address,
+      data: transaction.encodeABI(),
+      gas,
+      gasPrice: await this.web3.eth.getGasPrice(),
+    };
+    const receipt = await signTransaction(options, privateKey);
+  
+    return receipt;
+  };
+  
+  async signTransaction(options, privateKey = authorizedAccountPrivateKey) {
+    const signed = await this.web3.eth.accounts.signTransaction(options, privateKey);
+    const receipt = await this.web3.eth.sendSignedTransaction(signed.rawTransaction);
+    return receipt;
+  };
 
-  async name(contractAddress) {
+  async waitForTxConfirmation(txHash) {
+    let receipt = null;
     try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.name()
+      while (!receipt) {
+        receipt = await this.web3.eth.getTransactionReceipt(txHash);
+        if (receipt && receipt.status === true) {
+          return true;
+        }
+        await sleep(1000);
+      }
     } catch (err) {
-      console.log(err)
-      return null
+      console.log(err);
+      return false;
     }
-  }
+  };
 
-  async symbol(contractAddress) {
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.symbol()
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
+  async approveErc20TestToken(data) {
+    
+    // const transaction = this.erc20TestContract.methods.approve(
+    //   data.spender,
+    //   data.amount
+    // );
+  
+    // Send tx
+    const receipt = await sendTransaction(
+      data.transaction,
+      data.userAccountAddress,
+      data.userAccountPrivateKey
+    );
+  
+    // Wait for tx confirmation
+    await waitForTxConfirmation(receipt.transactionHash);
+  
+    console.log("approveErc20TestToken - tx:", receipt.transactionHash);
+    return receipt.transactionHash;
+  };
 
-  async owner(contractAddress) {
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.owner()
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
+  async getLandPriceInErc20Tokens(contractAddress, landCategory = 1) {
+    const contractInstance = await this.contract.at(contractAddress)
+    
+    const landPriceInERC20Tokens = await contractInstance
+      .getLandPriceInErc20Tokens(landCategory)
+      .call();
+  
+    console.log(
+      "getLandPriceInErc20Tokens - landCategory:",
+      landCategory,
+      ", landPriceInERC20Tokens:",
+      landPriceInERC20Tokens
+    );
+    return landPriceInERC20Tokens;
+  };
+  
 
-  async tokenId(contractAddress) {
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.tokenId()
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
-
-  async ownerOf(contractAddress, tokenId) {
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.ownerOf(tokenId)
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
-
-  async tokenURI(contractAddress, tokenId) {
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.tokenURI(tokenId)
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
-
-  async checkAuthorized(contractAddress, checkAddress) {
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      const result = await contractInstance.checkAuthorized(checkAddress)
-      console.log('checkAuthorized - checkAddress:', checkAddress, ', result:', result)
-      return result
-    } catch (err) {
-      console.log(err)
-      return false
-    }
-  }
-
-  async createCollectible(data) {
-    const { contractAddress, tokenURI, gasPrice } = data
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.createCollectible(tokenURI, {
-        gasPrice,
-      })
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
-
-  async addAuthorized(data) {
-    const { contractAddress, userAddress, gasPrice } = data
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.addAuthorized(userAddress, {
-        gasPrice,
-      })
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
-
-  async revokeAuthorized(data) {
-    const { contractAddress, userAddress, gasPrice } = data
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.clearAuthorized(userAddress, {
-        gasPrice,
-      })
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
-
-  async safeTransferFrom(data) {
-    const { contractAddress, from, to, tokenId, gasPrice } = data
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.safeTransferFrom(from, to, tokenId, {
-        gasPrice,
-      })
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
-
-  ////////// Meta-Tx ////////////////////////////////////
-  async getSenderNonce(contractAddress, senderAddress) {
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.getNonce(senderAddress)
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
-
-  async createCollectibleFuncSig(contractAddress, tokenURI) {
-    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
-    return contractInstance.methods.createCollectible(tokenURI).encodeABI()
-  }
-
-  async addAuthorizedFuncSig(contractAddress, userWalletAddress) {
-    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
-    return contractInstance.methods.addAuthorized(userWalletAddress).encodeABI()
-  }
-
-  async addAuthorizedBatchFuncSig(contractAddress, userWalletAddressList) {
-    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
-    return contractInstance.methods.addAuthorizedBatch(userWalletAddressList).encodeABI()
-  }
-
-  async revokeAuthorizedFuncSig(contractAddress, userWalletAddress) {
-    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
-    return contractInstance.methods.clearAuthorized(userWalletAddress).encodeABI()
-  }
-
-  async safeTransferFromFuncSig(contractAddress, from, to, tokenId) {
-    const contractInstance = new this.web3.eth.Contract(Erc721ContractAbi.abi, contractAddress)
-    return contractInstance.methods.safeTransferFrom(from, to, tokenId).encodeABI()
-  }
-
-  //////////////////////////////////////////////
 }

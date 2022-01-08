@@ -41,6 +41,7 @@ import web3Utils from 'web3-utils'
 import { isMobile } from 'react-device-detect'
 import './style.scss'
 import PrimaryMarketPlaceContract from 'contract-api/PrimaryMarketPlaceContract'
+import ERC20TestContract from 'contract-api/ERC20TestContract'
 
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
@@ -173,9 +174,10 @@ class CreateForm extends React.PureComponent {
               this.erc1155Contract = new Erc1155Contract(defaultAddress)
 
               this.primaryMarketPlaceContract = new PrimaryMarketPlaceContract(defaultAddress)
+              this.erc20TestContract = new ERC20TestContract(defaultAddress)
               
               console.log('111')
-              console.log(this.primaryMarketPlaceContract)
+              console.log(this.erc20TestContract)
 
               if (erc721InfoContractAddress) {
                 this.erc721InfoContract = new Erc721InfoContract(
@@ -1402,16 +1404,51 @@ class CreateForm extends React.PureComponent {
   buyLandInErc20 = async () => {
     console.log('erc20');
     try {
-      const landParcelLat = 100;
-      const landParcelLong = 200;
-      const _contract = primaryMarketPlaceContractAddress;
-      
-      const _buyLandInErc20 = await this.primaryMarketPlaceContract.buyLandInErc20Test({
-        contractAddress: _contract,
-        lat: landParcelLat,
-        long: landParcelLong,
-      })
-      console.log(_buyLandInErc20);
+      const data = {
+        landParcelLat: `${22 * 10 ** 6}`,
+        landParcelLong: `${32 * 10 ** 6}`,
+        userAccountAddress: this.state.address,
+        userAccountPrivateKey: `bc8acd99be9fca75bd3955a8f0681b145a6feb8f029350f76d1606547d138485`,
+      };
+
+      console.log('----: getLandPriceInErc20Tokens')
+      const _landCategory = 1;
+      const landPriceInERC20Tokens = await this.primaryMarketPlaceContract.getLandPriceInErc20Tokens(primaryMarketPlaceContractAddress, _landCategory); //.call();
+
+      console.log('----: erc20TestContract.methods.approve')
+      const transactionApproval = this.erc20TestContract.methods.approve(
+        primaryMarketPlaceContractAddress,
+        landPriceInERC20Tokens
+      );
+
+      console.log('----: primaryMarketPlaceContract.approveErc20TestToken')
+      await this.primaryMarketPlaceContract.approveErc20TestToken({
+        transaction: transactionApproval,
+        spender: primaryMarketPlaceContractAddress,
+        amount: landPriceInERC20Tokens,
+        userAccountAddress: data.userAccountAddress,
+        userAccountPrivateKey: data.userAccountPrivateKey,
+      });
+    
+      console.log('----: primaryMarketPlaceContract.buyLandInERC20')
+      const transactionInErc20 = await this.primaryMarketPlaceContract.buyLandInERC20(
+        data.landParcelLat,
+        data.landParcelLong
+      );
+    
+      // Send tx
+      console.log('----: primaryMarketPlaceContract.sendTransaction')
+      const receipt = await this.primaryMarketPlaceContract.sendTransaction(
+        transactionInErc20,
+        data.userAccountAddress,
+        data.userAccountPrivateKey
+      );
+    
+      // Wait for tx confirmation
+      console.log('----: waitForTxConfirmation')
+      await this.primaryMarketPlaceContract.waitForTxConfirmation(receipt.transactionHash);
+    
+      console.log("buyLandInERC20 - tx:", receipt.transactionHash);
 
     } catch (err) {
       console.log(err)
