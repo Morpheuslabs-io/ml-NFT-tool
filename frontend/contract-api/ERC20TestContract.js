@@ -6,15 +6,9 @@ import ERC20TestAbi from './ERC20Test.abi'
 let instance = null
 
 export default class ERC20TestContract {
-  constructor(defaultAddress) {
-    if (!instance) {
-      instance = this
-      this.web3 = Web3Service.getWeb3()
-      this.contract = contract(ERC20TestAbi)
-      this.contract.setProvider(this.web3.currentProvider)
-      this.contract.defaults({ from: defaultAddress })
-    }
-
+  constructor(contractAddress) {
+    this.web3 = Web3Service.getWeb3()
+    this.contract = new this.web3.eth.Contract(ERC20TestAbi, contractAddress);
     return instance
   }
 
@@ -22,17 +16,10 @@ export default class ERC20TestContract {
     const { contractAddress, landPriceInERC20Tokens } = data
 
     try {
-      while (!receipt) {
-        result = await this.web3.eth.approve(contractAddress, landPriceInERC20Tokens);
-        if (receipt && result.status === true) {
-          return true;
-        }
-        await sleep(1000);
-      }
+      return this.contract.methods.approve(contractAddress, landPriceInERC20Tokens);
     } catch (err) {
-      console.log(err);
-      return false;
+      console.log(err)
+      return null
     }
-  };
-  
+  }
 }

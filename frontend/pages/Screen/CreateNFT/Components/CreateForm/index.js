@@ -72,6 +72,7 @@ const VERSION = 'V1.0 beta'
 const erc721InfoContractAddress = process.env.REACT_APP_ERC721_INFO_CONTRACT_ADDRESS
 const erc721ContractGasless = process.env.REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS
 const primaryMarketPlaceContractAddress = process.env.REACT_APP_PRIMARY_MARKETPLACE_CONTRACT_ADDRESS
+const erc20TestContractAddress = process.env.ERC20_TEST_TOKEN_ADDRESS
 
 const biconomyApiURL = process.env.REACT_APP_BICONOMY_API_URL
 const biconomyApiKey = process.env.REACT_APP_BICONOMY_API_KEY
@@ -145,15 +146,12 @@ class CreateForm extends React.PureComponent {
     detectEthereumProvider()
       .then(async (provider) => {
         if (provider) {
-
-
           if (provider !== window.ethereum) {
             return notification.open({
               message: 'Metamask conflict',
               description: 'Do you have multiple wallets installed?',
             })
           } else {
-            
             const accounts = await ethereum.request({ method: 'eth_accounts' })
             if (accounts.length === 0) {
               this.clr = setInterval(async () => {
@@ -173,11 +171,14 @@ class CreateForm extends React.PureComponent {
               this.erc721Contract = new Erc721Contract(defaultAddress)
               this.erc1155Contract = new Erc1155Contract(defaultAddress)
 
-              this.primaryMarketPlaceContract = new PrimaryMarketPlaceContract(defaultAddress)
-              this.erc20TestContract = new ERC20TestContract(defaultAddress)
+              // Init Primary Market place and ERC20
+              this.primaryMarketPlaceContract = new PrimaryMarketPlaceContract(primaryMarketPlaceContractAddress)
+              this.erc20TestContract = new ERC20TestContract(erc20TestContractAddress )
               
-              console.log('111')
-              console.log(this.erc20TestContract)
+              console.log( this.primaryMarketPlaceContract)
+              console.log('----===--')
+              console.log( erc20TestContractAddress )
+              console.log( this.erc20TestContract)
 
               if (erc721InfoContractAddress) {
                 this.erc721InfoContract = new Erc721InfoContract(
@@ -187,7 +188,6 @@ class CreateForm extends React.PureComponent {
               } else {
                 this.erc721InfoContract = null
               }
-
 
               let contractGaslessOwner = null
               if (erc721ContractGasless) {
@@ -1402,7 +1402,7 @@ class CreateForm extends React.PureComponent {
   }
 
   buyLandInErc20 = async () => {
-    console.log('erc20');
+    console.log('erc20 time: ' + new Date().toISOString());
     try {
       const data = {
         landParcelLat: `${22 * 10 ** 6}`,
@@ -1410,18 +1410,19 @@ class CreateForm extends React.PureComponent {
         userAccountAddress: this.state.address,
         userAccountPrivateKey: `bc8acd99be9fca75bd3955a8f0681b145a6feb8f029350f76d1606547d138485`,
       };
-
-      console.log('----: getLandPriceInErc20Tokens')
+      
       const _landCategory = 1;
-      const landPriceInERC20Tokens = await this.primaryMarketPlaceContract.getLandPriceInErc20Tokens(primaryMarketPlaceContractAddress, _landCategory); //.call();
+      const landPriceInERC20Tokens = await this.primaryMarketPlaceContract.getLandPriceInErc20Tokens(_landCategory);
 
-      console.log('----: erc20TestContract.methods.approve')
-      const transactionApproval = this.erc20TestContract.methods.approve(
-        primaryMarketPlaceContractAddress,
+      console.log('----: erc20TestContract.methods.approve. '  + new Date().toISOString() + ' . landPriceInERC20Tokens: ' + landPriceInERC20Tokens)
+      const transactionApproval = this.erc20TestContract.approve(
+        this.state.address,
         landPriceInERC20Tokens
       );
 
-      console.log('----: primaryMarketPlaceContract.approveErc20TestToken')
+      console.log('----: primaryMarketPlaceContract.approveErc20TestToken. '  + new Date().toISOString())
+      console.log('=--')
+      console.log(this.primaryMarketPlaceContract)
       await this.primaryMarketPlaceContract.approveErc20TestToken({
         transaction: transactionApproval,
         spender: primaryMarketPlaceContractAddress,
@@ -1430,14 +1431,14 @@ class CreateForm extends React.PureComponent {
         userAccountPrivateKey: data.userAccountPrivateKey,
       });
     
-      console.log('----: primaryMarketPlaceContract.buyLandInERC20')
+      console.log('----: primaryMarketPlaceContract.buyLandInERC20. '  + new Date().toISOString())
       const transactionInErc20 = await this.primaryMarketPlaceContract.buyLandInERC20(
         data.landParcelLat,
         data.landParcelLong
       );
     
       // Send tx
-      console.log('----: primaryMarketPlaceContract.sendTransaction')
+      console.log('----: primaryMarketPlaceContract.sendTransaction. ' + '. ' + new Date().toISOString() + ' TxInErc20: ' + transactionInErc20 )
       const receipt = await this.primaryMarketPlaceContract.sendTransaction(
         transactionInErc20,
         data.userAccountAddress,
@@ -1445,10 +1446,10 @@ class CreateForm extends React.PureComponent {
       );
     
       // Wait for tx confirmation
-      console.log('----: waitForTxConfirmation')
+      console.log('----: waitForTxConfirmation. '  + new Date().toISOString())
       await this.primaryMarketPlaceContract.waitForTxConfirmation(receipt.transactionHash);
     
-      console.log("buyLandInERC20 - tx:", receipt.transactionHash);
+      console.log("buyLandInERC20 - tx: " + receipt.transactionHash + '. Done at:'  + new Date().toISOString());
 
     } catch (err) {
       console.log(err)
