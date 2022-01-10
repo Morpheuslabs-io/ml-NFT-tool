@@ -5,7 +5,7 @@ import PrimaryMarketPlaceAbi from './PrimaryMarketPlace.abi'
 
 let instance = null
 
-export default class PrimaryMarketPlaceContract {
+export default class WethTestContract {
   constructor(contractAddress) {
       instance = this
       this.web3 = Web3Service.getWeb3()
@@ -14,26 +14,26 @@ export default class PrimaryMarketPlaceContract {
   }
 
   // Launch a brandnew NFT token
-  // async buyLandInErc20Test(data) {
-  //   const { contractAddress, lat, long } = data
-  //   try {
-  //     const contractInstance = await this.contract.at(contractAddress)
-  //     return contractInstance.buyLandInERC20(lat, long)
-  //   } catch (err) {
-  //     console.log(err)
-  //     return null
-  //   }
-  // }
-  // async buyLandInWethTest(data) {
-  //   const { contractAddress, lat, long } = data
-  //   try {
-  //     const contractInstance = await this.contract.at(contractAddress)
-  //     return contractInstance.buyLandInWETH(lat, long)
-  //   } catch (err) {
-  //     console.log(err)
-  //     return null
-  //   }
-  // }
+  async buyLandInErc20Test(data) {
+    const { contractAddress, lat, long } = data
+    try {
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.buyLandInERC20(lat, long)
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+  async buyLandInWethTest(data) {
+    const { contractAddress, lat, long } = data
+    try {
+      const contractInstance = await this.contract.at(contractAddress)
+      return contractInstance.buyLandInWETH(lat, long)
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
 
   async sendTransaction(transaction, from, privateKey = authorizedAccountPrivateKey) {
     console.log("from:", from);
@@ -127,58 +127,6 @@ export default class PrimaryMarketPlaceContract {
     );
     return landPriceInERC20Tokens;
   };
+  
 
-  // WETH
-  async getLandPriceInWethTokens(landCategory) {
-    const landPriceInWethTokens = await this.contract.methods.getLandPriceInWETH(landCategory).call();
-  
-    console.log(
-      "getLandPriceInErc20Tokens - landCategory:",
-      landCategory,
-      ", landPriceInERC20Tokens:",
-      landPriceInWethTokens
-    );
-    return landPriceInWethTokens;
-  };
-
-  async approveWethTestToken() {
-    const transaction = wethTokenContract.methods.approve(
-    data.spender,
-    data.amount
-  );
-
-  // Send tx
-  const receipt = await sendTransaction(
-    transaction,
-    data.userAccountAddress,
-    data.userAccountPrivateKey
-  );
-
-  // Wait for tx confirmation
-  await waitForTxConfirmation(receipt.transactionHash);
-
-  console.log("approveWETH - tx:", receipt.transactionHash);
-  return receipt.transactionHash;
-  };
-  
-  async buyLandInWETH(data) {
-    const transaction = primaryMarketPlaceContract.methods.buyLandInWETH(
-      data.landParcelLat,
-      data.landParcelLong
-    );
-  
-    // Send tx
-    const receipt = await this.sendTransaction(
-      transaction,
-      data.userAccountAddress,
-      data.userAccountPrivateKey
-    );
-  
-    // Wait for tx confirmation
-    await this.waitForTxConfirmation(receipt.transactionHash);
-  
-    console.log("buyLandInWETH - tx:", receipt.transactionHash);
-    return receipt.transactionHash;
-  };
-  
 }
