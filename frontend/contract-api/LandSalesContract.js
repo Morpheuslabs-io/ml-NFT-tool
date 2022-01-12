@@ -1,15 +1,15 @@
 import contract from '@truffle/contract'
 import Web3Service from '../controller/Web3'
-import PrimaryMarketPlaceAbi from './PrimaryMarketPlace.abi'
+import LandSalesAbi from './LandSales.abi'
 
 
 let instance = null
 
-export default class PrimaryMarketPlaceContract {
+export default class LandSalesContract {
   constructor(contractAddress) {
       instance = this
       this.web3 = Web3Service.getWeb3()
-      this.contract = new this.web3.eth.Contract(PrimaryMarketPlaceAbi, contractAddress);
+      this.contract = new this.web3.eth.Contract(LandSalesAbi, contractAddress);
     return instance
   }
 

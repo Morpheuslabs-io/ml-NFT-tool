@@ -40,7 +40,7 @@ import detectEthereumProvider from '@metamask/detect-provider'
 import web3Utils from 'web3-utils'
 import { isMobile } from 'react-device-detect'
 import './style.scss'
-import PrimaryMarketPlaceContract from 'contract-api/PrimaryMarketPlaceContract'
+import LandSalesContract from 'contract-api/LandSalesContract'
 import ERC20TestContract from 'contract-api/ERC20TestContract'
 
 
@@ -71,7 +71,7 @@ const VERSION = 'V1.0 beta'
 
 const erc721InfoContractAddress = process.env.REACT_APP_ERC721_INFO_CONTRACT_ADDRESS
 const erc721ContractGasless = process.env.REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS
-const primaryMarketPlaceContractAddress = process.env.REACT_APP_PRIMARY_MARKETPLACE_CONTRACT_ADDRESS
+const landSalesContractAddress = process.env.LAND_SALES_CONTRACT_ADDRESS
 const erc20TestContractAddress = process.env.ERC20_TEST_TOKEN_ADDRESS
 const wethTestContractAddress = process.env.WETH_TOKEN_ADDRESS
 
@@ -173,11 +173,11 @@ class CreateForm extends React.PureComponent {
               this.erc1155Contract = new Erc1155Contract(defaultAddress)
 
               // Init Primary Market place and ERC20
-              this.primaryMarketPlaceContract = new PrimaryMarketPlaceContract(primaryMarketPlaceContractAddress)
+              this.landSalesContract = new LandSalesContract(landSalesContractAddress)
               this.erc20TestContract = new ERC20TestContract(erc20TestContractAddress)
               this.wethTestContract = new ERC20TestContract(wethTestContractAddress)
               
-              console.log( this.primaryMarketPlaceContract)
+              console.log( this.landSalesContract)
               console.log('----===--')
               console.log( erc20TestContractAddress )
               console.log( this.erc20TestContract)
@@ -1393,7 +1393,7 @@ class CreateForm extends React.PureComponent {
       };
       
       const _landCategory = 1;
-      const landPriceInWethTokens = await this.primaryMarketPlaceContract.getLandPriceInWethTokens(_landCategory);
+      const landPriceInWethTokens = await this.landSalesContract.getLandPriceInWethTokens(_landCategory);
 
       console.log('----: wethTestContract.methods.approve. '  + new Date().toISOString() + ' . landPriceInWethTokens: ' + landPriceInWethTokens)
       const transactionApproval = this.wethTestContract.approve(
@@ -1401,24 +1401,24 @@ class CreateForm extends React.PureComponent {
         landPriceInWethTokens
       );
 
-      console.log('----: primaryMarketPlaceContract.approveWethTestToken. '  + new Date().toISOString())
-      await this.primaryMarketPlaceContract.approveWethTestToken({
+      console.log('----: landSalesContract.approveWethTestToken. '  + new Date().toISOString())
+      await this.landSalesContract.approveWethTestToken({
         transaction: transactionApproval,
-        spender: primaryMarketPlaceContractAddress,
+        spender: landSalesContractAddress,
         amount: landPriceInWethTokens,
         userAccountAddress: data.userAccountAddress,
         userAccountPrivateKey: data.userAccountPrivateKey,
       });
     
-      console.log('----: primaryMarketPlaceContract.buyLandInERC20. '  + new Date().toISOString())
-      const transactionInErc20 = await this.primaryMarketPlaceContract.buyLandInWETH(
+      console.log('----: landSalesContract.buyLandInERC20. '  + new Date().toISOString())
+      const transactionInErc20 = await this.landSalesContract.buyLandInWETH(
         data.landParcelLat,
         data.landParcelLong
       );
     
       // Send tx
-      console.log('----: primaryMarketPlaceContract.sendTransaction. ' + '. ' + new Date().toISOString() + ' TxInErc20: ' + transactionInErc20 )
-      const receipt = await this.primaryMarketPlaceContract.sendTransaction(
+      console.log('----: landSalesContract.sendTransaction. ' + '. ' + new Date().toISOString() + ' TxInErc20: ' + transactionInErc20 )
+      const receipt = await this.landSalesContract.sendTransaction(
         transactionInErc20,
         data.userAccountAddress,
         data.userAccountPrivateKey
@@ -1426,7 +1426,7 @@ class CreateForm extends React.PureComponent {
     
       // Wait for tx confirmation
       console.log('----: waitForTxConfirmation. '  + new Date().toISOString())
-      await this.primaryMarketPlaceContract.waitForTxConfirmation(receipt.transactionHash);
+      await this.landSalesContract.waitForTxConfirmation(receipt.transactionHash);
     
       console.log("buyLandInERC20 - tx: " + receipt.transactionHash + '. Done at:'  + new Date().toISOString());
     } catch (err) {
@@ -1447,7 +1447,7 @@ class CreateForm extends React.PureComponent {
       };
       
       const _landCategory = 1;
-      const landPriceInERC20Tokens = await this.primaryMarketPlaceContract.getLandPriceInErc20Tokens(_landCategory);
+      const landPriceInERC20Tokens = await this.landSalesContract.getLandPriceInErc20Tokens(_landCategory);
 
       console.log('----: erc20TestContract.methods.approve. '  + new Date().toISOString() + ' . landPriceInERC20Tokens: ' + landPriceInERC20Tokens)
       const transactionApproval = this.erc20TestContract.approve(
@@ -1455,24 +1455,24 @@ class CreateForm extends React.PureComponent {
         landPriceInERC20Tokens
       );
 
-      console.log('----: primaryMarketPlaceContract.approveErc20TestToken. '  + new Date().toISOString())
-      await this.primaryMarketPlaceContract.approveErc20TestToken({
+      console.log('----: landSalesContract.approveErc20TestToken. '  + new Date().toISOString())
+      await this.landSalesContract.approveErc20TestToken({
         transaction: transactionApproval,
-        spender: primaryMarketPlaceContractAddress,
+        spender: landSalesContractAddress,
         amount: landPriceInERC20Tokens,
         userAccountAddress: data.userAccountAddress,
         userAccountPrivateKey: data.userAccountPrivateKey,
       });
     
-      console.log('----: primaryMarketPlaceContract.buyLandInERC20. '  + new Date().toISOString())
-      const transactionInErc20 = await this.primaryMarketPlaceContract.buyLandInERC20(
+      console.log('----: landSalesContract.buyLandInERC20. '  + new Date().toISOString())
+      const transactionInErc20 = await this.landSalesContract.buyLandInERC20(
         data.landParcelLat,
         data.landParcelLong
       );
     
       // Send tx
-      console.log('----: primaryMarketPlaceContract.sendTransaction. ' + '. ' + new Date().toISOString() + ' TxInErc20: ' + transactionInErc20 )
-      const receipt = await this.primaryMarketPlaceContract.sendTransaction(
+      console.log('----: landSalesContract.sendTransaction. ' + '. ' + new Date().toISOString() + ' TxInErc20: ' + transactionInErc20 )
+      const receipt = await this.landSalesContract.sendTransaction(
         transactionInErc20,
         data.userAccountAddress,
         data.userAccountPrivateKey
@@ -1480,7 +1480,7 @@ class CreateForm extends React.PureComponent {
     
       // Wait for tx confirmation
       console.log('----: waitForTxConfirmation. '  + new Date().toISOString())
-      await this.primaryMarketPlaceContract.waitForTxConfirmation(receipt.transactionHash);
+      await this.landSalesContract.waitForTxConfirmation(receipt.transactionHash);
     
       console.log("buyLandInERC20 - tx: " + receipt.transactionHash + '. Done at:'  + new Date().toISOString());
     } catch (err) {
