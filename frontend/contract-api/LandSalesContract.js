@@ -10,6 +10,9 @@ export default class LandSalesContract {
       instance = this
       this.web3 = Web3Service.getWeb3()
       this.contract = new this.web3.eth.Contract(LandSalesAbi, contractAddress);
+
+      console.log('--: ' + LandSalesContract)
+      console.log(this.contract.methods)
     return instance
   }
 
@@ -40,8 +43,8 @@ export default class LandSalesContract {
     console.log('trans: ')
     console.log(transaction)
     
-    const trans = await transaction;
-    console.log(trans)
+    // const trans = await transaction;
+    // console.log(trans)
     // const 
 
     // transaction.then(async (res) => {
@@ -61,7 +64,7 @@ export default class LandSalesContract {
 
     let gas = null;
     try {
-      gas = await trans.estimateGas({ from });
+      gas = await transaction.estimateGas({ from });
       console.log("gas: ", gas);
     } catch (err) {
       console.log("sendTransaction - estimateGas - Error:", err.message);
@@ -116,8 +119,11 @@ export default class LandSalesContract {
     return receipt.transactionHash;
   };
 
-  async getLandPriceInErc20Tokens(landCategory) {
-    const landPriceInERC20Tokens = await this.contract.methods.getLandPriceInErc20Tokens(landCategory).call();
+  async getLandPriceInErc20Tokens(landCategory, userAccountAddress, gasPrice) {
+    console.log('getLandPriceInErc20Tokens - landCategory: ' + landCategory);
+    const landPriceInERC20Tokens = await this.contract.methods.getLandPriceInErc20Tokens(landCategory).call({
+      userAccountAddress, gasPrice
+    });
   
     console.log(
       "getLandPriceInErc20Tokens - landCategory:",
@@ -148,7 +154,7 @@ export default class LandSalesContract {
   );
 
   // Send tx
-  const receipt = await sendTransaction(
+  const receipt = await this.sendTransaction(
     transaction,
     data.userAccountAddress,
     data.userAccountPrivateKey

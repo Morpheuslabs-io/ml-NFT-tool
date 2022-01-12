@@ -176,11 +176,6 @@ class CreateForm extends React.PureComponent {
               this.landSalesContract = new LandSalesContract(landSalesContractAddress)
               this.erc20TestContract = new ERC20TestContract(erc20TestContractAddress)
               this.wethTestContract = new ERC20TestContract(wethTestContractAddress)
-              
-              console.log( this.landSalesContract)
-              console.log('----===--')
-              console.log( erc20TestContractAddress )
-              console.log( this.erc20TestContract)
 
               if (erc721InfoContractAddress) {
                 this.erc721InfoContract = new Erc721InfoContract(
@@ -1410,7 +1405,7 @@ class CreateForm extends React.PureComponent {
         userAccountPrivateKey: data.userAccountPrivateKey,
       });
     
-      console.log('----: landSalesContract.buyLandInERC20. '  + new Date().toISOString())
+      console.log('----: landSalesContract.buyLandInWETH. '  + new Date().toISOString())
       const transactionInErc20 = await this.landSalesContract.buyLandInWETH(
         data.landParcelLat,
         data.landParcelLong
@@ -1428,7 +1423,7 @@ class CreateForm extends React.PureComponent {
       console.log('----: waitForTxConfirmation. '  + new Date().toISOString())
       await this.landSalesContract.waitForTxConfirmation(receipt.transactionHash);
     
-      console.log("buyLandInERC20 - tx: " + receipt.transactionHash + '. Done at:'  + new Date().toISOString());
+      console.log("buyLandInWETH - tx: " + receipt.transactionHash + '. Done at:'  + new Date().toISOString());
     } catch (err) {
       console.log(err)
       return null
@@ -1440,14 +1435,18 @@ class CreateForm extends React.PureComponent {
     console.log('erc20 time: ' + new Date().toISOString());
     try {
       const data = {
-        landParcelLat: `${22 * 10 ** 6}`,
-        landParcelLong: `${32 * 10 ** 6}`,
+        latitude: `${22 * 10 ** 6}`,
+        longitude: `${32 * 10 ** 6}`,
         userAccountAddress: this.state.address,
         userAccountPrivateKey: `bc8acd99be9fca75bd3955a8f0681b145a6feb8f029350f76d1606547d138485`,
+        gasPrice: gasPrice
       };
+
+    // const gasPriceGwei = await this.queryGasPrice(networkID)
+    // gasPrice = gasPriceGwei * Math.pow(10, 9)
       
       const _landCategory = 1;
-      const landPriceInERC20Tokens = await this.landSalesContract.getLandPriceInErc20Tokens(_landCategory);
+      const landPriceInERC20Tokens = await this.landSalesContract.getLandPriceInErc20Tokens(_landCategory, data.userAccountAddress, data.gasPrice);
 
       console.log('----: erc20TestContract.methods.approve. '  + new Date().toISOString() + ' . landPriceInERC20Tokens: ' + landPriceInERC20Tokens)
       const transactionApproval = this.erc20TestContract.approve(
