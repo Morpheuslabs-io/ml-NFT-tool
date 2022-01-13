@@ -1,50 +1,98 @@
 import contract from '@truffle/contract'
 import Web3Service from '../controller/Web3'
-import LandSalesAbi from './LandSales.abi'
+import LandSalesAbi from './LandSalesAbi.json'
+import ERC20TestAbi from './ERC20TestAbi.json'
 
 
 let instance = null
 
 export default class LandSalesContract {
-  constructor(contractAddress) {
+
+  constructor(defaultAddress) {
+    if (!instance) {
       instance = this
       this.web3 = Web3Service.getWeb3()
-      this.contract = new this.web3.eth.Contract(LandSalesAbi, contractAddress);
+      this.contract = contract(LandSalesAbi)
+      this.contract.setProvider(this.web3.currentProvider)
+      this.contract.defaults({ from: defaultAddress })
 
-      console.log('--: ' + LandSalesContract)
-      console.log(this.contract.methods)
+      this.wethContract = contract(ERC20TestAbi)
+      this.wethContract.setProvider(this.web3.currentProvider)
+      this.wethContract.defaults({ from: defaultAddress })
+
+      this.erc20Contract = contract(ERC20TestAbi)
+      this.erc20Contract.setProvider(this.web3.currentProvider)
+      this.erc20Contract.defaults({ from: defaultAddress })
+    }
+
     return instance
   }
 
-  async sendTransaction(transaction, from, privateKey = authorizedAccountPrivateKey) {
-    console.log("from:", from);
-    console.log('trans: ')
-    console.log(transaction)
-    
-    let gas = null;
+  // ERC20
+  async buyLandInErc20Test(data) {
     try {
-      gas = await transaction.estimateGas({ from });
-      console.log("gas: ", gas);
+      console.log('buyLandInErc20Test')
+      const contractInstance = await this.contract.at(data.landSalesContractAddress)
+      console.log('contractInstance')
+      console.log(contractInstance)
+      
+      const landPriceInERC20Tokens = await contractInstance.getLandPriceInErc20Tokens(data.landCategory).call();
+      // const landPriceInErc20Tokens = await this.getLandPriceInErc20Tokens(contractInstance, landCategory);
+
+      console.log("landPriceInErc20Tokens:", landPriceInErc20Tokens);
+      
+      await this.approveErc20TestToken({
+        spender: data.userAccountAddress,
+        amount: landPriceInErc20Tokens,
+        userAccountAddress: data.userAccountAddress,
+        userAccountPrivateKey: data.userAccountPrivateKey,
+        landSalesContractAddress: data.landSalesContractAddress
+      });
+
+      const transaction = contractInstance.buyLandInERC20(
+        data.longitude,
+        data.latitude
+      );
+
+      // Send tx
+      const receipt = await this.sendTransaction(
+        transaction,
+        data.userAccountAddress,
+        data.userAccountPrivateKey
+      );
+
+      // Wait for tx confirmation
+      await this.waitForTxConfirmation(receipt.transactionHash);
+
+      console.log("buyLandInERC20 - tx:", receipt.transactionHash);
+      return receipt.transactionHash;
+
     } catch (err) {
-      console.log("sendTransaction - estimateGas - Error:", err.message);
-      return null;
+      console.log(err)
+      return null
     }
+  }
+
+  async approveErc20TestToken(data) {
+    const erc20ContractInstance = await this.erc20Contract.at(data.landSalesContractAddress)
+
+    const transaction = erc20ContractInstance.methods.approve(
+      data.spender,
+      data.amount
+    );
   
-    const options = {
-      to: transaction._parent._address,
-      data: transaction.encodeABI(),
-      gas,
-      gasPrice: await this.web3.eth.getGasPrice(),
-    };
-    const receipt = await this.signTransaction(options, privateKey);
+    // Send tx
+    const receipt = await this.sendTransaction(
+      transaction,
+      data.userAccountAddress,
+      data.userAccountPrivateKey
+    );
   
-    return receipt;
-  };
+    // Wait for tx confirmation
+    await waitForTxConfirmation(receipt.transactionHash);
   
-  async signTransaction(options, privateKey = authorizedAccountPrivateKey) {
-    const signed = await this.web3.eth.accounts.signTransaction(options, privateKey);
-    const receipt = await this.web3.eth.sendSignedTransaction(signed.rawTransaction);
-    return receipt;
+    console.log("approveErc20TestToken - tx:", receipt.transactionHash);
+    return receipt.transactionHash;
   };
 
   async waitForTxConfirmation(txHash) {
@@ -63,22 +111,67 @@ export default class LandSalesContract {
     }
   };
 
-  async approveErc20TestToken(data) {
-    // Send tx
-    const receipt = await this.sendTransaction(
-      data.transaction,
-      data.userAccountAddress,
-      data.userAccountPrivateKey
-    );
+  async sendTransaction(transaction, from, privateKey = authorizedAccountPrivateKey) {
+    console.log("from:", from);
+    let gas = null;
+    try {
+      gas = await transaction.estimateGas({ from });
+    } catch (err) {
+      console.log("sendTransaction - estimateGas - Error:", err.message);
+      return null;
+    }
   
-    // Wait for tx confirmation
-    await this.waitForTxConfirmation(receipt.transactionHash);
+    const options = {
+      to: transaction._parent._address,
+      data: transaction.encodeABI(),
+      gas,
+      gasPrice: await web3.eth.getGasPrice(),
+    };
+    const receipt = await this.signTransaction(options, privateKey);
   
-    console.log("approveErc20TestToken - tx:", receipt.transactionHash);
-    return receipt.transactionHash;
+    return receipt;
   };
 
-  async approveWethTestToken(data) {
+  async signTransaction(options, privateKey = authorizedAccountPrivateKey) {
+    const signed = await web3.eth.accounts.signTransaction(options, privateKey);
+    const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction);
+    return receipt;
+  };
+
+  // async getLandPriceInErc20Tokens(contractInstance, landCategory = 0) {
+  //   const landPriceInERC20Tokens = await contractInstance.getLandPriceInErc20Tokens(landCategory);
+  
+  //   console.log("getLandPriceInErc20Tokens - landCategory:", landCategory,
+  //     ", landPriceInERC20Tokens:", landPriceInERC20Tokens
+  //   );
+  //   return landPriceInERC20Tokens;
+  // };
+
+  //
+  // WETH
+  //
+  async buyLandInWethTest(data) {
+    console.log('buyLandInErc20Test')
+    const contractInstance = await this.contract.at(data.landSalesContractAddress)
+    console.log('contractInstance')
+    console.log(contractInstance)
+    
+    const landPriceInERC20Tokens = await contractInstance.getLandPriceInWETH(data.landCategory).call();
+    // const landPriceInWETH = await getLandPriceInWETH();
+
+    await this.approveWETH({
+      spender: data.userAccountAddress,
+      amount: landPriceInErc20Tokens,
+      userAccountAddress: data.userAccountAddress,
+      userAccountPrivateKey: data.userAccountPrivateKey,
+      landSalesContractAddress: data.landSalesContractAddress
+    });
+
+    const transaction = contractInstance.buyLandInWETH(
+      data.landParcelLong,
+      data.landParcelLat
+    );
+
     // Send tx
     const receipt = await this.sendTransaction(
       transaction,
@@ -87,58 +180,18 @@ export default class LandSalesContract {
     );
 
     // Wait for tx confirmation
-    await waitForTxConfirmation(receipt.transactionHash);
+    await this.waitForTxConfirmation(receipt.transactionHash);
 
-    console.log("approveWETH - tx:", receipt.transactionHash);
+    console.log("buyLandInWETH - tx:", receipt.transactionHash);
     return receipt.transactionHash;
   }
 
-  async getLandPriceInWethTokens(landCategory) {
-    const landPriceInWethTokens = await this.contract.methods.getLandPriceInWETH(landCategory).call();
-  
-    console.log(
-      "getLandPriceInWethTokens - landCategory:",
-      landCategory,
-      ", landPriceInWethTokens:",
-      landPriceInWethTokens
-    );
-    return landPriceInWethTokens;
-  };
+  async approveWETH(data) {
+    const wethTokenContract = await this.wethContract.at(data.landSalesContractAddress)
 
-  async getLandPriceInErc20Tokens(landCategory, userAccountAddress, gasPrice) {
-    
-    console.log('getLandPriceInErc20Tokens - landCategory: ' + landCategory + ' gasPrice: ' + gasPrice);
-
-
-    const landPriceInERC20Tokens = await this.contract.methods.getLandPriceInErc20Tokens(landCategory).call(
-      function (err, res) {
-        //do stuff
-        if(!err) {
-          console.log('callback err: ')
-          console.log(err)
-        } else {
-          console.log('callback res:')
-          console.log(res)
-        }
-      }
-    )
-    // .call({
-    //   userAccountAddress, gasPrice
-    // });
-  
-    console.log(
-      "getLandPriceInErc20Tokens - landCategory:",
-      landCategory,
-      ", landPriceInERC20Tokens:",
-      landPriceInERC20Tokens
-    );
-    return landPriceInERC20Tokens;
-  };
-  
-  async buyLandInWETH(data) {
-    const transaction = this.contract.methods.methods.buyLandInWETH(
-      data.landParcelLat,
-      data.landParcelLong
+    const transaction = wethTokenContract.methods.approve(
+      data.spender,
+      data.amount
     );
   
     // Send tx
@@ -149,9 +202,9 @@ export default class LandSalesContract {
     );
   
     // Wait for tx confirmation
-    await this.waitForTxConfirmation(receipt.transactionHash);
+    await waitForTxConfirmation(receipt.transactionHash);
   
-    console.log("buyLandInWETH - tx:", receipt.transactionHash);
+    console.log("approveWETH - tx:", receipt.transactionHash);
     return receipt.transactionHash;
   };
 }

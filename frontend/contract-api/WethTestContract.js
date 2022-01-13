@@ -1,18 +1,29 @@
 import contract from '@truffle/contract'
 import Web3Service from '../controller/Web3'
-import LandSalesAbi from './LandSales.abi'
+import LandSalesAbi from './LandSalesAbi.json'
 
 
 let instance = null
 
 export default class WethTestContract {
-  constructor(contractAddress) {
+
+
+  constructor(defaultAddress) {
+    if (!instance) {
       instance = this
       this.web3 = Web3Service.getWeb3()
-      this.contract = new this.web3.eth.Contract(LandSalesAbi, contractAddress);
+      console.log('LandSalesContract')
+      console.log(LandSalesAbi)
+      this.contract = contract(LandSalesAbisAbi)
+      console.log(this.contract)
+      this.contract.setProvider(this.web3.currentProvider)
+      this.contract.defaults({ from: defaultAddress })
+    }
+
     return instance
   }
 
+  /*
   async buyLandInWethTest(data) {
     const { contractAddress, lat, long } = data
     try {
@@ -76,4 +87,5 @@ export default class WethTestContract {
     }
   };
 
+  */
 }

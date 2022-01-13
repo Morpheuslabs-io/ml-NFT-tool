@@ -41,9 +41,7 @@ import web3Utils from 'web3-utils'
 import { isMobile } from 'react-device-detect'
 import './style.scss'
 import LandSalesContract from 'contract-api/LandSalesContract'
-import ERC20TestContract from 'contract-api/ERC20TestContract'
-import WethTestContract from 'contract-api/WethTestContract'
-import LandRegistryContract from 'contract-api/LandRegistryContrat'
+import LandRegistryContract from 'contract-api/LandRegistryContract'
 
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
@@ -76,6 +74,7 @@ const erc721ContractGasless = process.env.REACT_APP_ERC721_GASLESS_CONTRACT_ADDR
 const landSalesContractAddress = process.env.LAND_SALES_CONTRACT_ADDRESS
 const erc20TestContractAddress = process.env.ERC20_TEST_TOKEN_ADDRESS
 const wethTestContractAddress = process.env.WETH_TOKEN_ADDRESS
+const userAccountPrivateKey = process.env.USER_ACCOUNT_PRIVATE_KEY
 
 const biconomyApiURL = process.env.REACT_APP_BICONOMY_API_URL
 const biconomyApiKey = process.env.REACT_APP_BICONOMY_API_KEY
@@ -178,8 +177,6 @@ class CreateForm extends React.PureComponent {
 
               // Init Primary Market place and ERC20
               this.landSalesContract = new LandSalesContract(landSalesContractAddress)
-              this.erc20TestContract = new ERC20TestContract(erc20TestContractAddress)
-              this.wethTestContract = new WethTestContract(wethTestContractAddress)
               this.landRegistryContract = new LandRegistryContract(landSalesContractAddress)
 
               if (erc721InfoContractAddress) {
@@ -1386,54 +1383,21 @@ class CreateForm extends React.PureComponent {
     console.log('weth time: ' + new Date().toISOString());
     try {
       const data = {
-        landParcelLat: `${22 * 10 ** 6}`,
-        landParcelLong: `${32 * 10 ** 6}`,
+        latitude: `${22 * 10 ** 6}`,
+        longitude: `${32 * 10 ** 6}`,
         userAccountAddress: this.state.address,
-        userAccountPrivateKey: `bc8acd99be9fca75bd3955a8f0681b145a6feb8f029350f76d1606547d138485`,
+        userAccountPrivateKey: userAccountPrivateKey,
+        landSalesContractAddress: landSalesContractAddress,
+        landCategory: 1
       };
-      
-      const _landCategory = 1;
-      const landPriceInWethTokens = await this.landSalesContract.getLandPriceInWethTokens(_landCategory);
 
-      console.log('----: wethTestContract.methods.approve. '  + new Date().toISOString() + ' . landPriceInWethTokens: ' + landPriceInWethTokens)
-      const transactionApproval = this.wethTestContract.approveWethToken(
-        this.state.address,
-        landPriceInWethTokens
-      );
+      const transaction = await this.landSalesContract.buyLandInWethTest(data);
 
-      console.log('----: landSalesContract.approveWethTestToken. '  + new Date().toISOString())
-      await this.landSalesContract.approveWethTestToken({
-        transaction: transactionApproval,
-        spender: landSalesContractAddress,
-        amount: landPriceInWethTokens,
-        userAccountAddress: data.userAccountAddress,
-        userAccountPrivateKey: data.userAccountPrivateKey,
-      });
-    
-      console.log('----: landSalesContract.buyLandInWETH. '  + new Date().toISOString())
-      const transactionInErc20 = await this.landSalesContract.buyLandInWETH(
-        data.landParcelLat,
-        data.landParcelLong
-      );
-    
-      // Send tx
-      console.log('----: landSalesContract.sendTransaction. ' + '. ' + new Date().toISOString() + ' TxInErc20: ' + transactionInErc20 )
-      const receipt = await this.landSalesContract.sendTransaction(
-        transactionInErc20,
-        data.userAccountAddress,
-        data.userAccountPrivateKey
-      );
-    
-      // Wait for tx confirmation
-      console.log('----: waitForTxConfirmation. '  + new Date().toISOString())
-      await this.landSalesContract.waitForTxConfirmation(receipt.transactionHash);
-    
-      console.log("buyLandInWETH - tx: " + receipt.transactionHash + '. Done at:'  + new Date().toISOString());
+      console.log("buyLandInWETH - tx: " + transaction + '. Done at:'  + new Date().toISOString());
     } catch (err) {
       console.log(err)
       return null
     }
-    
   }
 
   buyLandInErc20 = async () => {
@@ -1443,53 +1407,14 @@ class CreateForm extends React.PureComponent {
         latitude: `${22 * 10 ** 6}`,
         longitude: `${32 * 10 ** 6}`,
         userAccountAddress: this.state.address,
-        userAccountPrivateKey: `bc8acd99be9fca75bd3955a8f0681b145a6feb8f029350f76d1606547d138485`,
+        userAccountPrivateKey: userAccountPrivateKey,
+        landSalesContractAddress: landSalesContractAddress,
+        landCategory: 1
       };
 
-      console.log('network: ' + this.state.networkID)
-      const gasPriceGwei = await this.queryGasPrice(this.state.networkID)
-      const gasPrice = gasPriceGwei * Math.pow(10, 3)
+      const transaction = await this.landSalesContract.buyLandInErc20Test(data);
 
-      console.log('gasPrice: ' + gasPrice)
-      console.log('userAccountAddress: ' + data.userAccountAddress)
-      
-      const _landCategory = 1;
-      const landPriceInERC20Tokens = await this.landSalesContract.getLandPriceInErc20Tokens(_landCategory, data.userAccountAddress, gasPrice);
-
-      console.log('----: erc20TestContract.methods.approve. '  + new Date().toISOString() + ' . landPriceInERC20Tokens: ' + landPriceInERC20Tokens)
-      const transactionApproval = this.erc20TestContract.approve(
-        this.state.address,
-        landPriceInERC20Tokens
-      );
-
-      console.log('----: landSalesContract.approveErc20TestToken. '  + new Date().toISOString())
-      await this.landSalesContract.approveErc20TestToken({
-        transaction: transactionApproval,
-        spender: landSalesContractAddress,
-        amount: landPriceInERC20Tokens,
-        userAccountAddress: data.userAccountAddress,
-        userAccountPrivateKey: data.userAccountPrivateKey,
-      });
-    
-      console.log('----: landSalesContract.buyLandInERC20. '  + new Date().toISOString())
-      const transactionInErc20 = await this.landSalesContract.buyLandInERC20(
-        data.landParcelLat,
-        data.landParcelLong
-      );
-    
-      // Send tx
-      console.log('----: landSalesContract.sendTransaction. ' + '. ' + new Date().toISOString() + ' TxInErc20: ' + transactionInErc20 )
-      const receipt = await this.landSalesContract.sendTransaction(
-        transactionInErc20,
-        data.userAccountAddress,
-        data.userAccountPrivateKey
-      );
-    
-      // Wait for tx confirmation
-      console.log('----: waitForTxConfirmation. '  + new Date().toISOString())
-      await this.landSalesContract.waitForTxConfirmation(receipt.transactionHash);
-    
-      console.log("buyLandInERC20 - tx: " + receipt.transactionHash + '. Done at:'  + new Date().toISOString());
+      console.log("buyLandInERC20 - tx: " + transaction + '. Done at:'  + new Date().toISOString());
     } catch (err) {
       console.log(err)
       return null
@@ -1499,35 +1424,7 @@ class CreateForm extends React.PureComponent {
   updateLand = async () => {
     console.log('update land')
     try {
-      const ownerAddress = this.state.address;
-      const allLandOf = await this.landRegistryContract.getAllLandOf(ownerAddress);
-
-      const landData = {
-        name: "trung",
-        description: "trung mido",
-        image: "https://some-link.com",
-      };
-
-      const transaction = this.landRegistryContract.updateLandData({
-        landParcelLat: allLandOf[0][0],
-        landParcelLong: allLandOf[1][0],
-        data: JSON.stringify(landData),
-      });
-
-      // Send tx
-      const receipt = await this.landSalesContract.sendTransaction(
-        transaction,
-        userAccountAddress,
-        userAccountPrivateKey
-      );
-    
-      // Wait for tx confirmation
-      const transactionHash = await this.landSalesContract.methods.waitForTxConfirmation(receipt.transactionHash);
-    
-      console.log("updateLandData - tx:", transactionHash);
-      // return receipt.transactionHash;
-    
-      await this.landRegistryContract.getLandData(allLandOf[0][0], allLandOf[1][0]);
+      // TODO Update land
     } catch (err) {
       console.log(err)
       return null
@@ -1537,13 +1434,7 @@ class CreateForm extends React.PureComponent {
   getAllLands = async () => {
     console.log('Get All Lands')
     try {
-      const ownerAddress = this.state.address;
-      const allLandOf = await this.landRegistryContract.getAllLandOf(ownerAddress);
-      this.setState({ landData: allLandOf })
-      console.log('ALL LAND OF ' + ownerAddress + '\n')
-      console.log(allLandOf)
-      console.log('--')
-
+      // TODO get All land
     } catch (err) {
       console.log(err)
       return null
