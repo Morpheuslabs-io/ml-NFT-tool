@@ -13,17 +13,6 @@ export default class WethTestContract {
     return instance
   }
 
-  // Launch a brandnew NFT token
-  async buyLandInErc20Test(data) {
-    const { contractAddress, lat, long } = data
-    try {
-      const contractInstance = await this.contract.at(contractAddress)
-      return contractInstance.buyLandInERC20(lat, long)
-    } catch (err) {
-      console.log(err)
-      return null
-    }
-  }
   async buyLandInWethTest(data) {
     const { contractAddress, lat, long } = data
     try {
@@ -36,32 +25,9 @@ export default class WethTestContract {
   }
 
   async sendTransaction(transaction, from, privateKey = authorizedAccountPrivateKey) {
-    console.log("from:", from);
-    console.log('trans: ')
-    console.log(transaction)
-    
-    const trans = await transaction;
-    console.log(trans)
-    // const 
-
-    // transaction.then(async (res) => {
-    //   console.log('gas')
-    //   console.log(res)
-    //   console.log(res.estimateGas())
-    //   const gas = await res.estimateGas({ from });
-    //   console.log('gas')
-    //   console.log(gas)
-    // });
-
-    // const trans = await ( async () => {
-    //   console.log('trans')
-    //   const gas = await transaction.estimateGas({ from });
-    //   console.log(gas)
-    // })()
-
     let gas = null;
     try {
-      gas = await trans.estimateGas({ from });
+      gas = await transaction.estimateGas({ from });
       console.log("gas: ", gas);
     } catch (err) {
       console.log("sendTransaction - estimateGas - Error:", err.message);
@@ -101,32 +67,13 @@ export default class WethTestContract {
     }
   };
 
-  async approveErc20TestToken(data) {
-    // Send tx
-    const receipt = await this.sendTransaction(
-      data.transaction,
-      data.userAccountAddress,
-      data.userAccountPrivateKey
-    );
-  
-    // Wait for tx confirmation
-    await this.waitForTxConfirmation(receipt.transactionHash);
-  
-    console.log("approveErc20TestToken - tx:", receipt.transactionHash);
-    return receipt.transactionHash;
+  async approveWethToken(contractAddress, amount) {
+    try {
+      return this.contract.methods.approve(contractAddress, amount);
+    } catch (err) {
+      console.log(err)
+      return null
+    }
   };
-
-  async getLandPriceInErc20Tokens(landCategory) {
-    const landPriceInERC20Tokens = await this.contract.methods.getLandPriceInErc20Tokens(landCategory).call();
-  
-    console.log(
-      "getLandPriceInErc20Tokens - landCategory:",
-      landCategory,
-      ", landPriceInERC20Tokens:",
-      landPriceInERC20Tokens
-    );
-    return landPriceInERC20Tokens;
-  };
-  
 
 }

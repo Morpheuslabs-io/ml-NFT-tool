@@ -119,11 +119,53 @@ export default class LandSalesContract {
     return receipt.transactionHash;
   };
 
+  async approveWethTestToken(data) {
+    // Send tx
+    const receipt = await this.sendTransaction(
+      transaction,
+      data.userAccountAddress,
+      data.userAccountPrivateKey
+    );
+
+    // Wait for tx confirmation
+    await waitForTxConfirmation(receipt.transactionHash);
+
+    console.log("approveWETH - tx:", receipt.transactionHash);
+    return receipt.transactionHash;
+  }
+
+  async getLandPriceInWethTokens(landCategory) {
+    const landPriceInWethTokens = await this.contract.methods.getLandPriceInWETH(landCategory).call();
+  
+    console.log(
+      "getLandPriceInWethTokens - landCategory:",
+      landCategory,
+      ", landPriceInWethTokens:",
+      landPriceInWethTokens
+    );
+    return landPriceInWethTokens;
+  };
+
   async getLandPriceInErc20Tokens(landCategory, userAccountAddress, gasPrice) {
-    console.log('getLandPriceInErc20Tokens - landCategory: ' + landCategory);
-    const landPriceInERC20Tokens = await this.contract.methods.getLandPriceInErc20Tokens(landCategory).call({
-      userAccountAddress, gasPrice
-    });
+    
+    console.log('getLandPriceInErc20Tokens - landCategory: ' + landCategory + ' gasPrice: ' + gasPrice);
+
+
+    const landPriceInERC20Tokens = await this.contract.methods.getLandPriceInErc20Tokens(landCategory).call(
+      function (err, res) {
+        //do stuff
+        if(!err) {
+          console.log('callback err: ')
+          console.log(err)
+        } else {
+          console.log('callback res:')
+          console.log(res)
+        }
+      }
+    )
+    // .call({
+    //   userAccountAddress, gasPrice
+    // });
   
     console.log(
       "getLandPriceInErc20Tokens - landCategory:",
@@ -133,42 +175,9 @@ export default class LandSalesContract {
     );
     return landPriceInERC20Tokens;
   };
-
-  // WETH
-  async getLandPriceInWethTokens(landCategory) {
-    const landPriceInWethTokens = await this.contract.methods.getLandPriceInWETH(landCategory).call();
-  
-    console.log(
-      "getLandPriceInErc20Tokens - landCategory:",
-      landCategory,
-      ", landPriceInERC20Tokens:",
-      landPriceInWethTokens
-    );
-    return landPriceInWethTokens;
-  };
-
-  async approveWethTestToken() {
-    const transaction = wethTokenContract.methods.approve(
-    data.spender,
-    data.amount
-  );
-
-  // Send tx
-  const receipt = await this.sendTransaction(
-    transaction,
-    data.userAccountAddress,
-    data.userAccountPrivateKey
-  );
-
-  // Wait for tx confirmation
-  await waitForTxConfirmation(receipt.transactionHash);
-
-  console.log("approveWETH - tx:", receipt.transactionHash);
-  return receipt.transactionHash;
-  };
   
   async buyLandInWETH(data) {
-    const transaction = primaryMarketPlaceContract.methods.buyLandInWETH(
+    const transaction = this.contract.methods.methods.buyLandInWETH(
       data.landParcelLat,
       data.landParcelLong
     );
@@ -187,4 +196,41 @@ export default class LandSalesContract {
     return receipt.transactionHash;
   };
   
+  async getLandData(latitude, longitude) {
+    const landData = await landRegistryContract.methods.landData(longitude, latitude).call();
+  
+    console.log("getLandData:", landData);
+    return landData;
+  };
+
+
+  async getAllLandOf(owner) {
+    const allLandOf = await landRegistryContract.methods.landOf(owner).call();
+
+    console.log("getAllLandOf:", owner, "\n", allLandOf);
+    return allLandOf;
+  }
+
+  async updateLandData(data) {
+    console.log("updateLandData - data:", data);
+  
+    const transaction = landRegistryContract.methods.updateLandData(
+      data.landParcelLong,
+      data.landParcelLat,
+      data.data
+    );
+  
+    // Send tx
+    const receipt = await this.sendTransaction(
+      transaction,
+      userAccountAddress,
+      userAccountPrivateKey
+    );
+  
+    // Wait for tx confirmation
+    await this.waitForTxConfirmation(receipt.transactionHash);
+  
+    console.log("updateLandData - tx:", receipt.transactionHash);
+    return receipt.transactionHash;
+  };
 }

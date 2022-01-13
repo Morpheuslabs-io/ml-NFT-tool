@@ -42,6 +42,7 @@ import { isMobile } from 'react-device-detect'
 import './style.scss'
 import LandSalesContract from 'contract-api/LandSalesContract'
 import ERC20TestContract from 'contract-api/ERC20TestContract'
+import WethTestContract from 'contract-api/WethTestContract'
 
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
@@ -124,6 +125,8 @@ class CreateForm extends React.PureComponent {
     this.buyLandInErc20 = this.buyLandInErc20.bind(this)
     this.buyLandInWeth = this.buyLandInWeth.bind(this)
 
+    this.updateLand = this.updateLand(this)
+    this.getAllLands = this.getAllLands(this)
   }
 
   componentDidMount() {
@@ -175,7 +178,7 @@ class CreateForm extends React.PureComponent {
               // Init Primary Market place and ERC20
               this.landSalesContract = new LandSalesContract(landSalesContractAddress)
               this.erc20TestContract = new ERC20TestContract(erc20TestContractAddress)
-              this.wethTestContract = new ERC20TestContract(wethTestContractAddress)
+              this.wethTestContract = new WethTestContract(wethTestContractAddress)
 
               if (erc721InfoContractAddress) {
                 this.erc721InfoContract = new Erc721InfoContract(
@@ -1391,7 +1394,7 @@ class CreateForm extends React.PureComponent {
       const landPriceInWethTokens = await this.landSalesContract.getLandPriceInWethTokens(_landCategory);
 
       console.log('----: wethTestContract.methods.approve. '  + new Date().toISOString() + ' . landPriceInWethTokens: ' + landPriceInWethTokens)
-      const transactionApproval = this.wethTestContract.approve(
+      const transactionApproval = this.wethTestContract.approveWethToken(
         this.state.address,
         landPriceInWethTokens
       );
@@ -1439,14 +1442,17 @@ class CreateForm extends React.PureComponent {
         longitude: `${32 * 10 ** 6}`,
         userAccountAddress: this.state.address,
         userAccountPrivateKey: `bc8acd99be9fca75bd3955a8f0681b145a6feb8f029350f76d1606547d138485`,
-        gasPrice: gasPrice
       };
 
-    // const gasPriceGwei = await this.queryGasPrice(networkID)
-    // gasPrice = gasPriceGwei * Math.pow(10, 9)
+      console.log('network: ' + this.state.networkID)
+      const gasPriceGwei = await this.queryGasPrice(this.state.networkID)
+      const gasPrice = gasPriceGwei * Math.pow(10, 3)
+
+      console.log('gasPrice: ' + gasPrice)
+      console.log('userAccountAddress: ' + data.userAccountAddress)
       
       const _landCategory = 1;
-      const landPriceInERC20Tokens = await this.landSalesContract.getLandPriceInErc20Tokens(_landCategory, data.userAccountAddress, data.gasPrice);
+      const landPriceInERC20Tokens = await this.landSalesContract.getLandPriceInErc20Tokens(_landCategory, data.userAccountAddress, gasPrice);
 
       console.log('----: erc20TestContract.methods.approve. '  + new Date().toISOString() + ' . landPriceInERC20Tokens: ' + landPriceInERC20Tokens)
       const transactionApproval = this.erc20TestContract.approve(
@@ -1486,6 +1492,42 @@ class CreateForm extends React.PureComponent {
       console.log(err)
       return null
     }
+  }
+
+  updateLand() {
+    console.log('update land')
+
+
+    const ownerAddress = this.state.address;
+    const allLandOf = await this.landSalesContract.getAllLandOf(ownerAddress);
+
+    const landData = {
+      name: "trung",
+      description: "trung mido",
+      image: "https://some-link.com",
+    };
+    await this.landSalesContract.updateLandData({
+      landParcelLat: allLandOf[0][0],
+      landParcelLong: allLandOf[1][0],
+      data: JSON.stringify(landData),
+    });
+  
+    await this.landSalesContract.getLandData(allLandOf[0][0], allLandOf[1][0]);
+  }
+
+  getAllLands() {
+    console.log('Get All Lands')
+
+    // const latitude = `${22 * 10 ** 6}`;
+    // const longitude= `${32 * 10 ** 6}`;
+    // const landData = await this.landSalesContract.getAllLandOf(latitude, longitude);
+
+    const ownerAddress = this.state.address;
+    const allLandOf = await this.landSalesContract.getAllLandOf(ownerAddress);
+    this.setState({ landData: allLandOf })
+    console.log('ALL LAND OF ' + ownerAddress + '\n')
+    console.log(allLandOf)
+    console.log('--')
   }
 
   render() {
@@ -1641,6 +1683,15 @@ class CreateForm extends React.PureComponent {
           </Button>
           <Button type='primary' htmlType='submit' className='ant-big-btn' disabled={!this.state.address} onClick={this.buyLandInErc20}>
             Buy Land In ERC20
+          </Button>
+        </div>
+
+        <div className='action-section'>
+          <Button type='primary' htmlType='submit' className='ant-big-btn' disabled={!this.state.address} onClick={this.updateLand}>
+            Update Land
+          </Button>
+          <Button type='primary' htmlType='submit' className='ant-big-btn' disabled={!this.state.address} onClick={this.getAllLands}>
+            Get All Lands
           </Button>
         </div>
       </div>
