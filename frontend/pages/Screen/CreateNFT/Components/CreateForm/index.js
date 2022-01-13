@@ -43,6 +43,7 @@ import './style.scss'
 import LandSalesContract from 'contract-api/LandSalesContract'
 import ERC20TestContract from 'contract-api/ERC20TestContract'
 import WethTestContract from 'contract-api/WethTestContract'
+import LandRegistryContract from 'contract-api/LandRegistryContrat'
 
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
@@ -125,8 +126,8 @@ class CreateForm extends React.PureComponent {
     this.buyLandInErc20 = this.buyLandInErc20.bind(this)
     this.buyLandInWeth = this.buyLandInWeth.bind(this)
 
-    this.updateLand = this.updateLand(this)
-    this.getAllLands = this.getAllLands(this)
+    this.updateLand = this.updateLand.bind(this)
+    this.getAllLands = this.getAllLands.bind(this)
   }
 
   componentDidMount() {
@@ -179,6 +180,7 @@ class CreateForm extends React.PureComponent {
               this.landSalesContract = new LandSalesContract(landSalesContractAddress)
               this.erc20TestContract = new ERC20TestContract(erc20TestContractAddress)
               this.wethTestContract = new WethTestContract(wethTestContractAddress)
+              this.landRegistryContract = new LandRegistryContract(landSalesContractAddress)
 
               if (erc721InfoContractAddress) {
                 this.erc721InfoContract = new Erc721InfoContract(
@@ -1494,40 +1496,58 @@ class CreateForm extends React.PureComponent {
     }
   }
 
-  updateLand() {
+  updateLand = async () => {
     console.log('update land')
+    try {
+      const ownerAddress = this.state.address;
+      const allLandOf = await this.landRegistryContract.getAllLandOf(ownerAddress);
 
+      const landData = {
+        name: "trung",
+        description: "trung mido",
+        image: "https://some-link.com",
+      };
 
-    const ownerAddress = this.state.address;
-    const allLandOf = await this.landSalesContract.getAllLandOf(ownerAddress);
+      const transaction = this.landRegistryContract.updateLandData({
+        landParcelLat: allLandOf[0][0],
+        landParcelLong: allLandOf[1][0],
+        data: JSON.stringify(landData),
+      });
 
-    const landData = {
-      name: "trung",
-      description: "trung mido",
-      image: "https://some-link.com",
-    };
-    await this.landSalesContract.updateLandData({
-      landParcelLat: allLandOf[0][0],
-      landParcelLong: allLandOf[1][0],
-      data: JSON.stringify(landData),
-    });
-  
-    await this.landSalesContract.getLandData(allLandOf[0][0], allLandOf[1][0]);
+      // Send tx
+      const receipt = await this.landSalesContract.sendTransaction(
+        transaction,
+        userAccountAddress,
+        userAccountPrivateKey
+      );
+    
+      // Wait for tx confirmation
+      const transactionHash = await this.landSalesContract.methods.waitForTxConfirmation(receipt.transactionHash);
+    
+      console.log("updateLandData - tx:", transactionHash);
+      // return receipt.transactionHash;
+    
+      await this.landRegistryContract.getLandData(allLandOf[0][0], allLandOf[1][0]);
+    } catch (err) {
+      console.log(err)
+      return null
+    }
   }
 
-  getAllLands() {
+  getAllLands = async () => {
     console.log('Get All Lands')
+    try {
+      const ownerAddress = this.state.address;
+      const allLandOf = await this.landRegistryContract.getAllLandOf(ownerAddress);
+      this.setState({ landData: allLandOf })
+      console.log('ALL LAND OF ' + ownerAddress + '\n')
+      console.log(allLandOf)
+      console.log('--')
 
-    // const latitude = `${22 * 10 ** 6}`;
-    // const longitude= `${32 * 10 ** 6}`;
-    // const landData = await this.landSalesContract.getAllLandOf(latitude, longitude);
-
-    const ownerAddress = this.state.address;
-    const allLandOf = await this.landSalesContract.getAllLandOf(ownerAddress);
-    this.setState({ landData: allLandOf })
-    console.log('ALL LAND OF ' + ownerAddress + '\n')
-    console.log(allLandOf)
-    console.log('--')
+    } catch (err) {
+      console.log(err)
+      return null
+    }
   }
 
   render() {

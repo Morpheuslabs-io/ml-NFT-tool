@@ -16,52 +16,11 @@ export default class LandSalesContract {
     return instance
   }
 
-  // Launch a brandnew NFT token
-  // async buyLandInErc20Test(data) {
-  //   const { contractAddress, lat, long } = data
-  //   try {
-  //     const contractInstance = await this.contract.at(contractAddress)
-  //     return contractInstance.buyLandInERC20(lat, long)
-  //   } catch (err) {
-  //     console.log(err)
-  //     return null
-  //   }
-  // }
-  // async buyLandInWethTest(data) {
-  //   const { contractAddress, lat, long } = data
-  //   try {
-  //     const contractInstance = await this.contract.at(contractAddress)
-  //     return contractInstance.buyLandInWETH(lat, long)
-  //   } catch (err) {
-  //     console.log(err)
-  //     return null
-  //   }
-  // }
-
   async sendTransaction(transaction, from, privateKey = authorizedAccountPrivateKey) {
     console.log("from:", from);
     console.log('trans: ')
     console.log(transaction)
     
-    // const trans = await transaction;
-    // console.log(trans)
-    // const 
-
-    // transaction.then(async (res) => {
-    //   console.log('gas')
-    //   console.log(res)
-    //   console.log(res.estimateGas())
-    //   const gas = await res.estimateGas({ from });
-    //   console.log('gas')
-    //   console.log(gas)
-    // });
-
-    // const trans = await ( async () => {
-    //   console.log('trans')
-    //   const gas = await transaction.estimateGas({ from });
-    //   console.log(gas)
-    // })()
-
     let gas = null;
     try {
       gas = await transaction.estimateGas({ from });
@@ -193,44 +152,6 @@ export default class LandSalesContract {
     await this.waitForTxConfirmation(receipt.transactionHash);
   
     console.log("buyLandInWETH - tx:", receipt.transactionHash);
-    return receipt.transactionHash;
-  };
-  
-  async getLandData(latitude, longitude) {
-    const landData = await landRegistryContract.methods.landData(longitude, latitude).call();
-  
-    console.log("getLandData:", landData);
-    return landData;
-  };
-
-
-  async getAllLandOf(owner) {
-    const allLandOf = await landRegistryContract.methods.landOf(owner).call();
-
-    console.log("getAllLandOf:", owner, "\n", allLandOf);
-    return allLandOf;
-  }
-
-  async updateLandData(data) {
-    console.log("updateLandData - data:", data);
-  
-    const transaction = landRegistryContract.methods.updateLandData(
-      data.landParcelLong,
-      data.landParcelLat,
-      data.data
-    );
-  
-    // Send tx
-    const receipt = await this.sendTransaction(
-      transaction,
-      userAccountAddress,
-      userAccountPrivateKey
-    );
-  
-    // Wait for tx confirmation
-    await this.waitForTxConfirmation(receipt.transactionHash);
-  
-    console.log("updateLandData - tx:", receipt.transactionHash);
     return receipt.transactionHash;
   };
 }
