@@ -1425,9 +1425,8 @@ class CreateForm extends React.PureComponent {
   }
 
   updateLand = async () => {
-    console.log('update land')
     try {
-      // TODO Update land
+      await this.landRegistryContract.updateLand(this.state.address);
     } catch (err) {
       console.log(err)
       return null
@@ -1435,9 +1434,8 @@ class CreateForm extends React.PureComponent {
   }
 
   getAllLands = async () => {
-    console.log('Get All Lands')
     try {
-      // TODO get All land
+      await this.landRegistryContract.getAllLand(this.state.address);
     } catch (err) {
       console.log(err)
       return null
