@@ -40,8 +40,8 @@ import detectEthereumProvider from '@metamask/detect-provider'
 import web3Utils from 'web3-utils'
 import { isMobile } from 'react-device-detect'
 import './style.scss'
-import LandSalesContract from 'contract-api/LandSalesContract'
-import LandRegistryContract from 'contract-api/LandRegistryContract'
+import LandSalesContract from 'contract-vistaverse/LandSalesContract'
+import LandRegistryContract from 'contract-vistaverse/LandRegistryContract'
 
 
 const ipfs = new IPFS({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' })
@@ -121,7 +121,8 @@ class CreateForm extends React.PureComponent {
     this.formRef = React.createRef()
     this.clr = null
     this.getItemTxList = this.getItemTxList.bind(this)
-    this.connectToMetaMask = this.connectToMetaMask.bind(this)
+    this.metamaskWeb3Handle = this.metamaskWeb3Handle.bind(this)
+    this.disconnectWallet = this.disconnectWallet.bind(this)
     this.buyLandInErc20 = this.buyLandInErc20.bind(this)
     this.buyLandInWeth = this.buyLandInWeth.bind(this)
 
@@ -144,6 +145,14 @@ class CreateForm extends React.PureComponent {
 
   componentWillUnmount() {
     clearInterval(this.clr)
+  }
+
+  disconnectWallet = () => {
+    const web3 = Web3Service.getWeb3()
+    web3.eth.accounts.wallet.clear()
+    this.setState({
+      address: "",
+    })
   }
 
   metamaskWeb3Handle = () => {
@@ -174,10 +183,8 @@ class CreateForm extends React.PureComponent {
               console.log(`defaultAddress:${defaultAddress}`)
               this.erc721Contract = new Erc721Contract(defaultAddress)
               this.erc1155Contract = new Erc1155Contract(defaultAddress)
-
-              // Init Primary Market place and ERC20
-              this.landSalesContract = new LandSalesContract(landSalesContractAddress)
-              this.landRegistryContract = new LandRegistryContract(landSalesContractAddress)
+              this.landRegistryContract = new LandRegistryContract(defaultAddress)
+              this.landSalesContract = new LandSalesContract(defaultAddress)
 
               if (erc721InfoContractAddress) {
                 this.erc721InfoContract = new Erc721InfoContract(
@@ -206,7 +213,7 @@ class CreateForm extends React.PureComponent {
               })
               const gasPriceGwei = await this.queryGasPrice(networkID)
               gasPrice = gasPriceGwei * Math.pow(10, 9)
-              
+
               window.ethereum.on('chainChanged', (chainId) => {
                 if (chainId !== this.state.networkID) {
                   notification.open({
@@ -219,7 +226,7 @@ class CreateForm extends React.PureComponent {
                 }
               })
 
-              ethereum.on('accountsChanged', (accounts) => {
+              window.ethereum.on('accountsChanged', (accounts) => {
                 if (accounts[0] !== this.state.address) {
                   notification.open({
                     message: 'Metamask account changed',
@@ -231,9 +238,12 @@ class CreateForm extends React.PureComponent {
                 }
               })
             }
-          
           }
-
+        } else {
+          notification.open({
+            message: 'Metamask is not available',
+            description: 'Please install Metamask on your web browser',
+          })
         }
       })
       .catch((err) => console.error(err))
@@ -1347,37 +1357,40 @@ class CreateForm extends React.PureComponent {
     }
   }
 
-  connectToMetaMask() {
-    detectEthereumProvider()
-      .then(async (provider) => {
-        if (provider) {
-          if (provider !== window.ethereum) {
-            return notification.open({
-              message: 'Metamask conflict',
-              description: 'Do you have multiple wallets installed?',
-            })
-          } else {
-            const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
-            if (accounts.length === 0) {
-              this.clr = setInterval(async () => {
-                const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
-                if (accounts.length !== 0) {
-                  clearInterval(this.clr)
-                  window.location.reload()
-                }
-              }, 1000)
-              return notification.open({
-                message: 'Metamask is locked',
-                description: 'Please click the Metamask to unlock it',
-              })
-            } else {
-              this.initNetwork(accounts[0])
-            }
-          }
-        }
-      })
-      .catch((err) => console.error(err))
-  }
+  // connectToMetaMask() {
+  //   debugger
+  //   detectEthereumProvider()
+  //     .then(async (provider) => {
+  //       debugger
+  //       if (provider) {
+  //         if (provider !== window.ethereum) {
+  //           return notification.open({
+  //             message: 'Metamask conflict',
+  //             description: 'Do you have multiple wallets installed?',
+  //           })
+  //         } else {
+  //           const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+  //           debugger
+  //           if (accounts.length === 0) {
+  //             this.clr = setInterval(async () => {
+  //               const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
+  //               if (accounts.length !== 0) {
+  //                 clearInterval(this.clr)
+  //                 window.location.reload()
+  //               }
+  //             }, 1000)
+  //             return notification.open({
+  //               message: 'Metamask is locked',
+  //               description: 'Please click the Metamask to unlock it',
+  //             })
+  //           } else {
+  //             this.initNetwork(accounts[0])
+  //           }
+  //         }
+  //       }
+  //     })
+  //     .catch((err) => console.error(err))
+  // }
 
   buyLandInWeth= async () => {
     console.log('weth time: ' + new Date().toISOString());
@@ -1388,7 +1401,7 @@ class CreateForm extends React.PureComponent {
         userAccountAddress: this.state.address,
         userAccountPrivateKey: userAccountPrivateKey,
         landSalesContractAddress: landSalesContractAddress,
-        landCategory: 1
+        landCategory: 0
       };
 
       const transaction = await this.landSalesContract.buyLandInWethTest(data);
@@ -1406,10 +1419,6 @@ class CreateForm extends React.PureComponent {
       const data = {
         latitude: `${22 * 10 ** 6}`,
         longitude: `${32 * 10 ** 6}`,
-        userAccountAddress: this.state.address,
-        userAccountPrivateKey: userAccountPrivateKey,
-        landSalesContractAddress: landSalesContractAddress,
-        landCategory: 1
       };
 
       const transaction = await this.landSalesContract.buyLandInErc20Test(data);
@@ -1586,8 +1595,8 @@ class CreateForm extends React.PureComponent {
         </div>
 
         <div className='action-section'>
-          <Button type='primary' htmlType='submit' className='ant-big-btn' disabled={!!this.state.address} onClick={this.connectToMetaMask}>
-            Connect to MetaMask
+          <Button type='primary' htmlType='submit' className='ant-big-btn' onClick={this.metamaskWeb3Handle} disable = {this.state.address !== null}>
+            { this.state.address !== null ? "Connected" : "Connect to MetaMask" }
           </Button>
           <Button type='primary' htmlType='submit' className='ant-big-btn' disabled={!this.state.address} onClick={this.buyLandInWeth}>
             Buy Land In WETH

@@ -1,12 +1,10 @@
 import contract from '@truffle/contract'
 import Web3Service from '../controller/Web3'
-import LandRegistryAbi from './LandRegistryAbi.json'
-
+import LandRegistryAbi from './contract-interface/LandRegistryAbi.json'
 
 let instance = null
 
 export default class LandRegistryContract {
-
   constructor(defaultAddress) {
     if (!instance) {
       instance = this
@@ -18,5 +16,4 @@ export default class LandRegistryContract {
       return instance
     }
   }
-
 }
