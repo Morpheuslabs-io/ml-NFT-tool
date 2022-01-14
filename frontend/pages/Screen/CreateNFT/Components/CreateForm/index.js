@@ -11,10 +11,8 @@ import {
   notification,
   Select,
   Upload,
-  Tag,
   Menu,
   Dropdown,
-  Icon,
 } from 'antd'
 import { DownOutlined } from '@ant-design/icons'
 import ImgCrop from 'antd-img-crop'
@@ -31,7 +29,6 @@ import {
   addAuthorizedBatchMetaTx,
   clearAuthReqListMetaTx,
   revokeAuthorizedMetaTx,
-  safeTransferFromMetaTx,
 } from 'contract-api/BiconomyHandle'
 import Erc1155Contract from 'contract-api/Erc1155Contract'
 import IPFS from 'ipfs-http-client'
@@ -71,10 +68,6 @@ const VERSION = 'V1.0 beta'
 
 const erc721InfoContractAddress = process.env.REACT_APP_ERC721_INFO_CONTRACT_ADDRESS
 const erc721ContractGasless = process.env.REACT_APP_ERC721_GASLESS_CONTRACT_ADDRESS
-const landSalesContractAddress = process.env.LAND_SALES_CONTRACT_ADDRESS
-const erc20TestContractAddress = process.env.ERC20_TEST_TOKEN_ADDRESS
-const wethTestContractAddress = process.env.WETH_TOKEN_ADDRESS
-const userAccountPrivateKey = process.env.USER_ACCOUNT_PRIVATE_KEY
 
 const biconomyApiURL = process.env.REACT_APP_BICONOMY_API_URL
 const biconomyApiKey = process.env.REACT_APP_BICONOMY_API_KEY
@@ -175,8 +168,8 @@ class CreateForm extends React.PureComponent {
                 }
               }, 1000)
               return notification.open({
-                message: 'Metamask is locked',
-                description: 'Please click the Metamask to unlock it',
+                message: 'Metamask is locked or account not connected',
+                description: 'Please click the Metamask to unlock it or connect the account',
               })
             } else {
               const defaultAddress = accounts[0]
@@ -650,7 +643,6 @@ class CreateForm extends React.PureComponent {
       const {
         isMenuCreateCollection,
         isMenuAddItem,
-        isMenuAddAuthorized,
         isMenuRevokeAuthorized,
         isMenuTransferItem,
         isAuthorizedForAddItem,
@@ -833,7 +825,7 @@ class CreateForm extends React.PureComponent {
 
   // "e" contains only the index of "ownerTokenIdList"
   onItemTxTokenIdListChange = async (e) => {
-    const { selectedTokenIdToTransfer, ownerTokenIdList } = this.state
+    const { ownerTokenIdList } = this.state
     const selectedTokeIdData = ownerTokenIdList[e]
     const tokenMetadata = await this.getTokenMetadata(
       selectedTokeIdData.tokenId,
@@ -1303,7 +1295,7 @@ class CreateForm extends React.PureComponent {
   }
 
   renderMenuAddRevokeAuthorized = () => {
-    const { userAuthReqList, isMenuAddAuthorized, isMenuRevokeAuthorized } = this.state
+    const { userAuthReqList, isMenuRevokeAuthorized } = this.state
 
     if (!isMenuRevokeAuthorized) {
       return (
