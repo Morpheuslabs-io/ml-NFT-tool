@@ -1393,20 +1393,15 @@ class CreateForm extends React.PureComponent {
   // }
 
   buyLandInWeth= async () => {
-    console.log('weth time: ' + new Date().toISOString());
     try {
       const data = {
-        latitude: `${22 * 10 ** 6}`,
-        longitude: `${32 * 10 ** 6}`,
-        userAccountAddress: this.state.address,
-        userAccountPrivateKey: userAccountPrivateKey,
-        landSalesContractAddress: landSalesContractAddress,
-        landCategory: 0
+        latitude: `${93 * 10 ** 6}`,
+        longitude: `${93 * 10 ** 6}`,
       };
 
       const transaction = await this.landSalesContract.buyLandInWethTest(data);
 
-      console.log("buyLandInWETH - tx: " + transaction + '. Done at:'  + new Date().toISOString());
+      console.log("buyLandInWeth - tx: " + transaction);
     } catch (err) {
       console.log(err)
       return null
@@ -1414,7 +1409,6 @@ class CreateForm extends React.PureComponent {
   }
 
   buyLandInErc20 = async () => {
-    console.log('erc20 time: ' + new Date().toISOString());
     try {
       const data = {
         latitude: `${22 * 10 ** 6}`,
@@ -1423,7 +1417,7 @@ class CreateForm extends React.PureComponent {
 
       const transaction = await this.landSalesContract.buyLandInErc20Test(data);
 
-      console.log("buyLandInERC20 - tx: " + transaction + '. Done at:'  + new Date().toISOString());
+      console.log("buyLandInERC20 - tx: " + transaction);
     } catch (err) {
       console.log(err)
       return null

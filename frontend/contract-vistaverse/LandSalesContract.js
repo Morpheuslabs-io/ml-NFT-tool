@@ -5,6 +5,7 @@ import ERC20TestAbi from './contract-interface/ERC20TestAbi.json'
 import {
   LandSalesContractAddress,
   ERC20TokenContractAddress,
+  WETHTokenContractAddress,
 } from './contract-interface/ContractAddress'
 
 let instance = null
@@ -35,9 +36,7 @@ export default class LandSalesContract {
     try {
       const contractInstance = await this.landSalesContract.at(LandSalesContractAddress)
 
-      const landPriceInERC20Tokens = await contractInstance.getLandPriceInErc20Tokens(
-        0,
-      )
+      const landPriceInERC20Tokens = await contractInstance.getLandPriceInErc20Tokens(0)
 
       console.log('landPriceInERC20Tokens:', landPriceInERC20Tokens.toString())
 
@@ -84,96 +83,39 @@ export default class LandSalesContract {
     }
   }
 
-  async sendTransaction(transaction, from, privateKey = authorizedAccountPrivateKey) {
-    console.log('from:', from)
-    let gas = null
+  // WETH
+  async buyLandInWethTest(data) {
     try {
-      gas = await transaction.estimateGas({ from })
+      const contractInstance = await this.landSalesContract.at(LandSalesContractAddress)
+
+      const landPriceInWeth = await contractInstance.getLandPriceInWETH(0)
+
+      console.log('landPriceInWeth:', landPriceInWeth.toString())
+
+      await this.approveWETH(landPriceInWeth)
+
+      // Send tx
+      const receipt = await contractInstance.buyLandInWETH(data.longitude, data.latitude)
+
+      // Wait for tx confirmation
+      await this.waitForTxConfirmation(receipt.tx)
+
+      console.log('buyLandInWethTest - tx:', receipt.tx)
+      return receipt.tx
     } catch (err) {
-      console.log('sendTransaction - estimateGas - Error:', err.message)
+      console.log(err)
       return null
     }
-
-    const options = {
-      to: transaction._parent._address,
-      data: transaction.encodeABI(),
-      gas,
-      gasPrice: await web3.eth.getGasPrice(),
-    }
-    const receipt = await this.signTransaction(options, privateKey)
-
-    return receipt
   }
 
-  async signTransaction(options, privateKey = authorizedAccountPrivateKey) {
-    const signed = await web3.eth.accounts.signTransaction(options, privateKey)
-    const receipt = await web3.eth.sendSignedTransaction(signed.rawTransaction)
-    return receipt
-  }
-
-  // async getLandPriceInErc20Tokens(contractInstance, landCategory = 0) {
-  //   const landPriceInERC20Tokens = await contractInstance.getLandPriceInErc20Tokens(landCategory);
-
-  //   console.log("getLandPriceInErc20Tokens - landCategory:", landCategory,
-  //     ", landPriceInERC20Tokens:", landPriceInERC20Tokens
-  //   );
-  //   return landPriceInERC20Tokens;
-  // };
-
-  //
-  // WETH
-  //
-  async buyLandInWethTest(data) {
-    console.log('buyLandInErc20Test')
-    const contractInstance = await this.landSalesContract.at(data.landSalesContractAddress)
-    console.log('contractInstance')
-    console.log(contractInstance)
-
-    const landPriceInERC20Tokens = await contractInstance
-      .getLandPriceInWETH(data.landCategory)
-      .call()
-    // const landPriceInWETH = await getLandPriceInWETH();
-
-    await this.approveWETH({
-      spender: data.userAccountAddress,
-      amount: landPriceInErc20Tokens,
-      userAccountAddress: data.userAccountAddress,
-      userAccountPrivateKey: data.userAccountPrivateKey,
-      landSalesContractAddress: data.landSalesContractAddress,
-    })
-
-    const transaction = contractInstance.buyLandInWETH(data.landParcelLong, data.landParcelLat)
-
-    // Send tx
-    const receipt = await this.sendTransaction(
-      transaction,
-      data.userAccountAddress,
-      data.userAccountPrivateKey,
-    )
+  async approveWETH(amount) {
+    const wethContractInstance = await this.wethContract.at(WETHTokenContractAddress)
+    const receipt = await wethContractInstance.approve(LandSalesContractAddress, amount)
 
     // Wait for tx confirmation
-    await this.waitForTxConfirmation(receipt.transactionHash)
+    await this.waitForTxConfirmation(receipt.tx)
 
-    console.log('buyLandInWETH - tx:', receipt.transactionHash)
-    return receipt.transactionHash
-  }
-
-  async approveWETH(data) {
-    const wethTokenContract = await this.wethContract.at(data.landSalesContractAddress)
-
-    const transaction = wethTokenContract.methods.approve(data.spender, data.amount)
-
-    // Send tx
-    const receipt = await this.sendTransaction(
-      transaction,
-      data.userAccountAddress,
-      data.userAccountPrivateKey,
-    )
-
-    // Wait for tx confirmation
-    await waitForTxConfirmation(receipt.transactionHash)
-
-    console.log('approveWETH - tx:', receipt.transactionHash)
-    return receipt.transactionHash
+    console.log('approveWETH - tx:', receipt.tx)
+    return receipt.tx
   }
 }
